@@ -26,7 +26,8 @@ export default defineSchema({
     addedAt: v.number(),
   })
     .index("by_playlist_added", ["playlistId", "addedAt"])
-    .index("by_owner_added", ["ownerId", "addedAt"]),
+    .index("by_owner_added", ["ownerId", "addedAt"])
+    .index("by_playlist_source_url", ["playlistId", "sourceUrl"]),
   savedTracks: defineTable({
     ownerId: v.string(),
     title: v.string(),
@@ -35,5 +36,7 @@ export default defineSchema({
     sourceUrl: v.string(),
     artworkUrl: v.optional(v.string()),
     savedAt: v.number(),
-  }).index("by_owner_saved", ["ownerId", "savedAt"]),
+  })
+    .index("by_owner_saved", ["ownerId", "savedAt"])
+    .index("by_owner_source_url", ["ownerId", "sourceUrl"]),
 });
