@@ -11,9 +11,10 @@ A responsive music-player prototype with a clean, dark dashboard aesthetic inspi
 - Create a simple local playlist label
 - Keyboard shortcut / to focus search; Space toggles playback
 - PWA install metadata
+- Initial Convex backend source for user-owned playlists, playlist tracks, and saved tracks
 
-## Run
-Open index.html in a browser or serve this folder from any static web server. No build step or package installation is required.
+## Run the frontend
+Open index.html in a browser or serve this folder from any static web server. The frontend still works as a standalone prototype and currently uses localStorage for its library; Convex is not yet connected to the UI.
 
 ## Music integrations
 The **Connect a music source** panel supports official embedded players for:
@@ -25,19 +26,31 @@ Paste a public share URL into **Music link** and tap **Load player**. These are 
 
 ## Play your own audio
 - Tap **＋ File** beside the track count to choose an audio file stored on your phone. The file plays for the current session; reselect it after refreshing.
-- Tap **↗ Link** to paste a direct `https://` or `http://` audio-file URL. Spotify and YouTube webpage URLs are not direct audio streams.
+- Tap **↗ Link** to paste a direct HTTPS or HTTP audio-file URL. Spotify and YouTube webpage URLs are not direct audio streams.
 - Read the status message below the track list for playback errors.
 
 The built-in demo uses sample MP3 URLs from SoundHelix and requires internet access. No Spotify credentials or secret API keys are stored in the browser. A full Spotify Web Playback SDK integration would require Spotify developer configuration, OAuth, and plan/eligibility checks; this prototype deliberately uses official embeds instead.
 
+## Convex backend MVP (source added, deployment not yet configured)
+The `convex/` directory contains:
+- `schema.ts` — playlists, playlist tracks, and saved tracks with indexes
+- `playlists.ts` — list, create, rename, and delete playlists
+- `playlistTracks.ts` — list, add, and remove playlist tracks
+- `savedTracks.ts` — list, save, and remove saved tracks
+
+Ownership is derived from the authenticated Convex identity; client-provided owner IDs are not accepted. Mutations check record ownership and validate track titles and HTTP(S) URLs. The backend stores track metadata and links; it does **not** host or stream music files.
+
+Before deployment, initialize Convex in this workspace, install the Convex npm package, generate `convex/_generated/`, configure an auth provider, and deploy to a development deployment. Do not put deployment keys in source control. Then connect the frontend with `ConvexProvider` and authenticated queries/mutations. The current browser UI remains unchanged until that integration is implemented.
+
 ## Checks
-GitHub Actions runs a JavaScript syntax check, URL resolver tests for the three music providers, and an HTML interface smoke test.
+GitHub Actions checks JavaScript syntax, provider URL resolver tests, backend source safety smoke tests, and required HTML interface elements. The backend smoke tests are static checks, not a substitute for Convex typechecking or a live deployment test.
 
 ## Files
 - index.html — layout and controls
 - styles.css — theme and responsive styling
 - app.js — playback, search, library state, and interactions
 - manifest.webmanifest — install metadata
+- convex/ — initial backend schema and functions
 
 ## Run checks locally
-From the repository root, run `node --check apps/pulse-music-workspace/app.js` and `node --test apps/pulse-music-workspace/tests/integrations.test.cjs`.
+From the repository root, run `node --check apps/pulse-music-workspace/app.js` and `node --test apps/pulse-music-workspace/tests/*.test.cjs`.
