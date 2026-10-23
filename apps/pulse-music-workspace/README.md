@@ -15,8 +15,13 @@ A responsive music-player prototype with a clean, dark dashboard aesthetic inspi
 ## Run
 Open index.html in a browser or serve this folder from any static web server. No build step or package installation is required.
 
-## Audio
-The demo references sample MP3 URLs hosted by SoundHelix, so audio playback requires internet access and the external streams to be reachable. This is not a Spotify integration and does not include licensed music. Replace the src URLs in app.js with audio you have permission to use for production.
+## Play your own audio
+- Tap **＋ File** beside the track count to choose an audio file stored on your phone. The file plays for the current session; reselect it after refreshing.
+- Tap **↗ Link** to paste a direct `https://` or `http://` audio-file URL.
+- Spotify and YouTube webpage URLs are not direct audio streams and will not play in the browser audio element.
+- The status message under the track list explains loading and playback failures.
+
+The built-in demo uses sample MP3 URLs from SoundHelix and requires internet access. This is not a Spotify or Spotube integration and does not include licensed music. Spotube's Flutter audio-player and stream-resolution layers are separate; they cannot simply be copied into this browser app. A production version needs an authorized music provider/API and suitable handling for expiring streams and provider errors.
 
 ## Files
 - index.html — layout and controls
