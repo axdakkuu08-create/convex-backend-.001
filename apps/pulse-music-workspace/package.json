@@ -1,0 +1,18 @@
+{
+  "name": "pulse-music-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pulse music workspace frontend and Convex backend MVP",
+  "scripts": {
+    "convex:dev": "convex dev",
+    "convex:codegen": "convex codegen",
+    "typecheck": "convex codegen && tsc --noEmit",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "dependencies": {
+    "convex": "^1.27.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
