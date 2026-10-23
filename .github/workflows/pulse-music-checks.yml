@@ -22,6 +22,8 @@ jobs:
     defaults:
       run:
         working-directory: apps/pulse-music-workspace
+    env:
+      CONVEX_DEPLOYMENT: \${{ secrets.CONVEX_DEPLOYMENT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,12 +34,10 @@ jobs:
       - name: Install workspace dependencies
         run: npm install
       - name: Generate Convex types and typecheck backend
-        if: \${{ secrets.CONVEX_DEPLOYMENT != '' }}
-        env:
-          CONVEX_DEPLOYMENT: \${{ secrets.CONVEX_DEPLOYMENT }}
+        if: \${{ env.CONVEX_DEPLOYMENT != '' }}
         run: npm run typecheck
       - name: Explain skipped deployment typecheck
-        if: \${{ secrets.CONVEX_DEPLOYMENT == '' }}
+        if: \${{ env.CONVEX_DEPLOYMENT == '' }}
         run: echo "Skipping Convex codegen/typecheck until a development deployment is configured. Frontend and source smoke tests will still run."
       - name: Check JavaScript syntax
         run: node --check app.js
