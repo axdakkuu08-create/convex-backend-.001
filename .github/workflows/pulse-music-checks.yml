@@ -23,7 +23,7 @@ jobs:
       run:
         working-directory: apps/pulse-music-workspace
     env:
-      VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
+      VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL || 'https://resolute-otter-348.convex.cloud' }}
       CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
     steps:
       - name: Checkout
