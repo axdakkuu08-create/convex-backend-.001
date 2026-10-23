@@ -14,7 +14,17 @@ A responsive music-player prototype with a clean, dark dashboard aesthetic inspi
 - Initial Convex backend source for user-owned playlists, playlist tracks, and saved tracks
 
 ## Run the frontend
-Open index.html in a browser or serve this folder from any static web server. The frontend still works as a standalone prototype and currently uses localStorage for its library; Convex is not yet connected to the UI.
+
+Use Node.js 20 or newer from this folder:
+
+```sh
+npm install
+cp .env.example .env.local
+# Set VITE_CONVEX_URL to the public URL shown in your Convex deployment dashboard
+npm run dev
+```
+
+For a production bundle, run `npm run build`; the static output is written to `dist/`. The original music player remains in `app.js`. Likes, recent plays, and playlists still use localStorage until the follow-up library-sync integration is completed.
 
 ## Music integrations
 The **Connect a music source** panel supports official embedded players for:
@@ -31,16 +41,18 @@ Paste a public share URL into **Music link** and tap **Load player**. These are 
 
 The built-in demo uses sample MP3 URLs from SoundHelix and requires internet access. No Spotify credentials or secret API keys are stored in the browser. A full Spotify Web Playback SDK integration would require Spotify developer configuration, OAuth, and plan/eligibility checks; this prototype deliberately uses official embeds instead.
 
-## Convex backend MVP (source added, deployment not yet configured)
+## Convex backend MVP (passkey foundation added; deployment still required)
 The `convex/` directory contains:
 - `schema.ts` — playlists, playlist tracks, and saved tracks with indexes
 - `playlists.ts` — list, create, rename, and delete playlists
 - `playlistTracks.ts` — list, add, and remove playlist tracks
 - `savedTracks.ts` — list, save, and remove saved tracks
+- `auth.ts`, `auth.config.ts`, and `http.ts` — built-in Convex Auth passkey provider, JWT issuer configuration, and auth routes
+- `src/main.jsx` — passkey sign-in/register panel mounted above the existing player
 
 Ownership is derived from the authenticated Convex identity; client-provided owner IDs are not accepted. Mutations check record ownership and validate track titles and HTTP(S) URLs. The backend stores track metadata and links; it does **not** host or stream music files.
 
-Before deployment, initialize Convex in this workspace, install the Convex npm package, generate `convex/_generated/`, configure an auth provider, and deploy to a development deployment. Do not put deployment keys in source control. Then connect the frontend with `ConvexProvider` and authenticated queries/mutations. The current browser UI remains unchanged until that integration is implemented.
+The browser auth panel requires `VITE_CONVEX_URL` (a public deployment URL, not a secret). Set it in `.env.local` for local development or the GitHub Actions repository variable `VITE_CONVEX_URL` for CI/hosting builds. Then run `npx convex dev` from this workspace to generate `convex/_generated/`, create the development deployment, and set the Convex Auth environment values (`JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`, and passkey origin settings) using the official Convex Auth setup flow. Never commit private keys or deployment keys. The playlist and saved-track functions already require an authenticated identity, but the player library is not yet synchronized to those functions; that is the next integration milestone after deployment and typecheck.
 
 ## Checks
 GitHub Actions checks JavaScript syntax, provider URL resolver tests, backend source safety smoke tests, and required HTML interface elements. The backend smoke tests are static checks, not a substitute for Convex typechecking or a live deployment test.
