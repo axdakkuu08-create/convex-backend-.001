@@ -23,6 +23,7 @@ jobs:
       run:
         working-directory: apps/pulse-music-workspace
     env:
+      VITE_CONVEX_URL: ${{ vars.VITE_CONVEX_URL }}
       CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
     steps:
       - name: Checkout
@@ -43,6 +44,8 @@ jobs:
         run: node --check app.js
       - name: Test music provider integrations and Convex backend safeguards
         run: npm test
+      - name: Build production frontend
+        run: npm run build
       - name: Validate required interface elements
         run: |
           python3 - <<'PY'
