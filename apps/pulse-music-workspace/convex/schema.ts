@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export const musicSource = v.union(
   v.literal("spotify"),
@@ -9,6 +10,7 @@ export const musicSource = v.union(
 );
 
 export default defineSchema({
+  ...authTables,
   playlists: defineTable({
     ownerId: v.string(),
     name: v.string(),
