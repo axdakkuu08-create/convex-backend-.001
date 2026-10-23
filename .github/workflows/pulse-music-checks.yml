@@ -28,8 +28,8 @@ jobs:
           node-version: 20
       - name: Check JavaScript syntax
         run: node --check apps/pulse-music-workspace/app.js
-      - name: Test music provider URL integrations
-        run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs
+      - name: Test music provider integrations and Convex backend safeguards
+        run: node --test apps/pulse-music-workspace/tests/*.test.cjs
       - name: Validate required interface elements
         run: |
           python3 - <<'PY'
