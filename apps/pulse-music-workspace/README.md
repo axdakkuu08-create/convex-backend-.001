@@ -15,13 +15,23 @@ A responsive music-player prototype with a clean, dark dashboard aesthetic inspi
 ## Run
 Open index.html in a browser or serve this folder from any static web server. No build step or package installation is required.
 
+## Music integrations
+The **Connect a music source** panel supports official embedded players for:
+- **Spotify** tracks, albums, playlists, artists, shows, and episodes using Spotify Embed.
+- **YouTube / YouTube Music** videos and playlists using YouTube's privacy-enhanced embed host.
+- **SoundCloud** tracks and playlists using the SoundCloud widget.
+
+Paste a public share URL into **Music link** and tap **Load player**. These are official web embeds, not a bypass of provider playback rules. Sign-in, availability, ads, regional restrictions, and account limits remain controlled by each provider. Some content cannot be embedded. Spotify embeds may preview rather than play full tracks depending on provider policy and account status.
+
 ## Play your own audio
 - Tap **＋ File** beside the track count to choose an audio file stored on your phone. The file plays for the current session; reselect it after refreshing.
-- Tap **↗ Link** to paste a direct `https://` or `http://` audio-file URL.
-- Spotify and YouTube webpage URLs are not direct audio streams and will not play in the browser audio element.
-- The status message under the track list explains loading and playback failures.
+- Tap **↗ Link** to paste a direct `https://` or `http://` audio-file URL. Spotify and YouTube webpage URLs are not direct audio streams.
+- Read the status message below the track list for playback errors.
 
-The built-in demo uses sample MP3 URLs from SoundHelix and requires internet access. This is not a Spotify or Spotube integration and does not include licensed music. Spotube's Flutter audio-player and stream-resolution layers are separate; they cannot simply be copied into this browser app. A production version needs an authorized music provider/API and suitable handling for expiring streams and provider errors.
+The built-in demo uses sample MP3 URLs from SoundHelix and requires internet access. No Spotify credentials or secret API keys are stored in the browser. A full Spotify Web Playback SDK integration would require Spotify developer configuration, OAuth, and plan/eligibility checks; this prototype deliberately uses official embeds instead.
+
+## Checks
+GitHub Actions runs a JavaScript syntax check, URL resolver tests for the three music providers, and an HTML interface smoke test.
 
 ## Files
 - index.html — layout and controls
