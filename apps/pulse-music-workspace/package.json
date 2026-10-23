@@ -7,12 +7,20 @@
     "convex:dev": "convex dev",
     "convex:codegen": "convex codegen",
     "typecheck": "convex codegen && tsc --noEmit",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs",
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
-    "convex": "^1.27.0"
+    "convex": "^1.47.0",
+    "@auth/core": "0.41.1",
+    "@convex-dev/auth": "^0.0.96",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vite": "^7.0.0"
   }
 }
