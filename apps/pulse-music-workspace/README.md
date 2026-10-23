@@ -38,3 +38,6 @@ GitHub Actions runs a JavaScript syntax check, URL resolver tests for the three 
 - styles.css — theme and responsive styling
 - app.js — playback, search, library state, and interactions
 - manifest.webmanifest — install metadata
+
+## Run checks locally
+From the repository root, run `node --check apps/pulse-music-workspace/app.js` and `node --test apps/pulse-music-workspace/tests/integrations.test.cjs`.
