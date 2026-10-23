@@ -4,13 +4,13 @@ on:
   push:
     branches: [convex-inspired-app]
     paths:
-      - 'apps/pulse-music-workspace/**'
-      - '.github/workflows/pulse-music-checks.yml'
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-music-checks.yml"
   pull_request:
     branches: [main, Main]
     paths:
-      - 'apps/pulse-music-workspace/**'
-      - '.github/workflows/pulse-music-checks.yml'
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-music-checks.yml"
   workflow_dispatch:
 
 permissions:

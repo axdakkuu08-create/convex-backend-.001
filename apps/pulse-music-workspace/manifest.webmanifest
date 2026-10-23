@@ -1,1 +1,9 @@
-{"name":"Pulse Music Workspace","short_name":"Pulse","start_url":"./index.html","display":"standalone","background_color":"#101114","theme_color":"#101114","description":"A clean music workspace inspired by modern developer dashboards."}
+{
+  "name": "Pulse Music Workspace",
+  "short_name": "Pulse",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#101114",
+  "theme_color": "#101114",
+  "description": "A clean music workspace inspired by modern developer dashboards."
+}

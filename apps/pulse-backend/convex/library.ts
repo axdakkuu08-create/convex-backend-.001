@@ -35,7 +35,9 @@ function validateHttpUrl(value: string, label: string): URL {
     url.username ||
     url.password
   ) {
-    throw new Error(`${label} must use HTTP(S) and cannot contain embedded credentials.`);
+    throw new Error(
+      `${label} must use HTTP(S) and cannot contain embedded credentials.`,
+    );
   }
   return url;
 }
@@ -58,11 +60,14 @@ function validateTrack(
   if (source !== "direct") {
     const allowedHosts = SOURCE_HOSTS[source];
     const hostMatches = allowedHosts.some(
-      (host) => url.hostname.toLowerCase() === host ||
+      (host) =>
+        url.hostname.toLowerCase() === host ||
         url.hostname.toLowerCase().endsWith(`.${host}`),
     );
     if (!hostMatches) {
-      throw new Error("The music URL host does not match the selected provider.");
+      throw new Error(
+        "The music URL host does not match the selected provider.",
+      );
     }
   }
 
@@ -75,9 +80,11 @@ export const listSaved = query({
   args: {},
   handler: async (ctx) => {
     const ownerId = await requireUser(ctx);
-    return await ctx.db.query("savedTracks")
+    return await ctx.db
+      .query("savedTracks")
       .withIndex("by_owner_saved", (q) => q.eq("ownerId", ownerId))
-      .order("desc").collect();
+      .order("desc")
+      .collect();
   },
 });
 
@@ -85,11 +92,19 @@ export const saveTrack = mutation({
   args: trackArgs,
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
-    validateTrack(args.title, args.artist, args.source, args.sourceUrl, args.artworkUrl);
+    validateTrack(
+      args.title,
+      args.artist,
+      args.source,
+      args.sourceUrl,
+      args.artworkUrl,
+    );
 
-    const duplicate = await ctx.db.query("savedTracks")
+    const duplicate = await ctx.db
+      .query("savedTracks")
       .withIndex("by_owner_source_url", (q) =>
-        q.eq("ownerId", ownerId).eq("sourceUrl", args.sourceUrl))
+        q.eq("ownerId", ownerId).eq("sourceUrl", args.sourceUrl),
+      )
       .first();
     if (duplicate) return duplicate._id;
 
@@ -108,7 +123,8 @@ export const unsaveTrack = mutation({
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
     const track = await ctx.db.get(args.trackId);
-    if (!track || track.ownerId !== ownerId) throw new Error("Saved track not found.");
+    if (!track || track.ownerId !== ownerId)
+      throw new Error("Saved track not found.");
     await ctx.db.delete(args.trackId);
   },
 });
@@ -118,10 +134,15 @@ export const listPlaylistTracks = query({
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
     const playlist = await ctx.db.get(args.playlistId);
-    if (!playlist || playlist.ownerId !== ownerId) throw new Error("Playlist not found.");
-    return await ctx.db.query("playlistTracks")
-      .withIndex("by_playlist_added", (q) => q.eq("playlistId", args.playlistId))
-      .order("desc").collect();
+    if (!playlist || playlist.ownerId !== ownerId)
+      throw new Error("Playlist not found.");
+    return await ctx.db
+      .query("playlistTracks")
+      .withIndex("by_playlist_added", (q) =>
+        q.eq("playlistId", args.playlistId),
+      )
+      .order("desc")
+      .collect();
   },
 });
 
@@ -130,12 +151,21 @@ export const addToPlaylist = mutation({
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
     const playlist = await ctx.db.get(args.playlistId);
-    if (!playlist || playlist.ownerId !== ownerId) throw new Error("Playlist not found.");
-    validateTrack(args.title, args.artist, args.source, args.sourceUrl, args.artworkUrl);
+    if (!playlist || playlist.ownerId !== ownerId)
+      throw new Error("Playlist not found.");
+    validateTrack(
+      args.title,
+      args.artist,
+      args.source,
+      args.sourceUrl,
+      args.artworkUrl,
+    );
 
-    const duplicate = await ctx.db.query("playlistTracks")
+    const duplicate = await ctx.db
+      .query("playlistTracks")
       .withIndex("by_playlist_source_url", (q) =>
-        q.eq("playlistId", args.playlistId).eq("sourceUrl", args.sourceUrl))
+        q.eq("playlistId", args.playlistId).eq("sourceUrl", args.sourceUrl),
+      )
       .first();
     if (duplicate) return duplicate._id;
 
@@ -156,7 +186,8 @@ export const removeFromPlaylist = mutation({
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
     const track = await ctx.db.get(args.trackId);
-    if (!track || track.ownerId !== ownerId) throw new Error("Playlist track not found.");
+    if (!track || track.ownerId !== ownerId)
+      throw new Error("Playlist track not found.");
     await ctx.db.delete(args.trackId);
   },
 });

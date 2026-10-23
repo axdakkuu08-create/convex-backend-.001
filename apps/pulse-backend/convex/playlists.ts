@@ -15,9 +15,11 @@ export const listMine = query({
   args: {},
   handler: async (ctx) => {
     const ownerId = await requireUser(ctx);
-    return await ctx.db.query("playlists")
+    return await ctx.db
+      .query("playlists")
       .withIndex("by_owner_updated", (q) => q.eq("ownerId", ownerId))
-      .order("desc").collect();
+      .order("desc")
+      .collect();
   },
 });
 
@@ -27,7 +29,10 @@ export const create = mutation({
     const ownerId = await requireUser(ctx);
     const now = Date.now();
     return await ctx.db.insert("playlists", {
-      ownerId, name: cleanName(args.name), createdAt: now, updatedAt: now,
+      ownerId,
+      name: cleanName(args.name),
+      createdAt: now,
+      updatedAt: now,
     });
   },
 });
@@ -37,8 +42,12 @@ export const rename = mutation({
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
     const playlist = await ctx.db.get(args.playlistId);
-    if (!playlist || playlist.ownerId !== ownerId) throw new Error("Playlist not found.");
-    await ctx.db.patch(args.playlistId, { name: cleanName(args.name), updatedAt: Date.now() });
+    if (!playlist || playlist.ownerId !== ownerId)
+      throw new Error("Playlist not found.");
+    await ctx.db.patch(args.playlistId, {
+      name: cleanName(args.name),
+      updatedAt: Date.now(),
+    });
   },
 });
 
@@ -47,9 +56,13 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
     const playlist = await ctx.db.get(args.playlistId);
-    if (!playlist || playlist.ownerId !== ownerId) throw new Error("Playlist not found.");
-    const tracks = await ctx.db.query("playlistTracks")
-      .withIndex("by_playlist_added", (q) => q.eq("playlistId", args.playlistId))
+    if (!playlist || playlist.ownerId !== ownerId)
+      throw new Error("Playlist not found.");
+    const tracks = await ctx.db
+      .query("playlistTracks")
+      .withIndex("by_playlist_added", (q) =>
+        q.eq("playlistId", args.playlistId),
+      )
       .collect();
     for (const track of tracks) {
       if (track.ownerId === ownerId) await ctx.db.delete(track._id);
