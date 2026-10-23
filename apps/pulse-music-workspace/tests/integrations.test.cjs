@@ -35,5 +35,5 @@ test('SoundCloud links become official widget embeds', () => {
 test('unsupported domains and invalid links fail with a helpful error', () => {
   assert.throws(() => resolveMusicEmbed('https://example.com/song'), /Supported sources/);
   assert.throws(() => resolveMusicEmbed('not a URL'), /valid music link/);
-  assert.throws(() => resolveMusicEmbed('javascript:alert(1)'), /valid music link/);
+  assert.throws(() => resolveMusicEmbed('javascript:alert(1)'), /Only http and https/);
 });
