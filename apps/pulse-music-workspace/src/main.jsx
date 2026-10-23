@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { ConvexAuthProvider, useAuthActions, useConvexAuth, usePasskeyAuth } from "@convex-dev/auth/react";
+import { ConvexAuthProvider, useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import "./auth.css";
 
 function PasskeyPanel() {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const { signInOrRegisterWithPasskey } = usePasskeyAuth();
-  const { signOut } = useAuthActions();
+  const { signIn, signOut } = useAuthActions();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -28,8 +27,8 @@ function PasskeyPanel() {
     setBusy(true);
     setMessage("");
     try {
-      const result = await signInOrRegisterWithPasskey({ email: email.trim() });
-      setMessage(result?.registered ? "Passkey account created." : "Signed in successfully.");
+      await signIn("passkey", { email: email.trim() });
+      setMessage("Passkey request submitted. Follow your device's prompt to continue.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Passkey sign-in did not complete. Please try again.");
     } finally {
