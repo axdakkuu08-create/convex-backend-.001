@@ -1,9 +1,258 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101114"><title>Pulse — Music Workspace</title><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="styles.css"></head>
-<body><div class="layout"><aside class="sidebar" id="sidebar"><a class="brand" href="#">▥ <b>pulse<span>.</span></b></a><small>WORKSPACE</small><button class="nav active" data-view="discover">◈　Discover</button><button class="nav" data-view="library">▤　Your library</button><button class="nav" data-view="recent">◷　Recently played</button><hr><small>YOUR COLLECTION <button id="newPlaylist" class="plus">+</button></small><div id="playlists"><button class="playlist" data-mood="Focus">●　Focus mode</button><button class="playlist" data-mood="Night">●　Late night</button><button class="playlist" data-mood="Energy">●　Good energy</button></div><div class="sidefoot">●　Local demo workspace <b>READY</b></div></aside>
-<main><header><button id="menu" class="mobile">☰</button><div>Workspace <i>/</i> <b id="crumb">Discover</b></div><label class="search">⌕ <input id="search" placeholder="Search tracks, moods…"><kbd>/</kbd></label><div class="avatar">P</div></header>
-<section class="intro"><div><small class="eyebrow">— YOUR SOUND, ORGANIZED</small><h1 id="heading">Find your <span>next favorite.</span></h1><p>A quieter space for the music you love.</p></div><button id="shuffleAll" class="secondary">⤨ Shuffle play</button></section>
-<section class="hero"><div><small>● EDITOR'S PICK / 01</small><h2>Make room<br>for <em>focus.</em></h2><p>Minimal distractions. A little rhythm.<br>Get into your flow, one track at a time.</p><button id="heroPlay" class="primary">▶　Play mix　↗</button></div><div class="orb"><span>p.</span></div><label class="heroNo">01 — 03</label></section>
-<section class="sourcehub" id="sourceHub"><div class="sectionhead"><div><small>LISTEN YOUR WAY</small><h2>Connect a music source</h2></div><span class="source-badge">3 WEB PLAYERS</span></div><p class="source-copy">Paste a Spotify, YouTube, or SoundCloud link. Playback opens in the official embedded player—sign-in, ads, availability, and account limits are controlled by each service.</p><form id="sourceForm" class="source-form"><label class="source-input-label" for="sourceUrl">Music link</label><div class="source-input-row"><input id="sourceUrl" type="url" inputmode="url" placeholder="Paste a Spotify, YouTube or SoundCloud URL" autocomplete="url" required><button class="primary" type="submit">Load player ↗</button></div></form><div id="sourceError" class="source-error" role="status" aria-live="polite"></div><div id="embedWrap" class="embed-wrap" hidden><div class="embed-head"><span id="embedTitle">Music player</span><button id="closeEmbed" class="textbutton" type="button">Close ×</button></div><iframe id="sourceFrame" title="Embedded music player" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><p class="embed-note">If playback is unavailable, open the link in its official app or website. Some tracks require sign-in or may not be embeddable.</p></div><div class="source-shortcuts"><a href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer">Spotify ↗</a><a href="https://music.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube Music ↗</a><a href="https://soundcloud.com/" target="_blank" rel="noopener noreferrer">SoundCloud ↗</a></div></section><section><div class="sectionhead"><div><small>CURATED FOR YOU</small><h2>Pick a mood</h2></div><button id="allMoods" class="textbutton">View all ↗</button></div><div class="moods"><button data-mood="Focus" class="mood violet"><b>◉</b><strong>Deep focus</strong><span>Low-key · 12 tracks</span></button><button data-mood="Ambient" class="mood blue"><b>✳</b><strong>Ambient drift</strong><span>Atmospheric · 9 tracks</span></button><button data-mood="Energy" class="mood orange"><b>ϟ</b><strong>Good energy</strong><span>Upbeat · 16 tracks</span></button><button data-mood="Night" class="mood green"><b>☾</b><strong>After hours</strong><span>Slow burn · 11 tracks</span></button></div></section>
-<section class="tracks"><div class="sectionhead"><div><small>YOUR ROTATION</small><h2 id="trackHeading">Made for the moment</h2></div><div class="playback-tools"><span id="count">06 TRACKS</span><button id="addFileButton" title="Play audio from this phone" aria-label="Add audio file">＋ File</button><button id="addUrlButton" title="Add a direct audio file URL" aria-label="Add audio link">↗ Link</button><input id="audioFileInput" type="file" accept="audio/*,.mp3,.m4a,.ogg,.wav,.flac" hidden></div></div><div class="table"><div class="thead"><span>#</span><span>TRACK</span><span>MOOD</span><span>TIME</span><span></span></div><div id="rows"></div><div id="empty" hidden>No tracks found. Try another search.</div></div><p id="audioStatus" class="audio-status" role="status" aria-live="polite">Tip: add an audio file from your phone or a direct audio file link.</p></section><footer><span>Designed for your listening flow.</span><span>Pulse · Preview build 0.1</span></footer></main></div>
-<section class="player"><div class="now"><div id="cover" class="cover violet">✳</div><div><b id="nowTitle">Quiet Signals</b><small id="nowArtist">Pulse Sessions</small></div><button id="like" class="like">♡</button></div><div class="controls"><div><button id="shuffle">⤨</button><button id="prev">|◀</button><button id="play" class="play">▶</button><button id="next">▶|</button><button id="repeat">↻</button></div><div class="timeline"><span id="time">0:00</span><input id="progress" type="range" min="0" max="100" value="0"><span id="duration">5:42</span></div></div><div class="volume">◖ <input id="volume" type="range" min="0" max="1" step=".01" value=".75"><button id="queue">☷</button></div><audio id="audio" preload="metadata"></audio></section><div id="toast" role="status"></div><script src="app.js"></script></body></html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#101114" />
+    <title>Pulse — Music Workspace</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#"
+          >▥ <b>pulse<span>.</span></b></a
+        ><small>WORKSPACE</small
+        ><button class="nav active" data-view="discover">◈　Discover</button
+        ><button class="nav" data-view="library">▤　Your library</button
+        ><button class="nav" data-view="recent">◷　Recently played</button>
+        <hr />
+        <small
+          >YOUR COLLECTION
+          <button id="newPlaylist" class="plus">+</button></small
+        >
+        <div id="playlists">
+          <button class="playlist" data-mood="Focus">●　Focus mode</button
+          ><button class="playlist" data-mood="Night">●　Late night</button
+          ><button class="playlist" data-mood="Energy">●　Good energy</button>
+        </div>
+        <div class="sidefoot">●　Local demo workspace <b>READY</b></div>
+      </aside>
+      <main>
+        <header>
+          <button id="menu" class="mobile">☰</button>
+          <div>Workspace <i>/</i> <b id="crumb">Discover</b></div>
+          <label class="search"
+            >⌕ <input id="search" placeholder="Search tracks, moods…" /><kbd
+              >/</kbd
+            ></label
+          >
+          <div class="avatar">P</div>
+        </header>
+        <section class="intro">
+          <div>
+            <small class="eyebrow">— YOUR SOUND, ORGANIZED</small>
+            <h1 id="heading">Find your <span>next favorite.</span></h1>
+            <p>A quieter space for the music you love.</p>
+          </div>
+          <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
+        </section>
+        <section class="hero">
+          <div>
+            <small>● EDITOR'S PICK / 01</small>
+            <h2>Make room<br />for <em>focus.</em></h2>
+            <p>
+              Minimal distractions. A little rhythm.<br />Get into your flow,
+              one track at a time.
+            </p>
+            <button id="heroPlay" class="primary">▶　Play mix　↗</button>
+          </div>
+          <div class="orb"><span>p.</span></div>
+          <label class="heroNo">01 — 03</label>
+        </section>
+        <section class="sourcehub" id="sourceHub">
+          <div class="sectionhead">
+            <div>
+              <small>LISTEN YOUR WAY</small>
+              <h2>Connect a music source</h2>
+            </div>
+            <span class="source-badge">3 WEB PLAYERS</span>
+          </div>
+          <p class="source-copy">
+            Paste a Spotify, YouTube, or SoundCloud link. Playback opens in the
+            official embedded player—sign-in, ads, availability, and account
+            limits are controlled by each service.
+          </p>
+          <form id="sourceForm" class="source-form">
+            <label class="source-input-label" for="sourceUrl">Music link</label>
+            <div class="source-input-row">
+              <input
+                id="sourceUrl"
+                type="url"
+                inputmode="url"
+                placeholder="Paste a Spotify, YouTube or SoundCloud URL"
+                autocomplete="url"
+                required
+              /><button class="primary" type="submit">Load player ↗</button>
+            </div>
+          </form>
+          <div
+            id="sourceError"
+            class="source-error"
+            role="status"
+            aria-live="polite"
+          ></div>
+          <div id="embedWrap" class="embed-wrap" hidden>
+            <div class="embed-head">
+              <span id="embedTitle">Music player</span
+              ><button id="closeEmbed" class="textbutton" type="button">
+                Close ×
+              </button>
+            </div>
+            <iframe
+              id="sourceFrame"
+              title="Embedded music player"
+              loading="lazy"
+              allow="
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                fullscreen;
+                picture-in-picture;
+              "
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+            <p class="embed-note">
+              If playback is unavailable, open the link in its official app or
+              website. Some tracks require sign-in or may not be embeddable.
+            </p>
+          </div>
+          <div class="source-shortcuts">
+            <a
+              href="https://open.spotify.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Spotify ↗</a
+            ><a
+              href="https://music.youtube.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >YouTube Music ↗</a
+            ><a
+              href="https://soundcloud.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >SoundCloud ↗</a
+            >
+          </div>
+        </section>
+        <section>
+          <div class="sectionhead">
+            <div>
+              <small>CURATED FOR YOU</small>
+              <h2>Pick a mood</h2>
+            </div>
+            <button id="allMoods" class="textbutton">View all ↗</button>
+          </div>
+          <div class="moods">
+            <button data-mood="Focus" class="mood violet">
+              <b>◉</b><strong>Deep focus</strong
+              ><span>Low-key · 12 tracks</span></button
+            ><button data-mood="Ambient" class="mood blue">
+              <b>✳</b><strong>Ambient drift</strong
+              ><span>Atmospheric · 9 tracks</span></button
+            ><button data-mood="Energy" class="mood orange">
+              <b>ϟ</b><strong>Good energy</strong
+              ><span>Upbeat · 16 tracks</span></button
+            ><button data-mood="Night" class="mood green">
+              <b>☾</b><strong>After hours</strong
+              ><span>Slow burn · 11 tracks</span>
+            </button>
+          </div>
+        </section>
+        <section class="tracks">
+          <div class="sectionhead">
+            <div>
+              <small>YOUR ROTATION</small>
+              <h2 id="trackHeading">Made for the moment</h2>
+            </div>
+            <div class="playback-tools">
+              <span id="count">06 TRACKS</span
+              ><button
+                id="addFileButton"
+                title="Play audio from this phone"
+                aria-label="Add audio file"
+              >
+                ＋ File</button
+              ><button
+                id="addUrlButton"
+                title="Add a direct audio file URL"
+                aria-label="Add audio link"
+              >
+                ↗ Link</button
+              ><input
+                id="audioFileInput"
+                type="file"
+                accept="audio/*,.mp3,.m4a,.ogg,.wav,.flac"
+                hidden
+              />
+            </div>
+          </div>
+          <div class="table">
+            <div class="thead">
+              <span>#</span><span>TRACK</span><span>MOOD</span><span>TIME</span
+              ><span></span>
+            </div>
+            <div id="rows"></div>
+            <div id="empty" hidden>No tracks found. Try another search.</div>
+          </div>
+          <p
+            id="audioStatus"
+            class="audio-status"
+            role="status"
+            aria-live="polite"
+          >
+            Tip: add an audio file from your phone or a direct audio file link.
+          </p>
+        </section>
+        <footer>
+          <span>Designed for your listening flow.</span
+          ><span>Pulse · Preview build 0.1</span>
+        </footer>
+      </main>
+    </div>
+    <section class="player">
+      <div class="now">
+        <div id="cover" class="cover violet">✳</div>
+        <div>
+          <b id="nowTitle">Quiet Signals</b
+          ><small id="nowArtist">Pulse Sessions</small>
+        </div>
+        <button id="like" class="like">♡</button>
+      </div>
+      <div class="controls">
+        <div>
+          <button id="shuffle">⤨</button><button id="prev">|◀</button
+          ><button id="play" class="play">▶</button><button id="next">▶|</button
+          ><button id="repeat">↻</button>
+        </div>
+        <div class="timeline">
+          <span id="time">0:00</span
+          ><input id="progress" type="range" min="0" max="100" value="0" /><span
+            id="duration"
+            >5:42</span
+          >
+        </div>
+      </div>
+      <div class="volume">
+        ◖
+        <input
+          id="volume"
+          type="range"
+          min="0"
+          max="1"
+          step=".01"
+          value=".75"
+        /><button id="queue">☷</button>
+      </div>
+      <audio id="audio" preload="metadata"></audio>
+    </section>
+    <div id="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
