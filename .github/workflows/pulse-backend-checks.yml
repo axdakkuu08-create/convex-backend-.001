@@ -1,0 +1,37 @@
+name: Pulse backend validation
+
+on:
+  push:
+    branches:
+      - pulse-backend-security-stage-01
+  pull_request:
+    branches:
+      - main
+      - Main
+    paths:
+      - "apps/pulse-backend/**"
+      - ".github/workflows/pulse-backend-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/pulse-backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Generate Convex types
+        run: npx convex codegen
+      - name: Type-check backend
+        run: npm run typecheck
