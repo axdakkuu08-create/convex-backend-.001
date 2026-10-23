@@ -22,6 +22,8 @@ jobs:
     defaults:
       run:
         working-directory: apps/pulse-backend
+    env:
+      CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,6 +34,10 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Generate Convex types
+        if: ${{ env.CONVEX_DEPLOYMENT != '' }}
         run: npx convex codegen
+      - name: Explain skipped code generation
+        if: ${{ env.CONVEX_DEPLOYMENT == '' }}
+        run: echo "Skipping deployment-backed Convex codegen because CONVEX_DEPLOYMENT is not configured. This run does not verify generated Convex types."
       - name: Type-check backend
         run: npm run typecheck
