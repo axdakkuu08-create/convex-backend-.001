@@ -39,3 +39,15 @@ test('track mutations validate title and HTTP(S) URL and check ownership', () =>
     assert.match(source, /track\.ownerId !== ownerId/);
   }
 });
+
+test('passkey authentication is configured on both backend and browser entrypoint', () => {
+  const auth = fs.readFileSync(path.join(root, 'auth.ts'), 'utf8');
+  const authConfig = fs.readFileSync(path.join(root, 'auth.config.ts'), 'utf8');
+  const http = fs.readFileSync(path.join(root, 'http.ts'), 'utf8');
+  const schema = read('schema.ts');
+  assert.match(auth, /convexAuth/);
+  assert.match(auth, /Passkey/);
+  assert.match(authConfig, /CONVEX_SITE_URL/);
+  assert.match(http, /auth\.addHttpRoutes/);
+  assert.match(schema, /authTables/);
+});
