@@ -54,3 +54,25 @@ GitHub Actions checks JavaScript syntax, provider URL resolver tests, backend so
 
 ## Run checks locally
 From the repository root, run `node --check apps/pulse-music-workspace/app.js` and `node --test apps/pulse-music-workspace/tests/*.test.cjs`.
+
+
+## Backend development setup
+
+From the repository root, enter `apps/pulse-music-workspace` and run:
+
+```sh
+npm install
+npm run convex:dev
+```
+
+Complete the Convex CLI sign-in and create/select a **development** deployment when prompted. This step requires an authorized browser session and cannot be completed by CI without a configured deployment. Keep generated `convex/_generated/` files local/ignored for now; the CI job regenerates them from the schema and checks TypeScript.
+
+The package includes `npm run typecheck` (Convex code generation followed by TypeScript checking) and `npm test`. GitHub Actions runs both checks on workspace changes.
+
+Before deploying for real users:
+1. Configure a supported authentication provider in the Convex dashboard and add its issuer/domain configuration in `convex/auth.config.ts`.
+2. Verify the provider's identity subject is stable and unique per user.
+3. Test ownership boundaries against a development deployment.
+4. Only then connect the frontend and deploy the production backend.
+
+Do not create fake owner IDs or expose server/deployment keys in the browser. Until authentication is configured, backend queries and mutations intentionally reject unauthenticated requests.
