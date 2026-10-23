@@ -6,7 +6,6 @@ export const musicSource = v.union(
   v.literal("youtube"),
   v.literal("soundcloud"),
   v.literal("direct"),
-  v.literal("local"),
 );
 
 export default defineSchema({
