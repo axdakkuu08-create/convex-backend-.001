@@ -4,17 +4,70 @@ import { musicSource } from "./schema";
 import { requireUser } from "./lib/auth";
 
 const trackArgs = {
-  title: v.string(), artist: v.optional(v.string()), source: musicSource,
-  sourceUrl: v.string(), artworkUrl: v.optional(v.string()),
+  title: v.string(),
+  artist: v.optional(v.string()),
+  source: musicSource,
+  sourceUrl: v.string(),
+  artworkUrl: v.optional(v.string()),
 };
 
-function validateTrack(title: string, sourceUrl: string) {
-  if (!title.trim() || title.trim().length > 200) throw new Error("Track titles must contain 1–200 characters.");
-  if (sourceUrl.length > 2048) throw new Error("The music URL is too long.");
+const SOURCE_HOSTS: Record<"spotify" | "youtube" | "soundcloud", string[]> = {
+  spotify: ["spotify.com", "spotify.link"],
+  youtube: ["youtube.com", "youtu.be"],
+  soundcloud: ["soundcloud.com"],
+};
+
+function validateHttpUrl(value: string, label: string): URL {
+  if (!value.trim() || value.length > 2048) {
+    throw new Error(`${label} must be a valid URL up to 2048 characters.`);
+  }
+
   let url: URL;
-  try { url = new URL(sourceUrl); } catch { throw new Error("Enter a valid music URL."); }
-  if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new Error("Only HTTP and HTTPS music links are supported.");
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`Enter a valid ${label.toLowerCase()}.`);
+  }
+
+  if (
+    (url.protocol !== "https:" && url.protocol !== "http:") ||
+    !url.hostname ||
+    url.username ||
+    url.password
+  ) {
+    throw new Error(`${label} must use HTTP(S) and cannot contain embedded credentials.`);
+  }
+  return url;
+}
+
+function validateTrack(
+  title: string,
+  artist: string | undefined,
+  source: "spotify" | "youtube" | "soundcloud" | "direct",
+  sourceUrl: string,
+  artworkUrl: string | undefined,
+): void {
+  if (!title.trim() || title.trim().length > 200) {
+    throw new Error("Track titles must contain 1–200 characters.");
+  }
+  if (artist !== undefined && artist.trim().length > 200) {
+    throw new Error("Artist names must contain at most 200 characters.");
+  }
+
+  const url = validateHttpUrl(sourceUrl, "Music URL");
+  if (source !== "direct") {
+    const allowedHosts = SOURCE_HOSTS[source];
+    const hostMatches = allowedHosts.some(
+      (host) => url.hostname.toLowerCase() === host ||
+        url.hostname.toLowerCase().endsWith(`.${host}`),
+    );
+    if (!hostMatches) {
+      throw new Error("The music URL host does not match the selected provider.");
+    }
+  }
+
+  if (artworkUrl !== undefined) {
+    validateHttpUrl(artworkUrl, "Artwork URL");
   }
 }
 
@@ -32,13 +85,20 @@ export const saveTrack = mutation({
   args: trackArgs,
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
-    validateTrack(args.title, args.sourceUrl);
-    const existing = await ctx.db.query("savedTracks")
-      .withIndex("by_owner_saved", (q) => q.eq("ownerId", ownerId)).collect();
-    const duplicate = existing.find((track) => track.sourceUrl === args.sourceUrl);
+    validateTrack(args.title, args.artist, args.source, args.sourceUrl, args.artworkUrl);
+
+    const duplicate = await ctx.db.query("savedTracks")
+      .withIndex("by_owner_source_url", (q) =>
+        q.eq("ownerId", ownerId).eq("sourceUrl", args.sourceUrl))
+      .first();
     if (duplicate) return duplicate._id;
+
     return await ctx.db.insert("savedTracks", {
-      ...args, title: args.title.trim(), ownerId, savedAt: Date.now(),
+      ...args,
+      title: args.title.trim(),
+      artist: args.artist?.trim(),
+      ownerId,
+      savedAt: Date.now(),
     });
   },
 });
@@ -71,13 +131,20 @@ export const addToPlaylist = mutation({
     const ownerId = await requireUser(ctx);
     const playlist = await ctx.db.get(args.playlistId);
     if (!playlist || playlist.ownerId !== ownerId) throw new Error("Playlist not found.");
-    validateTrack(args.title, args.sourceUrl);
-    const existing = await ctx.db.query("playlistTracks")
-      .withIndex("by_playlist_added", (q) => q.eq("playlistId", args.playlistId)).collect();
-    const duplicate = existing.find((track) => track.sourceUrl === args.sourceUrl);
+    validateTrack(args.title, args.artist, args.source, args.sourceUrl, args.artworkUrl);
+
+    const duplicate = await ctx.db.query("playlistTracks")
+      .withIndex("by_playlist_source_url", (q) =>
+        q.eq("playlistId", args.playlistId).eq("sourceUrl", args.sourceUrl))
+      .first();
     if (duplicate) return duplicate._id;
+
     const trackId = await ctx.db.insert("playlistTracks", {
-      ...args, title: args.title.trim(), ownerId, addedAt: Date.now(),
+      ...args,
+      title: args.title.trim(),
+      artist: args.artist?.trim(),
+      ownerId,
+      addedAt: Date.now(),
     });
     await ctx.db.patch(args.playlistId, { updatedAt: Date.now() });
     return trackId;
