@@ -32,7 +32,7 @@ runs:
     - name: Install libsodium and libssl
       shell: bash
       if: runner.os == 'Linux'
-      run: sudo apt-get install pkg-config libsodium-dev libssl-dev
+      run: sudo apt-get update && sudo apt-get install -y pkg-config libsodium-dev libssl-dev libsnappy-dev
 
     # The runner AMI ships a prebuilt librocksdb but no pkg-config .pc, so mise's
     # ROCKSDB_COMPILE check fails and librocksdb-sys rebuilds it from source every
