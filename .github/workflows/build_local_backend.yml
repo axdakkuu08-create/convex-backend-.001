@@ -18,7 +18,7 @@ jobs:
     name: Build Convex Backend
     # Use a GitHub-hosted runner so the job does not wait forever for the
     # unavailable self-hosted AWS runner (self-hosted, aws, x64, xlarge).
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repo
