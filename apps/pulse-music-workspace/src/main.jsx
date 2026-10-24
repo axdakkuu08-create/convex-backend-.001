@@ -1,8 +1,68 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ConvexAuthProvider, useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
-import { ConvexReactClient } from "convex/react";
+import { ConvexReactClient, useMutation, useQuery } from "convex/react";
+import { makeFunctionReference } from "convex/server";
 import "./auth.css";
+
+const listSavedTracks = makeFunctionReference("savedTracks:list");
+const saveTrack = makeFunctionReference("savedTracks:save");
+const removeSavedTrack = makeFunctionReference("savedTracks:remove");
+
+function LibrarySyncBridge() {
+  const { isAuthenticated } = useConvexAuth();
+  const savedTracks = useQuery(listSavedTracks, isAuthenticated ? {} : "skip");
+  const saveTrackMutation = useMutation(saveTrack);
+  const removeTrackMutation = useMutation(removeSavedTrack);
+
+  useEffect(() => {
+    if (!isAuthenticated || !savedTracks) return;
+    let cancelled = false;
+    async function syncLocalLibrary() {
+      const localTracks = typeof window.pulseGetLikedTracks === "function" ? window.pulseGetLikedTracks() : [];
+      for (const track of localTracks) {
+        if (cancelled) return;
+        if (!savedTracks.some((saved) => saved.sourceUrl === track.src) && /^https?:\/\//i.test(track.src)) {
+          try {
+            await saveTrackMutation({
+              title: track.title,
+              artist: track.artist,
+              source: "direct",
+              sourceUrl: track.src,
+            });
+          } catch (error) {
+            window.pulseShowCloudMessage?.(error instanceof Error ? error.message : "A saved track could not sync.");
+          }
+        }
+      }
+      if (!cancelled) window.pulseApplyCloudSavedTracks?.(savedTracks);
+    }
+    void syncLocalLibrary();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, savedTracks, saveTrackMutation]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const onToggle = async (event) => {
+      const detail = event.detail;
+      if (!detail?.track?.sourceUrl || !/^https?:\/\//i.test(detail.track.sourceUrl)) return;
+      try {
+        if (detail.liked) {
+          await saveTrackMutation(detail.track);
+        } else {
+          const existing = (savedTracks || []).find((item) => item.sourceUrl === detail.track.sourceUrl);
+          if (existing) await removeTrackMutation({ trackId: existing._id });
+        }
+      } catch (error) {
+        window.pulseShowCloudMessage?.(error instanceof Error ? error.message : "Cloud library sync failed.");
+      }
+    };
+    window.addEventListener("pulse:library-toggle", onToggle);
+    return () => window.removeEventListener("pulse:library-toggle", onToggle);
+  }, [isAuthenticated, savedTracks, saveTrackMutation, removeTrackMutation]);
+
+  return null;
+}
 
 function PasskeyPanel() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -11,13 +71,21 @@ function PasskeyPanel() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    window.pulseShowCloudMessage = (text) => setMessage(text);
+    return () => { delete window.pulseShowCloudMessage; };
+  }, []);
+
   if (isLoading) return <div className="pulse-auth" aria-live="polite">Checking sign-in…</div>;
   if (isAuthenticated) {
     return (
-      <div className="pulse-auth pulse-auth--signed-in">
-        <span><strong>Pulse account connected</strong><small>Your playlists can be synced after backend deployment.</small></span>
-        <button type="button" onClick={() => void signOut()}>Sign out</button>
-      </div>
+      <>
+        <div className="pulse-auth pulse-auth--signed-in">
+          <span><strong>Pulse account connected</strong><small>Saved tracks sync to your account when connected.</small></span>
+          <button type="button" onClick={() => void signOut()}>Sign out</button>
+        </div>
+        {message && <p className="pulse-auth__message" role="status">{message}</p>}
+      </>
     );
   }
 
@@ -61,6 +129,7 @@ if (rootElement) {
     createRoot(rootElement).render(
       <React.StrictMode>
         <ConvexAuthProvider client={client}>
+          <LibrarySyncBridge />
           <PasskeyPanel />
         </ConvexAuthProvider>
       </React.StrictMode>,
