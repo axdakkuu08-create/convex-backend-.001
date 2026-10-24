@@ -40,6 +40,17 @@ test('track mutations validate title and HTTP(S) URL and check ownership', () =>
   }
 });
 
+test('browser entrypoint wires saved-track operations into the music player', () => {
+  const entry = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.jsx'), 'utf8');
+  const player = fs.readFileSync(path.join(__dirname, '..', 'app.js'), 'utf8');
+  assert.match(entry, /savedTracks:list/);
+  assert.match(entry, /savedTracks:save/);
+  assert.match(entry, /savedTracks:remove/);
+  assert.match(entry, /pulse:library-toggle/);
+  assert.match(player, /pulseGetLikedTracks/);
+  assert.match(player, /pulse:library-toggle/);
+});
+
 test('passkey authentication is configured on both backend and browser entrypoint', () => {
   const auth = fs.readFileSync(path.join(root, 'auth.ts'), 'utf8');
   const authConfig = fs.readFileSync(path.join(root, 'auth.config.ts'), 'utf8');
