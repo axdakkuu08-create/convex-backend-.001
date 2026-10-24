@@ -23,7 +23,8 @@ player remains local-first: favourites and recently played history use
 separate workspace and requires a configured OIDC provider and development
 deployment before it can safely be connected.
 
-See [the integration contract and acceptance checklist](../../docs/pulse-convex-frontend-integration.md).
+See
+[the integration contract and acceptance checklist](../../docs/pulse-convex-frontend-integration.md).
 Do not treat passing CI as proof of a live deployment or sign-in. The planned
 integration must preserve local playback and local data as a fallback.
 
