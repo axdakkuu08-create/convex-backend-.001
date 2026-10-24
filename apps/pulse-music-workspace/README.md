@@ -24,7 +24,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-For a production bundle, run `npm run build`; the static output is written to `dist/`. The original music player remains in `app.js`. Likes, recent plays, and playlists still use localStorage until the follow-up library-sync integration is completed.
+For a production bundle, run `npm run build`; the static output is written to `dist/`. The original music player remains in `app.js`. Recent plays and demo-only playlist labels remain local; saved likes are kept locally and synchronized to Convex for signed-in users when the deployment and authentication are configured.
 
 ## Music integrations
 The **Connect a music source** panel supports official embedded players for:
@@ -52,7 +52,7 @@ The `convex/` directory contains:
 
 Ownership is derived from the authenticated Convex identity; client-provided owner IDs are not accepted. Mutations check record ownership and validate track titles and HTTP(S) URLs. The backend stores track metadata and links; it does **not** host or stream music files.
 
-The browser auth panel requires `VITE_CONVEX_URL` (a public deployment URL, not a secret). Set it in `.env.local` for local development or the GitHub Actions repository variable `VITE_CONVEX_URL` for CI/hosting builds. Then run `npx convex dev` from this workspace to generate `convex/_generated/`, create the development deployment, and set the Convex Auth environment values (`JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`, and passkey origin settings) using the official Convex Auth setup flow. Never commit private keys or deployment keys. The playlist and saved-track functions already require an authenticated identity, but the player library is not yet synchronized to those functions; that is the next integration milestone after deployment and typecheck.
+The browser auth panel requires `VITE_CONVEX_URL` (a public deployment URL, not a secret). Set it in `.env.local` for local development or the GitHub Actions repository variable `VITE_CONVEX_URL` for CI/hosting builds. Then run `npx convex dev` from this workspace to generate `convex/_generated/`, create the development deployment, and set the Convex Auth environment values (`JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`, and passkey origin settings) using the official Convex Auth setup flow. Never commit private keys or deployment keys. The player now connects its saved-track actions to `savedTracks:list`, `savedTracks:save`, and `savedTracks:remove`. On sign-in, locally saved demo tracks are uploaded if missing, and cloud-saved demo tracks are reflected in the local library. Local audio files are not uploaded or synced. Playlist CRUD functions are available in the backend, but the current playlist labels remain local UI state and are a separate follow-up.
 
 ## Checks
 GitHub Actions checks JavaScript syntax, provider URL resolver tests, backend source safety smoke tests, and required HTML interface elements. The backend smoke tests are static checks, not a substitute for Convex typechecking or a live deployment test.
