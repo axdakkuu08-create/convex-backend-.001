@@ -22,8 +22,15 @@ not prove a live Convex deployment or a working sign-in flow.
    short-lived, verified OIDC access/ID token whose issuer and audience match
    `convex/auth.config.ts`. Never put a client secret or private key in browser
    code.
-4. Provide the development deployment URL as `VITE_CONVEX_URL` (or the
-   equivalent build-time config) without committing secrets.
+4. Provide the development deployment URL to the frontend. The player is static
+   HTML/JavaScript with no build step, so `VITE_CONVEX_URL` does not apply
+   unless a Vite build is added. Until then, supply the URL through a separate,
+   uncommitted `config.js` that sets a global (for example
+   `window.PULSE_CONFIG = { convexUrl: "..." }`) and is loaded before `app.js`;
+   the deployment process writes that file. If the integration adds Vite
+   instead, document the build and deployment steps here. The deployment URL is
+   not a secret, but never place deploy keys, client secrets, or private keys in
+   this file or anywhere in browser code.
 
 ## Backend API contract
 
@@ -64,6 +71,8 @@ local-only player usable and explain that cloud sync is unavailable.
       provider's official settings.
 - [ ] Development Convex deployment configured; no deployment secrets committed.
 - [ ] Sign-in, token refresh, and sign-out verified.
+- [ ] Frontend configured with the development deployment URL; no secrets
+      committed.
 - [ ] Cloud playlists survive reload and remain owner-scoped.
 - [ ] Cloud saved tracks survive reload and remain owner-scoped.
 - [ ] Local-only playback still works when offline or signed out.
@@ -72,5 +81,7 @@ local-only player usable and explain that cloud sync is unavailable.
       CI status.
 - [ ] Android browser smoke test completed.
 
-Until the first three setup items are supplied and tested, the repository should
-describe cloud sync as **prepared / not yet connected**, not as a live feature.
+Until all four setup items are supplied and tested (identity-provider setup, a
+Convex development deployment, verified browser sign-in, and the frontend
+deployment URL configuration), the repository should describe cloud sync as
+**prepared / not yet connected**, not as a live feature.
