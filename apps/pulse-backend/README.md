@@ -54,8 +54,8 @@ The frontend still uses browser-local state for favourites/recent history and
 official music-provider embeds. The first cloud milestone supports Clerk sign-in
 and cloud playlist create/list/delete when public values are configured in
 `apps/pulse-music-workspace/config.js`. Playback behaviour is unchanged.
-Favourites and recent history remain local-only for now. Keep local storage as
-a fallback until additional sync is tested.
+Favourites and recent history remain local-only for now. Keep local storage as a
+fallback until additional sync is tested.
 
 ## Security model
 
