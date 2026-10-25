@@ -38,6 +38,10 @@ jobs:
         run: |
           test -n "$CONVEX_DEPLOY_KEY" || (echo "Missing repository secret PULSE_CONVEX_DEV_DEPLOY_KEY" && exit 1)
           test -n "$CLERK_JWT_ISSUER_DOMAIN" || (echo "Missing repository variable PULSE_CLERK_JWT_ISSUER_DOMAIN" && exit 1)
+          case "$CONVEX_DEPLOY_KEY" in
+            dev:*) echo "Development deploy key format verified." ;;
+            *) echo "Refusing to run: the configured key does not have the Convex development-key prefix. Replace PULSE_CONVEX_DEV_DEPLOY_KEY with a key generated for the Development deployment." ; exit 1 ;;
+          esac
 
       - name: Sync Convex development deployment
         run: npx convex dev --once
