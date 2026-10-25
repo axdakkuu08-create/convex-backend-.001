@@ -1,0 +1,43 @@
+name: Sync Pulse Convex development backend
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Typecheck and sync development deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/pulse-backend
+    env:
+      CONVEX_DEPLOY_KEY: ${{ secrets.PULSE_CONVEX_DEV_DEPLOY_KEY }}
+      CLERK_JWT_ISSUER_DOMAIN: ${{ vars.PULSE_CLERK_JWT_ISSUER_DOMAIN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/pulse-backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck backend
+        run: npm run typecheck
+
+      - name: Verify required configuration is present
+        run: |
+          test -n "$CONVEX_DEPLOY_KEY" || (echo "Missing repository secret PULSE_CONVEX_DEV_DEPLOY_KEY" && exit 1)
+          test -n "$CLERK_JWT_ISSUER_DOMAIN" || (echo "Missing repository variable PULSE_CLERK_JWT_ISSUER_DOMAIN" && exit 1)
+
+      - name: Sync Convex development deployment
+        run: npx convex dev --once
