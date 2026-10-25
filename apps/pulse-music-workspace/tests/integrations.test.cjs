@@ -109,7 +109,17 @@ test("cloud playlists are opt-in and use owner-scoped backend functions", () => 
   assert.match(cloudSource, /playlists:create/);
   assert.match(cloudSource, /playlists:remove/);
   assert.match(cloudSource, /template: "convex"/);
-  assert.match(configSource, /convexUrl: ""/);
-  assert.match(configSource, /clerkPublishableKey: ""/);
+});
+
+test("public config is either blank or holds only public client values", () => {
+  assert.match(
+    configSource,
+    /convexUrl:\s*"(https:\/\/[a-z0-9-]+\.convex\.cloud)?"/,
+  );
+  assert.match(
+    configSource,
+    /clerkPublishableKey:\s*"(pk_(test|live)_[A-Za-z0-9+=_-]+)?"/,
+  );
   assert.doesNotMatch(configSource, /sk_test_|sk_live_|convex deploy key/i);
+  assert.doesNotMatch(configSource, /convexUrl:\s*".*\/"/);
 });
