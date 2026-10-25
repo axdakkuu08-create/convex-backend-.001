@@ -1,9 +1,9 @@
 # Pulse Music Backend (Convex)
 
 This is a **separate backend workspace** for the existing Pulse music frontend.
-It does not replace or modify `apps/pulse-music-workspace/`. The frontend
-remains usable without this backend until a later integration change is
-reviewed.
+It does not replace the existing `apps/pulse-music-workspace/`. The frontend
+remains usable in local mode; optional cloud playlists activate only after Clerk
+and Convex development settings are configured.
 
 ## MVP included
 
@@ -49,10 +49,10 @@ hand-written in this scaffold.
 
 ## Frontend integration is a separate milestone
 
-The existing frontend still uses browser-local state and official music-provider
-embeds. This backend work does not change playback code or bypass Spotify,
-YouTube, or SoundCloud rules. The first frontend milestone now supports Clerk sign-in and cloud playlist
-create/list/delete when public values are configured in `apps/pulse-music-workspace/config.js`.
+The frontend still uses browser-local state for favourites/recent history and
+official music-provider embeds. The first cloud milestone supports Clerk sign-in
+and cloud playlist create/list/delete when public values are configured in
+`apps/pulse-music-workspace/config.js`. Playback behaviour is unchanged.
 Favourites and recent history remain local-only for now. Keep local storage as
 a fallback until additional sync is tested.
 
