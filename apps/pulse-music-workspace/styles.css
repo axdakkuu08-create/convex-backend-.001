@@ -1017,3 +1017,62 @@ footer {
     height: 250px;
   }
 }
+
+
+/* Optional Convex cloud-playlist controls */
+.cloud-account {
+  border-top: 1px solid var(--line);
+  margin-top: 16px;
+  padding-top: 16px;
+  min-width: 0;
+}
+.cloud-account > small {
+  display: block;
+  margin-bottom: 8px;
+}
+#cloudStatus {
+  color: #a6a8b2;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  margin: 0 0 7px;
+}
+.cloud-account .nav {
+  width: 100%;
+  margin: 2px 0;
+  padding: 9px 10px;
+}
+.cloud-playlists {
+  max-height: 160px;
+  overflow-y: auto;
+}
+.cloud-playlist-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  color: #d4d5dc;
+  font-size: 11px;
+  border-radius: 6px;
+}
+.cloud-playlist-row span {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.cloud-delete {
+  border: 0;
+  background: transparent;
+  color: #a6a8b2;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.cloud-delete:hover {
+  background: #34353e;
+  color: white;
+}
+.cloud-empty {
+  color: #777986;
+  font-size: 10px;
+  padding: 0 8px;
+}
