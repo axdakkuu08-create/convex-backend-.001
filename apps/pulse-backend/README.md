@@ -19,8 +19,8 @@ reviewed.
 ## Authentication status
 
 The backend now includes `convex/auth.config.ts` for an OIDC-compatible
-provider, using deployment environment variables `PULSE_AUTH_DOMAIN` and
-`PULSE_AUTH_APPLICATION_ID`. **These values must be configured and verified on
+provider, using deployment environment variables `CLERK_JWT_ISSUER_DOMAIN` and
+`the fixed application ID `convex``. **These values must be configured and verified on
 the Convex development deployment before syncing or deploying the auth
 configuration.** The provider account and frontend sign-in flow are not
 configured by this repository change.
@@ -38,7 +38,7 @@ Convex account are required.
 
 1. Choose an OIDC-compatible identity provider and follow its official Convex
    setup guide.
-2. Configure `PULSE_AUTH_DOMAIN` and `PULSE_AUTH_APPLICATION_ID` on the Convex
+2. Configure `CLERK_JWT_ISSUER_DOMAIN` and `the fixed application ID `convex`` on the Convex
    **development** deployment.
 3. Open `apps/pulse-backend/` in a trusted Node.js cloud development
    environment.
