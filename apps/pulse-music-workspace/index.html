@@ -30,6 +30,14 @@
           ><button class="playlist" data-mood="Night">●　Late night</button
           ><button class="playlist" data-mood="Energy">●　Good energy</button>
         </div>
+        <div class="cloud-account" aria-label="Cloud account">
+          <small>ACCOUNT / CLOUD</small>
+          <p id="cloudStatus" role="status" aria-live="polite">Cloud sync is optional.</p>
+          <button id="cloudSignIn" class="nav" type="button">Sign in to sync</button>
+          <button id="cloudSignOut" class="nav" type="button" hidden>Sign out</button>
+          <button id="cloudNewPlaylist" class="nav" type="button" hidden>＋ Cloud playlist</button>
+          <div id="cloudPlaylists" class="cloud-playlists"></div>
+        </div>
         <div class="sidefoot">●　Local demo workspace <b>READY</b></div>
       </aside>
       <main>
@@ -253,6 +261,8 @@
       <audio id="audio" preload="metadata"></audio>
     </section>
     <div id="toast" role="status"></div>
+    <script src="config.js"></script>
     <script src="app.js"></script>
+    <script type="module" src="cloud-sync.js"></script>
   </body>
 </html>
