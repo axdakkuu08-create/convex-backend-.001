@@ -1,12 +1,14 @@
 # Pulse cloud playlists setup (Clerk + Convex)
 
-This is the first cloud milestone for the existing static HTML/JavaScript player.
-It adds sign-in and cloud playlist create/list/delete. Playback remains local and
-the cloud client stays disabled until both public frontend settings are filled.
+This is the first cloud milestone for the existing static HTML/JavaScript
+player. It adds sign-in and cloud playlist create/list/delete. Playback remains
+local and the cloud client stays disabled until both public frontend settings
+are filled.
 
 ## 1. Create a Clerk development application
 
-1. Open the [Clerk Dashboard](https://dashboard.clerk.com/) and create a development application.
+1. Open the [Clerk Dashboard](https://dashboard.clerk.com/) and create a
+development application.
 2. In Clerk's integrations, activate the **Convex** integration.
 3. Copy the Clerk **Frontend API URL** and **publishable key**. The URL is the
    issuer domain; the publishable key is safe for browser use. Never copy a
@@ -15,18 +17,18 @@ the cloud client stays disabled until both public frontend settings are filled.
    deployed origin in Clerk's allowed origins / redirect configuration if Clerk
    requests it.
 
-Clerk's Convex integration provides the `convex` session-token template used
-by the browser client.
+Clerk's Convex integration provides the `convex` session-token template used by
+the browser client.
 
 ## 2. Configure the Convex development deployment
 
-1. Open the [Convex Dashboard](https://dashboard.convex.dev/) and create or select
-   a **development** deployment for this repository's backend.
-2. In that deployment's environment variables, set
-   `CLERK_JWT_ISSUER_DOMAIN` to the exact Clerk Frontend API URL from step 1.
+1. Open the [Convex Dashboard](https://dashboard.convex.dev/) and create or
+   select a **development** deployment for this repository's backend.
+2. In that deployment's environment variables, set `CLERK_JWT_ISSUER_DOMAIN` to
+   the exact Clerk Frontend API URL from step 1.
 3. In a trusted Node.js environment, open `apps/pulse-backend/`, install
-   dependencies with `npm install`, authenticate with `npx convex login`,
-   then run `npx convex dev` to sync the backend and auth configuration.
+   dependencies with `npm install`, authenticate with `npx convex login`, then
+   run `npx convex dev` to sync the backend and auth configuration.
 4. Confirm the Convex dashboard's Authentication settings show the Clerk issuer
    and application ID `convex`. Do not proceed if they do not match the Clerk
    integration.
@@ -44,8 +46,8 @@ Edit `apps/pulse-music-workspace/config.js`:
 - `clerkPublishableKey`: the Clerk **publishable** key only.
 
 Both values are public client configuration. Never put a Clerk secret key,
-Convex deploy key, admin key, private key, or access token in `config.js`,
-HTML, JavaScript, or GitHub Pages.
+Convex deploy key, admin key, private key, or access token in `config.js`, HTML,
+JavaScript, or GitHub Pages.
 
 Deploy the frontend from `apps/pulse-music-workspace/` using your existing
 static hosting workflow. If the site is served from GitHub Pages, confirm the
