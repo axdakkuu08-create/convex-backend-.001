@@ -35,7 +35,8 @@ Review and edit through GitHub on Android. Validation runs through GitHub
 Actions. To sync authentication or deploy, a trusted Node.js environment and
 Convex account are required.
 
-1. Create a Clerk application and activate the Convex integration in the Clerk Dashboard.
+1. Create a Clerk application and activate the Convex integration in the Clerk
+   Dashboard.
 2. Set `CLERK_JWT_ISSUER_DOMAIN` to the Clerk Frontend API URL in the Convex
    **development** deployment environment. The application ID is `convex`.
 3. Open `apps/pulse-backend/` in a trusted Node.js cloud development
