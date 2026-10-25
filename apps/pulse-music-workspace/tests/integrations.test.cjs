@@ -91,7 +91,6 @@ test("unsupported domains and invalid links fail with a helpful error", () => {
   );
 });
 
-
 const cloudSource = fs.readFileSync(
   path.join(__dirname, "..", "cloud-sync.js"),
   "utf8",
@@ -102,7 +101,10 @@ const configSource = fs.readFileSync(
 );
 
 test("cloud playlists are opt-in and use owner-scoped backend functions", () => {
-  assert.match(cloudSource, /if \(!config\.convexUrl \|\| !config\.clerkPublishableKey\)/);
+  assert.match(
+    cloudSource,
+    /if \(!config\.convexUrl \|\| !config\.clerkPublishableKey\)/,
+  );
   assert.match(cloudSource, /playlists:listMine/);
   assert.match(cloudSource, /playlists:create/);
   assert.match(cloudSource, /playlists:remove/);
