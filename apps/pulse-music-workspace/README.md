@@ -17,10 +17,10 @@ and is not affiliated with Convex.
 
 ## Cloud playlist integration (optional)
 
-The frontend now contains an **opt-in** Clerk + Convex cloud-playlist client.
-It remains disabled until both public values in `config.js` are filled in.
-Without those values, the existing local player continues to work and no cloud
-requests are made.
+The frontend now contains an **opt-in** Clerk + Convex cloud-playlist client. It
+remains disabled until both public values in `config.js` are filled in. Without
+those values, the existing local player continues to work and no cloud requests
+are made.
 
 Follow [the cloud setup guide](CLOUD_SETUP.md) before enabling it. The guide
 covers the Clerk Convex integration, the Convex development deployment, and
