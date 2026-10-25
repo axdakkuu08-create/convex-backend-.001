@@ -13,8 +13,8 @@ Clerk issuer is configured and the backend auth configuration is synced**.
    (the issuer domain) and the browser-safe publishable key.
 3. In the Convex **development deployment** environment settings, set
    `CLERK_JWT_ISSUER_DOMAIN` to that exact Frontend API URL.
-4. The backend's `convex/auth.config.ts` uses application ID `convex`. The
-   Clerk integration must issue a compatible token with the matching issuer and
+4. The backend's `convex/auth.config.ts` uses application ID `convex`. The Clerk
+   integration must issue a compatible token with the matching issuer and
    audience.
 5. From `apps/pulse-backend/` in a trusted Node.js environment, run
    `npm install`, authenticate with `npx convex login` if needed, then run
