@@ -138,7 +138,6 @@ async function startCloud() {
     });
     await updateAuth();
 
-    signInButton.hidden = false;
     signInButton.addEventListener("click", () => clerk.openSignIn());
     signOutButton.addEventListener("click", async () => {
       await clerk.signOut();
