@@ -7,18 +7,14 @@ and the configuration is synced**.
 
 ## Required provider values
 
-Configure these as environment variables on the **Convex development
-deployment** before running `npx convex dev`:
+Configure `CLERK_JWT_ISSUER_DOMAIN` in the **Convex development deployment**
+using the exact Clerk Frontend API URL. The application ID is fixed to `convex`.
+Activate the Convex integration in Clerk so the session token's issuer and
+`aud` claim match the backend configuration.
 
-- `PULSE_AUTH_DOMAIN`: the exact issuer/domain provided by your OIDC identity
-  provider.
-- `PULSE_AUTH_APPLICATION_ID`: the exact audience/application ID expected in the
-  access/identity token.
-
-The domain and application ID must match the JWT claims and provider setup. Do
-not guess these values. Use the provider's official Convex integration
-instructions. A provider may require a specific audience such as `convex`;
-another provider may require its client ID.
+The Clerk issuer domain and application ID must match the JWT claims. Use
+Clerk's official Convex integration instructions; this integration uses the
+application ID `convex`.
 
 After development is verified, configure separate values on the production
 deployment before any production deployment. Never put client secrets, admin
@@ -26,8 +22,8 @@ keys, private signing keys, or access tokens in GitHub files or frontend code.
 
 ## Before frontend integration
 
-1. Choose and create an OIDC-compatible identity-provider application.
-2. Set the two values above in the Convex development deployment settings.
+1. Create a Clerk application and activate the Convex integration.
+2. Set `CLERK_JWT_ISSUER_DOMAIN` in the Convex development deployment settings.
 3. Run `npx convex dev` from `apps/pulse-backend/` in a trusted Node.js
    environment to sync the auth configuration.
 4. Confirm the Convex dashboard lists the expected issuer and application ID.
