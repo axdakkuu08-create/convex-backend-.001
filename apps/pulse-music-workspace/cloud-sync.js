@@ -11,9 +11,16 @@ function status(message) {
   if (cloudStatus) cloudStatus.textContent = message;
 }
 function escapeText(value) {
-  return String(value ?? "").replace(/[&<>"]/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
-  })[char]);
+  return String(value ?? "").replace(
+    /[&<>"]/g,
+    (char) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+      })[char],
+  );
 }
 
 if (!config.convexUrl || !config.clerkPublishableKey) {
@@ -27,11 +34,12 @@ if (!config.convexUrl || !config.clerkPublishableKey) {
 
 async function startCloud() {
   try {
-    const [{ Clerk }, { ConvexClient }, { makeFunctionReference }] = await Promise.all([
-      import("https://esm.sh/@clerk/clerk-js@5"),
-      import("https://esm.sh/convex@1.31.5/browser"),
-      import("https://esm.sh/convex@1.31.5/server"),
-    ]);
+    const [{ Clerk }, { ConvexClient }, { makeFunctionReference }] =
+      await Promise.all([
+        import("https://esm.sh/@clerk/clerk-js@5"),
+        import("https://esm.sh/convex@1.31.5/browser"),
+        import("https://esm.sh/convex@1.31.5/server"),
+      ]);
     const clerk = new Clerk(config.clerkPublishableKey);
     const convex = new ConvexClient(config.convexUrl);
     const listMine = makeFunctionReference("playlists:listMine");
@@ -53,11 +61,15 @@ async function startCloud() {
         remove.textContent = "×";
         remove.setAttribute("aria-label", "Delete playlist " + playlist.name);
         remove.addEventListener("click", async () => {
-          if (!confirm('Delete cloud playlist "' + playlist.name + '"?')) return;
+          if (!confirm('Delete cloud playlist "' + playlist.name + '"?'))
+            return;
           try {
             await convex.mutation(removePlaylist, { playlistId: playlist._id });
           } catch (error) {
-            status("Could not delete playlist: " + (error?.message || "unknown error"));
+            status(
+              "Could not delete playlist: " +
+                (error?.message || "unknown error"),
+            );
           }
         });
         row.append(name, remove);
@@ -90,7 +102,11 @@ async function startCloud() {
         listMine,
         {},
         renderPlaylists,
-        (error) => status("Cloud playlist error: " + (error?.message || "check configuration")),
+        (error) =>
+          status(
+            "Cloud playlist error: " +
+              (error?.message || "check configuration"),
+          ),
       );
     };
 
@@ -104,12 +120,20 @@ async function startCloud() {
 
     await clerk.load();
     convex.setAuth(fetchToken, (isAuthenticated) => {
-      status(isAuthenticated ? "Signed in · cloud playlists are live." : "Sign in to enable cloud playlists.");
+      status(
+        isAuthenticated
+          ? "Signed in · cloud playlists are live."
+          : "Sign in to enable cloud playlists.",
+      );
     });
     clerk.addListener(() => {
       void updateAuth();
       convex.setAuth(fetchToken, (isAuthenticated) => {
-        status(isAuthenticated ? "Signed in · cloud playlists are live." : "Sign in to enable cloud playlists.");
+        status(
+          isAuthenticated
+            ? "Signed in · cloud playlists are live."
+            : "Sign in to enable cloud playlists.",
+        );
       });
     });
     await updateAuth();
@@ -124,10 +148,15 @@ async function startCloud() {
       const name = prompt("Name your cloud playlist");
       if (!name || !name.trim()) return;
       try {
-        await convex.mutation(createPlaylist, { name: name.trim().slice(0, 80) });
+        await convex.mutation(createPlaylist, {
+          name: name.trim().slice(0, 80),
+        });
         status("Cloud playlist created.");
       } catch (error) {
-        status("Could not create playlist: " + (error?.message || "check configuration"));
+        status(
+          "Could not create playlist: " +
+            (error?.message || "check configuration"),
+        );
       }
     });
   } catch (error) {
