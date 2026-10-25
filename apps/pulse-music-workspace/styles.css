@@ -36,6 +36,7 @@ button {
 .sidebar {
   position: fixed;
   inset: 0 auto 92px 0;
+  overflow-y: auto;
   width: 230px;
   padding: 27px 17px;
   background: #121317;
