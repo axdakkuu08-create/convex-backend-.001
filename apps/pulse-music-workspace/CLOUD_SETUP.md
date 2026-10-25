@@ -8,7 +8,7 @@ are filled.
 ## 1. Create a Clerk development application
 
 1. Open the [Clerk Dashboard](https://dashboard.clerk.com/) and create a
-development application.
+   development application.
 2. In Clerk's integrations, activate the **Convex** integration.
 3. Copy the Clerk **Frontend API URL** and **publishable key**. The URL is the
    issuer domain; the publishable key is safe for browser use. Never copy a
