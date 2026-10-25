@@ -1,7 +1,7 @@
 // Public browser configuration only. Safe to commit placeholders; never put secrets here.
 window.PULSE_CONFIG = Object.freeze({
-  // Copy the deployment's https://<deployment>.convex.cloud URL here.
-  convexUrl: "",
-  // Clerk publishable key only (starts with pk_test_ or pk_live_). Never use a secret key.
-  clerkPublishableKey: "",
+  // Confirmed development deployment URL (without a trailing slash).
+  convexUrl: "https://resolute-otter-348.convex.cloud",
+  // Clerk development publishable key only. Never use a secret key here.
+  clerkPublishableKey: "pk_test_c29jaWFsLXNuYWtlLTM0My5jbGVyay5hY2NvdW50cy5kZXYk",
 });
