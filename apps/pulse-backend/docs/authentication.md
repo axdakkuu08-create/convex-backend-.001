@@ -1,49 +1,47 @@
 # Pulse authentication setup
 
-Pulse's backend uses Convex's verified identity for every private library
-operation. The repository now contains an OIDC provider configuration template;
-it is **not active on a deployment until valid provider values are configured
-and the configuration is synced**.
+Pulse uses Convex's verified identity for every private library operation. This
+repository uses Clerk as the OpenID Connect identity provider for the static
+Pulse frontend. The configuration is **not active on a deployment until the
+Clerk issuer is configured and the backend auth configuration is synced**.
 
-## Required provider values
+## Development setup
 
-Configure these as environment variables on the **Convex development
-deployment** before running `npx convex dev`:
+1. Create a Clerk application in the
+   [Clerk Dashboard](https://dashboard.clerk.com/).
+2. Activate Clerk's Convex integration and copy the exact Clerk Frontend API URL
+   (the issuer domain) and the browser-safe publishable key.
+3. In the Convex **development deployment** environment settings, set
+   `CLERK_JWT_ISSUER_DOMAIN` to that exact Frontend API URL.
+4. The backend's `convex/auth.config.ts` uses application ID `convex`. The Clerk
+   integration must issue a compatible token with the matching issuer and
+   audience.
+5. From `apps/pulse-backend/` in a trusted Node.js environment, run
+   `npm install`, authenticate with `npx convex login` if needed, then run
+   `npx convex dev` to sync the auth configuration.
+6. Confirm the Convex dashboard's Authentication settings list the expected
+   Clerk issuer and application ID `convex`.
 
-- `PULSE_AUTH_DOMAIN`: the exact issuer/domain provided by your OIDC identity
-  provider.
-- `PULSE_AUTH_APPLICATION_ID`: the exact audience/application ID expected in the
-  access/identity token.
+See the [frontend cloud setup guide](../../pulse-music-workspace/CLOUD_SETUP.md)
+for how to fill the public values in `apps/pulse-music-workspace/config.js`.
 
-The domain and application ID must match the JWT claims and provider setup. Do
-not guess these values. Use the provider's official Convex integration
-instructions. A provider may require a specific audience such as `convex`;
-another provider may require its client ID.
+## Production
 
-After development is verified, configure separate values on the production
-deployment before any production deployment. Never put client secrets, admin
-keys, private signing keys, or access tokens in GitHub files or frontend code.
-
-## Before frontend integration
-
-1. Choose and create an OIDC-compatible identity-provider application.
-2. Set the two values above in the Convex development deployment settings.
-3. Run `npx convex dev` from `apps/pulse-backend/` in a trusted Node.js
-   environment to sync the auth configuration.
-4. Confirm the Convex dashboard lists the expected issuer and application ID.
-5. Test signed-out requests, signed-in requests, and cross-user access attempts.
-6. Only then plan frontend login wiring. The current Pulse frontend remains
-   unchanged and does not yet provide a login flow.
+Do not reuse development credentials or deploy until the development flow has
+been verified. Configure the production deployment with the intended Clerk
+production issuer, then run the appropriate production deployment command. Never
+put Clerk secret keys, Convex deploy keys, admin keys, private signing keys, or
+access tokens in frontend files or GitHub.
 
 ## Identity and ownership
 
 Backend functions use Convex's verified `tokenIdentifier`, not an owner ID sent
-by the browser. This is globally unique across identity providers. All private
-functions must continue to authenticate and verify ownership before reading or
-changing records.
+by the browser. Every private query and mutation must authenticate and verify
+ownership before reading or changing records. Test signed-out requests and
+cross-account access before relying on cloud data.
 
 ## Important
 
-This template does not create an identity-provider account, configure a
-deployment, or make sign-in work by itself. Do not deploy until both values are
-configured and verified. No live deployment is performed as part of this change.
+This setup does not create a Clerk account, provision a Convex deployment, or
+make sign-in work by itself. GitHub CI checks are not proof of a live deployment
+or real login.

@@ -1,9 +1,9 @@
 # Pulse Music Backend (Convex)
 
 This is a **separate backend workspace** for the existing Pulse music frontend.
-It does not replace or modify `apps/pulse-music-workspace/`. The frontend
-remains usable without this backend until a later integration change is
-reviewed.
+It does not replace the existing `apps/pulse-music-workspace/`. The frontend
+remains usable in local mode; optional cloud playlists activate only after Clerk
+and Convex development settings are configured.
 
 ## MVP included
 
@@ -18,12 +18,11 @@ reviewed.
 
 ## Authentication status
 
-The backend now includes `convex/auth.config.ts` for an OIDC-compatible
-provider, using deployment environment variables `PULSE_AUTH_DOMAIN` and
-`PULSE_AUTH_APPLICATION_ID`. **These values must be configured and verified on
-the Convex development deployment before syncing or deploying the auth
-configuration.** The provider account and frontend sign-in flow are not
-configured by this repository change.
+The backend now includes `convex/auth.config.ts` for Clerk. Set the Convex
+`CLERK_JWT_ISSUER_DOMAIN` environment variable to the exact Clerk Frontend API
+URL and activate Clerk's Convex integration. The application ID is fixed to
+`convex`. Sync and verify the configuration on a development deployment before
+using sign-in.
 
 See [docs/authentication.md](docs/authentication.md). Never trust a user ID
 supplied by the browser; functions use Convex's verified `tokenIdentifier`. The
@@ -36,10 +35,10 @@ Review and edit through GitHub on Android. Validation runs through GitHub
 Actions. To sync authentication or deploy, a trusted Node.js environment and
 Convex account are required.
 
-1. Choose an OIDC-compatible identity provider and follow its official Convex
-   setup guide.
-2. Configure `PULSE_AUTH_DOMAIN` and `PULSE_AUTH_APPLICATION_ID` on the Convex
-   **development** deployment.
+1. Create a Clerk application and activate the Convex integration in the Clerk
+   Dashboard.
+2. Set `CLERK_JWT_ISSUER_DOMAIN` to the Clerk Frontend API URL in the Convex
+   **development** deployment environment. The application ID is `convex`.
 3. Open `apps/pulse-backend/` in a trusted Node.js cloud development
    environment.
 4. Run `npm install`, then `npx convex dev` and follow the official prompts.
@@ -51,11 +50,12 @@ hand-written in this scaffold.
 
 ## Frontend integration is a separate milestone
 
-The existing frontend still uses browser-local state and official music-provider
-embeds. This backend work does not change playback code or bypass Spotify,
-YouTube, or SoundCloud rules. After authentication is configured and tested,
-integrate cloud playlists first, then favourites and recent history. Keep local
-storage as a fallback until sync is tested.
+The frontend still uses browser-local state for favourites/recent history and
+official music-provider embeds. The first cloud milestone supports Clerk sign-in
+and cloud playlist create/list/delete when public values are configured in
+`apps/pulse-music-workspace/config.js`. Playback behaviour is unchanged.
+Favourites and recent history remain local-only for now. Keep local storage as a
+fallback until additional sync is tested.
 
 ## Security model
 

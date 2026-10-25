@@ -15,18 +15,19 @@ and is not affiliated with Convex.
 - Keyboard shortcut / to focus search; Space toggles playback
 - PWA install metadata
 
-## Cloud library status
+## Cloud playlist integration (optional)
 
-Cloud playlists and saved-track sync are **not connected yet**. The current
-player remains local-first: favourites and recently played history use
-`localStorage`, and playlist labels are session-only. The Convex backend is a
-separate workspace and requires a configured OIDC provider and development
-deployment before it can safely be connected.
+The frontend now contains an **opt-in** Clerk + Convex cloud-playlist client. It
+remains disabled until both public values in `config.js` are filled in. Without
+those values, the existing local player continues to work and no cloud requests
+are made.
 
-See
-[the integration contract and acceptance checklist](../../docs/pulse-convex-frontend-integration.md).
-Do not treat passing CI as proof of a live deployment or sign-in. The planned
-integration must preserve local playback and local data as a fallback.
+Follow [the cloud setup guide](CLOUD_SETUP.md) before enabling it. The guide
+covers the Clerk Convex integration, the Convex development deployment, and
+account-isolation checks. Cloud playlists are a first milestone; local
+favourites and recently played history still use `localStorage` and are not
+synced yet. A passing GitHub workflow does not prove that a real deployment or
+sign-in works.
 
 ## Run
 
@@ -72,7 +73,9 @@ music providers, and an HTML interface smoke test.
 
 - index.html — layout and controls
 - styles.css — theme and responsive styling
-- app.js — playback, search, library state, and interactions
+- app.js — playback, search, local library state, and interactions
+- config.js — public Convex URL and Clerk publishable-key placeholders
+- cloud-sync.js — optional cloud playlist sign-in and CRUD
 - manifest.webmanifest — install metadata
 
 ## Run checks locally

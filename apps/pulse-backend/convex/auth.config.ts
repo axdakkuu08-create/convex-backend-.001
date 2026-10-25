@@ -1,25 +1,22 @@
 import type { AuthConfig } from "convex/server";
 
 /**
- * Pulse authentication must be configured before running `npx convex dev`
- * or deploying this backend.
+ * Clerk issuer configuration for Pulse.
  *
- * Set PULSE_AUTH_DOMAIN to the exact OIDC issuer/domain and
- * PULSE_AUTH_APPLICATION_ID to the audience/application ID expected in the JWT.
- * Follow the chosen provider's official Convex instructions; do not guess.
- * Never commit secrets, private keys, or access tokens.
+ * Set CLERK_JWT_ISSUER_DOMAIN in the Convex development deployment's
+ * environment settings to the exact Clerk Frontend API URL, then run
+ * `npx convex dev` from apps/pulse-backend to sync this configuration.
+ * Use a separate issuer value for production. Never commit secrets or tokens.
  */
-const domain = process.env.PULSE_AUTH_DOMAIN?.trim();
-const applicationID = process.env.PULSE_AUTH_APPLICATION_ID?.trim();
+const domain = process.env.CLERK_JWT_ISSUER_DOMAIN?.trim();
 
-if (!domain || !applicationID) {
+if (!domain) {
   throw new Error(
-    "Pulse authentication is not configured. Set both PULSE_AUTH_DOMAIN and " +
-      "PULSE_AUTH_APPLICATION_ID to the values from your OIDC provider before " +
-      "running Convex dev or deploying.",
+    "Pulse authentication is not configured. Set CLERK_JWT_ISSUER_DOMAIN " +
+      "to the exact Clerk Frontend API URL in the Convex deployment settings.",
   );
 }
 
 export default {
-  providers: [{ domain, applicationID }],
+  providers: [{ domain, applicationID: "convex" }],
 } satisfies AuthConfig;
