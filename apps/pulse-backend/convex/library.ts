@@ -192,7 +192,6 @@ export const removeFromPlaylist = mutation({
   },
 });
 
-
 export const listRecent = query({
   args: {},
   handler: async (ctx) => {
@@ -209,7 +208,13 @@ export const recordPlayed = mutation({
   args: trackArgs,
   handler: async (ctx, args) => {
     const ownerId = await requireUser(ctx);
-    validateTrack(args.title, args.artist, args.source, args.sourceUrl, args.artworkUrl);
+    validateTrack(
+      args.title,
+      args.artist,
+      args.source,
+      args.sourceUrl,
+      args.artworkUrl,
+    );
     const duplicate = await ctx.db
       .query("recentlyPlayed")
       .withIndex("by_owner_source_url", (q) =>
