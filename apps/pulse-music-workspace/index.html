@@ -157,36 +157,100 @@
             >
           </div>
         </section>
-                <section class="spotify-panel" id="spotifyPanel" aria-labelledby="spotifyHeading">
+        <section
+          class="spotify-panel"
+          id="spotifyPanel"
+          aria-labelledby="spotifyHeading"
+        >
           <div class="sectionhead">
-            <div><small>OPTIONAL MUSIC SOURCE</small><h2 id="spotifyHeading">Connect Spotify</h2></div>
+            <div>
+              <small>OPTIONAL MUSIC SOURCE</small>
+              <h2 id="spotifyHeading">Connect Spotify</h2>
+            </div>
             <span class="spotify-pill">OFFICIAL PLAYER</span>
           </div>
-          <p class="spotify-copy">Connect your account to browse your playlists and saved tracks. Playback stays in Spotify’s official browser player.</p>
+          <p class="spotify-copy">
+            Connect your account to browse your playlists and saved tracks.
+            Playback stays in Spotify’s official browser player.
+          </p>
           <div class="spotify-config-row">
             <label for="spotifyClientId">Spotify app Client ID</label>
-            <input id="spotifyClientId" type="text" autocomplete="off" placeholder="Paste your Spotify Client ID" />
-            <button id="spotifySaveClient" class="secondary" type="button">Save on this device</button>
+            <input
+              id="spotifyClientId"
+              type="text"
+              autocomplete="off"
+              placeholder="Paste your Spotify Client ID"
+            />
+            <button id="spotifySaveClient" class="secondary" type="button">
+              Save on this device
+            </button>
           </div>
-          <p class="spotify-note">Register this exact redirect address in your Spotify Developer app: <code id="spotifyRedirectUri"></code>. A client ID is public; never paste a client secret here.</p>
+          <p class="spotify-note">
+            Register this exact redirect address in your Spotify Developer app:
+            <code id="spotifyRedirectUri"></code>. A client ID is public; never
+            paste a client secret here.
+          </p>
           <div class="spotify-actions">
-            <button id="spotifyConnect" class="primary" type="button">Connect Spotify</button>
-            <button id="spotifyDisconnect" class="secondary" type="button" hidden>Disconnect</button>
-            <button id="spotifyRefresh" class="secondary" type="button" hidden>Refresh library</button>
+            <button id="spotifyConnect" class="primary" type="button">
+              Connect Spotify
+            </button>
+            <button
+              id="spotifyDisconnect"
+              class="secondary"
+              type="button"
+              hidden
+            >
+              Disconnect
+            </button>
+            <button id="spotifyRefresh" class="secondary" type="button" hidden>
+              Refresh library
+            </button>
           </div>
-          <p id="spotifyStatus" class="spotify-status" role="status" aria-live="polite">Not connected. Local Pulse playback works independently.</p>
+          <p
+            id="spotifyStatus"
+            class="spotify-status"
+            role="status"
+            aria-live="polite"
+          >
+            Not connected. Local Pulse playback works independently.
+          </p>
           <div id="spotifyLibrary" class="spotify-library" hidden>
-            <div class="spotify-list"><h3>Your playlists</h3><div id="spotifyPlaylists"></div></div>
-            <div class="spotify-list"><h3>Saved tracks</h3><div id="spotifySavedTracks"></div></div>
+            <div class="spotify-list">
+              <h3>Your playlists</h3>
+              <div id="spotifyPlaylists"></div>
+            </div>
+            <div class="spotify-list">
+              <h3>Saved tracks</h3>
+              <div id="spotifySavedTracks"></div>
+            </div>
           </div>
           <div id="spotifyPlayerWrap" class="spotify-player-wrap" hidden>
-            <div class="spotify-player-head"><strong>Spotify browser player</strong><span id="spotifyDeviceStatus">Starting player…</span></div>
-            <div class="spotify-current" id="spotifyCurrent">Choose a track from your Spotify playlists or saved tracks.</div>
-            <div class="spotify-controls"><button id="spotifyPrev" type="button" aria-label="Previous track">|◀</button><button id="spotifyPlayPause" type="button">Play</button><button id="spotifyNext" type="button" aria-label="Next track">▶|</button></div>
-            <p class="spotify-note">Full-track playback requires Spotify Premium and a supported browser. If unavailable, open the track in Spotify.</p>
+            <div class="spotify-player-head">
+              <strong>Spotify browser player</strong
+              ><span id="spotifyDeviceStatus">Starting player…</span>
+            </div>
+            <div class="spotify-current" id="spotifyCurrent">
+              Choose a track from your Spotify playlists or saved tracks.
+            </div>
+            <div class="spotify-controls">
+              <button
+                id="spotifyPrev"
+                type="button"
+                aria-label="Previous track"
+              >
+                |◀</button
+              ><button id="spotifyPlayPause" type="button">Play</button
+              ><button id="spotifyNext" type="button" aria-label="Next track">
+                ▶|
+              </button>
+            </div>
+            <p class="spotify-note">
+              Full-track playback requires Spotify Premium and a supported
+              browser. If unavailable, open the track in Spotify.
+            </p>
           </div>
         </section>
-<section>
+        <section>
           <div class="sectionhead">
             <div>
               <small>CURATED FOR YOU</small>

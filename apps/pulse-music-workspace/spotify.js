@@ -14,7 +14,7 @@
     "playlist-read-private",
     "playlist-read-collaborative",
     "user-modify-playback-state",
-    "user-read-playback-state"
+    "user-read-playback-state",
   ].join(" ");
   let token = null;
   let player = null;
@@ -22,21 +22,47 @@
   let currentUri = null;
   let busy = false;
 
-  const setStatus = (message) => { $("spotifyStatus").textContent = message; };
-  const safe = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[c]);
-  const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  const setStatus = (message) => {
+    $("spotifyStatus").textContent = message;
+  };
+  const safe = (value) =>
+    String(value ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  const b64url = (bytes) =>
+    btoa(String.fromCharCode(...new Uint8Array(bytes)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/g, "");
   const randomString = (length = 64) => {
     const bytes = crypto.getRandomValues(new Uint8Array(length));
-    return Array.from(bytes, (x) => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"[x % 66]).join("");
+    return Array.from(
+      bytes,
+      (x) =>
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"[
+          x % 66
+        ],
+    ).join("");
   };
   async function challengeFor(verifier) {
-    return b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+    return b64url(
+      await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)),
+    );
   }
   function getClientId() {
-    return ($("spotifyClientId").value || localStorage.getItem(CLIENT_KEY) || "").trim();
+    return (
+      $("spotifyClientId").value ||
+      localStorage.getItem(CLIENT_KEY) ||
+      ""
+    ).trim();
   }
   function setBusy(value) {
     busy = value;
@@ -48,23 +74,37 @@
       const stored = sessionStorage.getItem(TOKEN_KEY);
       token = stored ? JSON.parse(stored) : null;
       if (token && token.expires_at <= Date.now() + 30000) token = null;
-    } catch (_) { token = null; }
+    } catch (_) {
+      token = null;
+    }
     return token;
   }
   async function spotifyFetch(path, options = {}) {
-    if (!token || token.expires_at <= Date.now()) throw new Error("Spotify session expired. Please connect again.");
+    if (!token || token.expires_at <= Date.now())
+      throw new Error("Spotify session expired. Please connect again.");
     const response = await fetch("https://api.spotify.com/v1" + path, {
       ...options,
-      headers: { Authorization: "Bearer " + token.access_token, ...(options.headers || {}) }
+      headers: {
+        Authorization: "Bearer " + token.access_token,
+        ...(options.headers || {}),
+      },
     });
     if (response.status === 401) {
-      sessionStorage.removeItem(TOKEN_KEY); token = null;
+      sessionStorage.removeItem(TOKEN_KEY);
+      token = null;
       throw new Error("Spotify authorization expired. Please connect again.");
     }
     if (!response.ok) {
       let detail = "";
-      try { detail = (await response.json()).error?.message || ""; } catch (_) {}
-      throw new Error("Spotify API returned " + response.status + (detail ? ": " + detail : "") + ".");
+      try {
+        detail = (await response.json()).error?.message || "";
+      } catch (_) {}
+      throw new Error(
+        "Spotify API returned " +
+          response.status +
+          (detail ? ": " + detail : "") +
+          ".",
+      );
     }
     if (response.status === 204) return null;
     return response.json();
@@ -72,12 +112,16 @@
   async function authorize() {
     const clientId = getClientId();
     if (!clientId) {
-      setStatus("Add your Spotify app Client ID first. This is public configuration, not a secret.");
+      setStatus(
+        "Add your Spotify app Client ID first. This is public configuration, not a secret.",
+      );
       $("spotifyClientId").focus();
       return;
     }
     if (!window.isSecureContext) {
-      setStatus("Spotify connection requires HTTPS (or localhost). Open the secure Pulse Preview URL.");
+      setStatus(
+        "Spotify connection requires HTTPS (or localhost). Open the secure Pulse Preview URL.",
+      );
       return;
     }
     const verifier = randomString(64);
@@ -91,9 +135,11 @@
       scope: SCOPES,
       state,
       code_challenge_method: "S256",
-      code_challenge: await challengeFor(verifier)
+      code_challenge: await challengeFor(verifier),
     });
-    window.location.assign("https://accounts.spotify.com/authorize?" + params.toString());
+    window.location.assign(
+      "https://accounts.spotify.com/authorize?" + params.toString(),
+    );
   }
   async function handleCallback() {
     const url = new URL(window.location.href);
@@ -103,7 +149,9 @@
     if (!code && !authError) return false;
     history.replaceState({}, document.title, REDIRECT_URI);
     if (authError) {
-      setStatus("Spotify connection was cancelled or denied: " + authError + ".");
+      setStatus(
+        "Spotify connection was cancelled or denied: " + authError + ".",
+      );
       return true;
     }
     const expectedState = sessionStorage.getItem(STATE_KEY);
@@ -124,16 +172,26 @@
           grant_type: "authorization_code",
           code,
           redirect_uri: REDIRECT_URI,
-          code_verifier: verifier
-        })
+          code_verifier: verifier,
+        }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error_description || data.error || "Token exchange failed");
-      token = { ...data, expires_at: Date.now() + (data.expires_in || 3600) * 1000 };
+      if (!response.ok)
+        throw new Error(
+          data.error_description || data.error || "Token exchange failed",
+        );
+      token = {
+        ...data,
+        expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+      };
       sessionStorage.setItem(TOKEN_KEY, JSON.stringify(token));
       setStatus("Spotify connected. Loading playlists and saved tracks…");
     } catch (error) {
-      setStatus("Spotify sign-in failed: " + error.message + ". Check the exact redirect URI in your Spotify app settings.");
+      setStatus(
+        "Spotify sign-in failed: " +
+          error.message +
+          ". Check the exact redirect URI in your Spotify app settings.",
+      );
     }
     return true;
   }
@@ -148,7 +206,12 @@
       const script = document.createElement("script");
       script.src = "https://sdk.scdn.co/spotify-player.js";
       script.async = true;
-      script.onerror = () => reject(new Error("Spotify player SDK could not load. Check your connection or content blockers."));
+      script.onerror = () =>
+        reject(
+          new Error(
+            "Spotify player SDK could not load. Check your connection or content blockers.",
+          ),
+        );
       document.head.appendChild(script);
     });
   }
@@ -161,7 +224,7 @@
       player = new Spotify.Player({
         name: "Pulse Web Player",
         getOAuthToken: (callback) => callback(token?.access_token || ""),
-        volume: 0.75
+        volume: 0.75,
       });
       player.addListener("ready", ({ device_id }) => {
         deviceId = device_id;
@@ -171,14 +234,33 @@
         deviceId = null;
         $("spotifyDeviceStatus").textContent = "Player temporarily offline";
       });
-      player.addListener("initialization_error", ({ message }) => $("spotifyDeviceStatus").textContent = "Player setup: " + message);
-      player.addListener("authentication_error", ({ message }) => $("spotifyDeviceStatus").textContent = "Auth error: " + message);
-      player.addListener("account_error", () => $("spotifyDeviceStatus").textContent = "Spotify Premium is required for full-track browser playback.");
-      player.addListener("playback_error", ({ message }) => $("spotifyDeviceStatus").textContent = "Playback error: " + message);
+      player.addListener(
+        "initialization_error",
+        ({ message }) =>
+          ($("spotifyDeviceStatus").textContent = "Player setup: " + message),
+      );
+      player.addListener(
+        "authentication_error",
+        ({ message }) =>
+          ($("spotifyDeviceStatus").textContent = "Auth error: " + message),
+      );
+      player.addListener(
+        "account_error",
+        () =>
+          ($("spotifyDeviceStatus").textContent =
+            "Spotify Premium is required for full-track browser playback."),
+      );
+      player.addListener(
+        "playback_error",
+        ({ message }) =>
+          ($("spotifyDeviceStatus").textContent = "Playback error: " + message),
+      );
       player.addListener("player_state_changed", (state) => {
         if (!state) return;
         const t = state.track_window.current_track;
-        $("spotifyCurrent").textContent = t ? t.name + " — " + t.artists.map(a => a.name).join(", ") : "Nothing playing";
+        $("spotifyCurrent").textContent = t
+          ? t.name + " — " + t.artists.map((a) => a.name).join(", ")
+          : "Nothing playing";
         $("spotifyPlayPause").textContent = state.paused ? "Play" : "Pause";
         currentUri = t?.uri || currentUri;
       });
@@ -191,97 +273,194 @@
   function renderItems(target, items, emptyMessage, onClick) {
     const node = $(target);
     if (!items.length) {
-      node.innerHTML = '<p class="spotify-empty">' + safe(emptyMessage) + '</p>';
+      node.innerHTML =
+        '<p class="spotify-empty">' + safe(emptyMessage) + "</p>";
       return;
     }
-    node.innerHTML = items.map((item, i) =>
-      '<button class="spotify-item" type="button" data-index="' + i + '">' +
-      '<span>' + safe(item.title) + '<small>' + safe(item.subtitle || "") + '</small></span><b>›</b></button>'
-    ).join("");
-    node.querySelectorAll("button").forEach((button, i) => button.addEventListener("click", () => onClick(items[i])));
+    node.innerHTML = items
+      .map(
+        (item, i) =>
+          '<button class="spotify-item" type="button" data-index="' +
+          i +
+          '">' +
+          "<span>" +
+          safe(item.title) +
+          "<small>" +
+          safe(item.subtitle || "") +
+          "</small></span><b>›</b></button>",
+      )
+      .join("");
+    node
+      .querySelectorAll("button")
+      .forEach((button, i) =>
+        button.addEventListener("click", () => onClick(items[i])),
+      );
   }
   async function loadLibrary() {
     setBusy(true);
     try {
       const [playlists, saved] = await Promise.all([
         spotifyFetch("/me/playlists?limit=50"),
-        spotifyFetch("/me/tracks?limit=50")
+        spotifyFetch("/me/tracks?limit=50"),
       ]);
-      const playlistItems = (playlists.items || []).map(p => ({
-        id: p.id, title: p.name, subtitle: (p.tracks?.total ?? 0) + " tracks · playlist", type: "playlist"
+      const playlistItems = (playlists.items || []).map((p) => ({
+        id: p.id,
+        title: p.name,
+        subtitle: (p.tracks?.total ?? 0) + " tracks · playlist",
+        type: "playlist",
       }));
-      const savedItems = (saved.items || []).map(row => row.track).filter(Boolean).map(t => ({
-        id: t.id, uri: t.uri, title: t.name,
-        subtitle: (t.artists || []).map(a => a.name).join(", "),
-        type: "track"
-      }));
+      const savedItems = (saved.items || [])
+        .map((row) => row.track)
+        .filter(Boolean)
+        .map((t) => ({
+          id: t.id,
+          uri: t.uri,
+          title: t.name,
+          subtitle: (t.artists || []).map((a) => a.name).join(", "),
+          type: "track",
+        }));
       $("spotifyLibrary").hidden = false;
-      renderItems("spotifyPlaylists", playlistItems, "No playlists were returned for this account.", openPlaylist);
-      renderItems("spotifySavedTracks", savedItems, "No saved tracks were returned for this account.", playTrack);
+      renderItems(
+        "spotifyPlaylists",
+        playlistItems,
+        "No playlists were returned for this account.",
+        openPlaylist,
+      );
+      renderItems(
+        "spotifySavedTracks",
+        savedItems,
+        "No saved tracks were returned for this account.",
+        playTrack,
+      );
       $("spotifyDisconnect").hidden = false;
       $("spotifyRefresh").hidden = false;
-      setStatus("Connected · loaded " + playlistItems.length + " playlists and " + savedItems.length + " saved tracks. Refresh to load the next page if needed.");
+      setStatus(
+        "Connected · loaded " +
+          playlistItems.length +
+          " playlists and " +
+          savedItems.length +
+          " saved tracks. Refresh to load the next page if needed.",
+      );
       await startPlayer();
     } catch (error) {
       setStatus(error.message);
       if (!token) disconnect(false);
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
   async function openPlaylist(playlist) {
     setStatus("Loading playlist: " + playlist.title + "…");
     try {
-      const data = await spotifyFetch("/playlists/" + encodeURIComponent(playlist.id) + "/items?limit=50");
-      const tracks = (data.items || []).map(row => row.item).filter(t => t && t.uri && t.type === "track").map(t => ({
-        id: t.id, uri: t.uri, title: t.name, subtitle: (t.artists || []).map(a => a.name).join(", "), type: "track"
-      }));
-      renderItems("spotifySavedTracks", tracks, "No playable tracks were returned. Some playlist items may not be available through the API.", playTrack);
-      setStatus("Playlist: " + playlist.title + " · " + tracks.length + " tracks shown. Select a track to play.");
+      const data = await spotifyFetch(
+        "/playlists/" + encodeURIComponent(playlist.id) + "/items?limit=50",
+      );
+      const tracks = (data.items || [])
+        .map((row) => row.item)
+        .filter((t) => t && t.uri && t.type === "track")
+        .map((t) => ({
+          id: t.id,
+          uri: t.uri,
+          title: t.name,
+          subtitle: (t.artists || []).map((a) => a.name).join(", "),
+          type: "track",
+        }));
+      renderItems(
+        "spotifySavedTracks",
+        tracks,
+        "No playable tracks were returned. Some playlist items may not be available through the API.",
+        playTrack,
+      );
+      setStatus(
+        "Playlist: " +
+          playlist.title +
+          " · " +
+          tracks.length +
+          " tracks shown. Select a track to play.",
+      );
     } catch (error) {
-      setStatus(error.message + " Spotify may provide playlist metadata without its contents for some playlists.");
+      setStatus(
+        error.message +
+          " Spotify may provide playlist metadata without its contents for some playlists.",
+      );
     }
   }
   async function playTrack(track) {
     if (!track.uri) return;
     if (!player || !deviceId) {
-      setStatus("The Spotify player is still starting. Wait a moment, then select the track again.");
+      setStatus(
+        "The Spotify player is still starting. Wait a moment, then select the track again.",
+      );
       return;
     }
     try {
       await player.activateElement();
-      const response = await fetch("https://api.spotify.com/v1/me/player/play?device_id=" + encodeURIComponent(deviceId), {
-        method: "PUT",
-        headers: { Authorization: "Bearer " + token.access_token, "Content-Type": "application/json" },
-        body: JSON.stringify({ uris: [track.uri] })
-      });
+      const response = await fetch(
+        "https://api.spotify.com/v1/me/player/play?device_id=" +
+          encodeURIComponent(deviceId),
+        {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer " + token.access_token,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ uris: [track.uri] }),
+        },
+      );
       if (!response.ok && response.status !== 204) {
         let message = "";
-        try { message = (await response.json()).error?.message || ""; } catch (_) {}
-        throw new Error(response.status === 403 ? "Playback unavailable. Check Premium eligibility and your Spotify app settings." : "Playback request failed (" + response.status + ")" + (message ? ": " + message : "") + ".");
+        try {
+          message = (await response.json()).error?.message || "";
+        } catch (_) {}
+        throw new Error(
+          response.status === 403
+            ? "Playback unavailable. Check Premium eligibility and your Spotify app settings."
+            : "Playback request failed (" +
+                response.status +
+                ")" +
+                (message ? ": " + message : "") +
+                ".",
+        );
       }
       $("spotifyCurrent").textContent = track.title + " — " + track.subtitle;
       $("spotifyPlayerWrap").hidden = false;
       setStatus("Playback requested for " + track.title + ".");
-    } catch (error) { setStatus(error.message); }
+    } catch (error) {
+      setStatus(error.message);
+    }
   }
   function disconnect(showMessage = true) {
-    if (player) { player.disconnect(); player = null; }
-    deviceId = null; token = null; currentUri = null;
+    if (player) {
+      player.disconnect();
+      player = null;
+    }
+    deviceId = null;
+    token = null;
+    currentUri = null;
     sessionStorage.removeItem(TOKEN_KEY);
     $("spotifyLibrary").hidden = true;
     $("spotifyPlayerWrap").hidden = true;
     $("spotifyDisconnect").hidden = true;
     $("spotifyRefresh").hidden = true;
     $("spotifyPlayPause").textContent = "Play";
-    if (showMessage) setStatus("Disconnected from Spotify. Your Pulse local playback is unchanged.");
+    if (showMessage)
+      setStatus(
+        "Disconnected from Spotify. Your Pulse local playback is unchanged.",
+      );
   }
   async function init() {
     $("spotifyRedirectUri").textContent = REDIRECT_URI;
     $("spotifyClientId").value = localStorage.getItem(CLIENT_KEY) || "";
     $("spotifySaveClient").addEventListener("click", () => {
       const id = $("spotifyClientId").value.trim();
-      if (!id) { setStatus("Paste your Spotify Client ID first."); return; }
+      if (!id) {
+        setStatus("Paste your Spotify Client ID first.");
+        return;
+      }
       localStorage.setItem(CLIENT_KEY, id);
-      setStatus("Client ID saved on this device. Redirect URI must match exactly in Spotify Developer settings.");
+      setStatus(
+        "Client ID saved on this device. Redirect URI must match exactly in Spotify Developer settings.",
+      );
     });
     $("spotifyConnect").addEventListener("click", authorize);
     $("spotifyDisconnect").addEventListener("click", () => disconnect(true));
