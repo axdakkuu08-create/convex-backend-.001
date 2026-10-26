@@ -17,7 +17,10 @@ const trackArgs = {
 };
 
 // Legacy Spotify records remain readable, but new writes no longer accept Spotify.
-const SOURCE_HOSTS: Record<"spotify" | "jamendo" | "youtube" | "soundcloud", string[]> = {
+const SOURCE_HOSTS: Record<
+  "spotify" | "jamendo" | "youtube" | "soundcloud",
+  string[]
+> = {
   spotify: ["spotify.com", "spotify.link"],
   jamendo: ["jamendo.com"],
   youtube: ["youtube.com", "youtu.be"],
