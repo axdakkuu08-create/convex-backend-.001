@@ -186,14 +186,17 @@ async function startCloud() {
     await updateAuth();
 
     window.addEventListener("pulse:track-liked", async (event) => {
+      if (!authenticated) return;
       try { await convex.mutation(saveTrack, event.detail); status("Saved to your cloud library."); }
       catch (error) { status("Could not sync favorite: " + (error?.message || "local favorite is still saved")); }
     });
     window.addEventListener("pulse:track-unliked", async (event) => {
+      if (!authenticated) return;
       try { const saved = await convex.query(listSaved, {}); const match = saved.find((item) => item.sourceUrl === event.detail.sourceUrl); if (match) await convex.mutation(unsaveTrack, { trackId: match._id }); }
       catch (error) { status("Could not remove cloud favorite: " + (error?.message || "unknown error")); }
     });
     window.addEventListener("pulse:track-played", async (event) => {
+      if (!authenticated) return;
       try { await convex.mutation(recordPlayed, event.detail); }
       catch (error) { status("Listening history did not sync: " + (error?.message || "local playback continues")); }
     });
