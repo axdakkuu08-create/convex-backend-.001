@@ -88,7 +88,9 @@ function pulseTrackPayload(track) {
   if (!/^https?:\/\//i.test(sourceUrl)) return null;
   let source = "direct";
   try {
-    const host = new URL(sourceUrl).hostname.toLowerCase().replace(/^www\./, "");
+    const host = new URL(sourceUrl).hostname
+      .toLowerCase()
+      .replace(/^www\./, "");
     if (host === "open.spotify.com") source = "spotify";
     else if (host === "youtube.com" || host === "youtu.be" || host === "music.youtube.com") source = "youtube";
     else if (host === "soundcloud.com") source = "soundcloud";
@@ -266,10 +268,25 @@ function loadMusicEmbed(raw) {
     const result = resolveMusicEmbed(raw);
     const sourceUrl = new URL(raw.trim());
     const host = sourceUrl.hostname.toLowerCase().replace(/^www\./, "");
-    const source = host === "open.spotify.com" ? "spotify" :
-      ["youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be"].includes(host) ? "youtube" :
-      host === "soundcloud.com" ? "soundcloud" : "direct";
-    window.PULSE_CURRENT_TRACK = { title: result.title, artist: "", source, sourceUrl: sourceUrl.href };
+    const source =
+      host === "open.spotify.com"
+        ? "spotify"
+        : [
+            "youtube.com",
+            "m.youtube.com",
+            "music.youtube.com",
+            "youtu.be",
+          ].includes(host)
+          ? "youtube"
+          : host === "soundcloud.com"
+            ? "soundcloud"
+            : "direct";
+    window.PULSE_CURRENT_TRACK = {
+      title: result.title,
+      artist: "",
+      source,
+      sourceUrl: sourceUrl.href,
+    };
     frame.src = result.url;
     frame.title = result.title;
     wrap.classList.remove("compact", "video", "soundcloud");
@@ -354,7 +371,11 @@ function like(id) {
   const track = tracks.find((item) => item.id === id);
   const wasLiked = liked.has(id);
   liked.has(id) ? liked.delete(id) : liked.add(id);
-  if (track) emitPulseLibraryEvent(wasLiked ? "pulse:track-unliked" : "pulse:track-liked", track);
+  if (track)
+    emitPulseLibraryEvent(
+      wasLiked ? "pulse:track-unliked" : "pulse:track-liked",
+      track,
+    );
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
   $("like").classList.toggle("liked", liked.has(tracks[index].id));
@@ -497,7 +518,13 @@ $("newPlaylist").onclick = () => {
   toast("Playlist created for this session");
 };
 $("queue").onclick = () =>
-  toast("Queue: " + tracks.map((t) => t.title).join(" · ") + (window.PULSE_CURRENT_TRACK ? " · Source: " + window.PULSE_CURRENT_TRACK.title : ""));
+  toast(
+    "Queue: " +
+      tracks.map((t) => t.title).join(" · ") +
+      (window.PULSE_CURRENT_TRACK
+        ? " · Source: " + window.PULSE_CURRENT_TRACK.title
+        : ""),
+  );
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
 document.addEventListener("click", (e) => {
   if (
@@ -531,8 +558,15 @@ $("sourceForm").addEventListener("submit", (e) => {
   loadMusicEmbed($("sourceUrl").value);
 });
 $("saveEmbedSource").onclick = () => {
-  if (!window.PULSE_CURRENT_TRACK) { toast("Load a supported music link first."); return; }
-  window.dispatchEvent(new CustomEvent("pulse:track-liked", { detail: window.PULSE_CURRENT_TRACK }));
+  if (!window.PULSE_CURRENT_TRACK) {
+    toast("Load a supported music link first.");
+    return;
+  }
+  window.dispatchEvent(
+    new CustomEvent("pulse:track-liked", {
+      detail: window.PULSE_CURRENT_TRACK,
+    }),
+  );
   toast("Source saved to your cloud library when signed in.");
 };
 $("closeEmbed").onclick = () => {
