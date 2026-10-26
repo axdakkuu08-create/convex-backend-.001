@@ -99,6 +99,10 @@ function emitPulseLibraryEvent(name, track) {
   const payload = pulseTrackPayload(track);
   if (payload) window.dispatchEvent(new CustomEvent(name, { detail: payload }));
 }
+window.PULSE_EXPORT_LOCAL_LIBRARY = () => ({
+  liked: [...liked].map((id) => tracks.find((track) => track.id === id)).filter(Boolean).map(pulseTrackPayload).filter(Boolean),
+  recent: recent.map((id) => tracks.find((track) => track.id === id)).filter(Boolean).map(pulseTrackPayload).filter(Boolean),
+});
 function fmt(n) {
   return Number.isFinite(n)
     ? Math.floor(n / 60) + ":" + String(Math.floor(n % 60)).padStart(2, "0")
