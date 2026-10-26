@@ -65,7 +65,129 @@
           >
           <div class="avatar">P</div>
         </header>
-        <section class="tracks">
+        <section class="intro">
+          <div>
+            <small class="eyebrow">— YOUR SOUND, ORGANIZED</small>
+            <h1 id="heading">Find your <span>next favorite.</span></h1>
+            <p>A quieter space for the music you love.</p>
+          </div>
+          <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
+        </section>
+        <section class="hero">
+          <div>
+            <small>● EDITOR'S PICK / 01</small>
+            <h2>Make room<br />for <em>focus.</em></h2>
+            <p>
+              Minimal distractions. A little rhythm.<br />Get into your flow,
+              one track at a time.
+            </p>
+            <button id="heroPlay" class="primary">▶　Play mix　↗</button>
+          </div>
+          <div class="orb"><span>p.</span></div>
+          <label class="heroNo">01 — 03</label>
+        </section>
+        <section class="sourcehub" id="sourceHub">
+          <div class="sectionhead">
+            <div>
+              <small>LISTEN YOUR WAY</small>
+              <h2>Connect a music source</h2>
+            </div>
+            <span class="source-badge">3 WEB PLAYERS</span>
+          </div>
+          <p class="source-copy">
+            Search Jamendo's licensed independent-music catalogue, or load a YouTube or SoundCloud link.
+            Jamendo audio plays in Pulse's shared player; embedded providers keep their own controls.
+          </p>
+          <div class="jamendo-search">
+            <form id="jamendoForm" class="source-form">
+              <label class="source-input-label" for="jamendoQuery">Search Jamendo tracks</label>
+              <div class="source-input-row">
+                <input id="jamendoQuery" type="search" placeholder="Search artists, track names, moods…" autocomplete="off" />
+                <button class="primary" type="submit">Search Jamendo</button>
+              </div>
+            </form>
+            <p id="jamendoStatus" class="source-error" role="status" aria-live="polite">Add a Jamendo API client ID in config.js to enable catalogue search.</p>
+            <div id="jamendoResults" class="jamendo-results" aria-live="polite"></div>
+          </div>
+          <form id="sourceForm" class="source-form">
+            <label class="source-input-label" for="sourceUrl">Music link</label>
+            <div class="source-input-row">
+              <input
+                id="sourceUrl"
+                type="url"
+                inputmode="url"
+                placeholder="Paste a YouTube or SoundCloud URL"
+                autocomplete="url"
+                required
+              /><button class="primary" type="submit">Load player ↗</button>
+            </div>
+          </form>
+          <div
+            id="sourceError"
+            class="source-error"
+            role="status"
+            aria-live="polite"
+          ></div>
+          <div id="embedWrap" class="embed-wrap" hidden>
+            <div class="embed-head">
+              <span id="embedTitle">Music player</span
+              ><button id="saveEmbedSource" class="textbutton" type="button">
+                ♡ Save source
+              </button>
+              <button id="closeEmbed" class="textbutton" type="button">
+                Close ×
+              </button>
+            </div>
+            <iframe
+              id="sourceFrame"
+              title="Embedded music player"
+              loading="lazy"
+              allow="
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                fullscreen;
+                picture-in-picture;
+              "
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+            <p class="embed-note">
+              If playback is unavailable, open the link in its official app or
+              website. Some tracks require sign-in or may not be embeddable.
+            </p>
+          </div>
+          <div class="source-shortcuts">
+            <a href="https://developer.jamendo.com/v3.0/docs" target="_blank" rel="noopener noreferrer">Jamendo API ↗</a>
+            <a href="https://music.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube Music ↗</a>
+            <a href="https://soundcloud.com/" target="_blank" rel="noopener noreferrer">SoundCloud ↗</a>
+          </div>
+        </section>
+        <section>
+          <div class="sectionhead">
+            <div>
+              <small>CURATED FOR YOU</small>
+              <h2>Pick a mood</h2>
+            </div>
+            <button id="allMoods" class="textbutton">View all ↗</button>
+          </div>
+          <div class="moods">
+            <button data-mood="Focus" class="mood violet">
+              <b>◉</b><strong>Deep focus</strong
+              ><span>Low-key · 12 tracks</span></button
+            ><button data-mood="Ambient" class="mood blue">
+              <b>✳</b><strong>Ambient drift</strong
+              ><span>Atmospheric · 9 tracks</span></button
+            ><button data-mood="Energy" class="mood orange">
+              <b>ϟ</b><strong>Good energy</strong
+              ><span>Upbeat · 16 tracks</span></button
+            ><button data-mood="Night" class="mood green">
+              <b>☾</b><strong>After hours</strong
+              ><span>Slow burn · 11 tracks</span>
+            </button>
+          </div>
+        </section>
+                <section class="tracks">
           <div class="sectionhead">
             <div>
               <small>YOUR ROTATION</small>
