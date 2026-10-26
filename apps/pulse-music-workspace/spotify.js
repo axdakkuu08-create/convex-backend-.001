@@ -96,13 +96,27 @@
     }
     if (!response.ok) {
       let detail = "";
+      let reason = "";
       try {
-        detail = (await response.json()).error?.message || "";
+        const payload = await response.json();
+        // Spotify Web API errors are usually nested under "error", but some
+        // responses use top-level fields. Keep diagnostics free of tokens.
+        const apiError = payload?.error;
+        detail =
+          (typeof apiError === "object" ? apiError?.message : apiError) ||
+          payload?.message ||
+          payload?.error_description ||
+          "";
+        reason = payload?.reason || apiError?.reason || "";
       } catch (_) {}
+      const endpoint = path.split("?")[0];
       throw new Error(
-        "Spotify API returned " +
+        "Spotify API request failed · HTTP " +
           response.status +
-          (detail ? ": " + detail : "") +
+          " · endpoint " +
+          endpoint +
+          (detail ? " · message: " + detail : " · no error message returned") +
+          (reason ? " · reason: " + reason : "") +
           ".",
       );
     }
