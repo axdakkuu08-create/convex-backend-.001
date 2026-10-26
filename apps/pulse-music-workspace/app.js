@@ -658,24 +658,33 @@ $("addUrlButton").onclick = () => {
 setTrack(0);
 
 
-// Unified queue foundation: one ordered list for direct audio and provider links.
-// Provider embeds remain subject to their own playback-control APIs and policies.
+ 
+// Unified queue foundation for direct audio and provider links.
 (() => {
   const queue = [];
   let queueIndex = -1;
   const currentQueueItem = () => queue[queueIndex] || null;
   const esc = (value) =>
-    String(value ?? "").replace(/[&<>"]/g, (c) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
-    })[c]);
+    String(value ?? "").replace(/[&<>"]/g, (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+      })[c],
+    );
   const panel = document.createElement("section");
   panel.id = "pulseQueuePanel";
   panel.hidden = true;
   panel.setAttribute("aria-label", "Playback queue");
-  panel.style.cssText = "position:fixed;right:16px;bottom:104px;z-index:1000;width:min(360px,calc(100vw - 32px));max-height:55vh;overflow:auto;padding:16px;border:1px solid #34363d;border-radius:16px;background:#15161b;color:#f4f4f6;box-shadow:0 12px 40px #0008";
-  panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><strong>Playback queue</strong><button type="button" id="pulseQueueClose" aria-label="Close queue">×</button></div><p id="pulseQueueNotice" role="status" style="font-size:12px;opacity:.8">Add tracks or source links to build your queue.</p><ol id="pulseQueueItems" style="padding-left:20px"></ol><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="pulseQueuePrev">Previous</button><button type="button" id="pulseQueuePlay">Play / Open</button><button type="button" id="pulseQueueNext">Next</button><button type="button" id="pulseQueueClear">Clear</button></div>';
+  panel.style.cssText =
+    "position:fixed;right:16px;bottom:104px;z-index:1000;width:min(360px,calc(100vw - 32px));max-height:55vh;overflow:auto;padding:16px;border:1px solid #34363d;border-radius:16px;background:#15161b;color:#f4f4f6;box-shadow:0 12px 40px #0008";
+  panel.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><strong>Playback queue</strong><button type="button" id="pulseQueueClose" aria-label="Close queue">×</button></div><p id="pulseQueueNotice" role="status" style="font-size:12px;opacity:.8">Add tracks or source links to build your queue.</p><ol id="pulseQueueItems" style="padding-left:20px"></ol><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="pulseQueuePrev">Previous</button><button type="button" id="pulseQueuePlay">Play / Open</button><button type="button" id="pulseQueueNext">Next</button><button type="button" id="pulseQueueClear">Clear</button></div>';
   document.body.append(panel);
-  const notice = (message) => { document.getElementById("pulseQueueNotice").textContent = message; };
+  const notice = (message) => {
+    document.getElementById("pulseQueueNotice").textContent = message;
+  };
   function renderQueue() {
     const list = document.getElementById("pulseQueueItems");
     list.replaceChildren();
@@ -684,9 +693,15 @@ setTrack(0);
       li.style.margin = "8px 0";
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = (i === queueIndex ? "▶ " : "") + item.title + (item.artist ? " — " + item.artist : "");
+      button.textContent =
+        (i === queueIndex ? "▶ " : "") +
+        item.title +
+        (item.artist ? " — " + item.artist : "");
       button.style.cssText = "max-width:100%;text-align:left;white-space:normal";
-      button.addEventListener("click", () => { queueIndex = i; playQueueItem(); });
+      button.addEventListener("click", () => {
+        queueIndex = i;
+        playQueueItem();
+      });
       li.append(button);
       list.append(li);
     });
@@ -698,18 +713,41 @@ setTrack(0);
     let source = item.source || "direct";
     if (sourceUrl) {
       try {
-        const host = new URL(sourceUrl).hostname.toLowerCase().replace(/^www\./, "");
+        const host = new URL(sourceUrl).hostname
+          .toLowerCase()
+          .replace(/^www\./, "");
         if (host === "open.spotify.com") source = "spotify";
-        else if (["youtube.com", "youtu.be", "music.youtube.com", "m.youtube.com"].includes(host)) source = "youtube";
+        else if (
+          ["youtube.com", "youtu.be", "music.youtube.com", "m.youtube.com"].includes(
+            host,
+          )
+        )
+          source = "youtube";
         else if (host === "soundcloud.com") source = "soundcloud";
-      } catch (_) { return null; }
+      } catch (_) {
+        return null;
+      }
     }
-    return { title: String(item.title).slice(0, 200), artist: String(item.artist || "").slice(0, 200), source, sourceUrl, localId: item.id, localOnly: Boolean(item.localFile || (sourceUrl && sourceUrl.startsWith("blob:"))) };
+    return {
+      title: String(item.title).slice(0, 200),
+      artist: String(item.artist || "").slice(0, 200),
+      source,
+      sourceUrl,
+      localId: item.id,
+      localOnly: Boolean(
+        item.localFile || (sourceUrl && sourceUrl.startsWith("blob:")),
+      ),
+    };
   }
   function add(item) {
     const normalized = normalize(item);
-    if (!normalized) { notice("This item cannot be added to the queue."); return; }
-    const duplicate = queue.findIndex((q) => q.sourceUrl && q.sourceUrl === normalized.sourceUrl);
+    if (!normalized) {
+      notice("This item cannot be added to the queue.");
+      return;
+    }
+    const duplicate = queue.findIndex(
+      (q) => q.sourceUrl && q.sourceUrl === normalized.sourceUrl,
+    );
     if (duplicate >= 0) {
       queueIndex = duplicate;
       notice("That source is already queued.");
@@ -722,17 +760,39 @@ setTrack(0);
   }
   function playQueueItem() {
     const item = currentQueueItem();
-    if (!item) { notice("Add a track first."); return; }
-    if (item.localId !== undefined && tracks.some((t) => t.id === item.localId)) {
+    if (!item) {
+      notice("Add a track first.");
+      return;
+    }
+    if (
+      item.localId !== undefined &&
+      tracks.some((t) => t.id === item.localId)
+    ) {
       const idx = tracks.findIndex((t) => t.id === item.localId);
-      if (idx >= 0) { setTrack(idx, true); notice("Playing " + item.title); return; }
+      if (idx >= 0) {
+        setTrack(idx, true);
+        notice("Playing " + item.title);
+        return;
+      }
     }
     if (!item.sourceUrl || item.localOnly) {
-      notice("This local file is available only in the device session where it was added.");
+      notice(
+        "This local file is available only in the device session where it was added.",
+      );
       return;
     }
     if (item.source === "direct") {
-      const track = { id: Date.now(), title: item.title, artist: item.artist || "Queued audio", mood: "Queue", time: "—", cover: "blue", symbol: "♫", src: item.sourceUrl, customUrl: true };
+      const track = {
+        id: Date.now(),
+        title: item.title,
+        artist: item.artist || "Queued audio",
+        mood: "Queue",
+        time: "—",
+        cover: "blue",
+        symbol: "♫",
+        src: item.sourceUrl,
+        customUrl: true,
+      };
       tracks.push(track);
       setTrack(tracks.length - 1, true);
       notice("Playing " + item.title);
@@ -740,13 +800,21 @@ setTrack(0);
     }
     if (typeof loadMusicEmbed === "function") {
       loadMusicEmbed(item.sourceUrl);
-      notice(item.source.toUpperCase() + " opened. Use the provider's embedded controls; browser security does not expose universal play/pause controls for all embeds.");
+      notice(
+        item.source.toUpperCase() +
+          " opened. Use the provider's embedded controls; universal play/pause is not available for every embed.",
+      );
     } else {
-      notice("Open this provider link in its official player: " + item.sourceUrl);
+      notice(
+        "Open this provider link in its official player: " + item.sourceUrl,
+      );
     }
   }
   function move(delta) {
-    if (!queue.length) { notice("Add a track first."); return; }
+    if (!queue.length) {
+      notice("Add a track first.");
+      return;
+    }
     queueIndex = (queueIndex + delta + queue.length) % queue.length;
     playQueueItem();
     renderQueue();
@@ -757,7 +825,12 @@ setTrack(0);
     play: playQueueItem,
     next: () => move(1),
     previous: () => move(-1),
-    clear: () => { queue.length = 0; queueIndex = -1; renderQueue(); notice("Queue cleared."); },
+    clear: () => {
+      queue.length = 0;
+      queueIndex = -1;
+      renderQueue();
+      notice("Queue cleared.");
+    },
   };
   document.getElementById("queue").onclick = () => {
     panel.hidden = !panel.hidden;
@@ -766,11 +839,14 @@ setTrack(0);
       else renderQueue();
     }
   };
-  document.getElementById("pulseQueueClose").onclick = () => { panel.hidden = true; };
+  document.getElementById("pulseQueueClose").onclick = () => {
+    panel.hidden = true;
+  };
   document.getElementById("pulseQueuePrev").onclick = () => move(-1);
   document.getElementById("pulseQueueNext").onclick = () => move(1);
   document.getElementById("pulseQueuePlay").onclick = playQueueItem;
-  document.getElementById("pulseQueueClear").onclick = () => window.PULSE_QUEUE.clear();
+  document.getElementById("pulseQueueClear").onclick = () =>
+    window.PULSE_QUEUE.clear();
   document.getElementById("sourceForm").addEventListener("submit", () => {
     window.setTimeout(() => {
       if (window.PULSE_CURRENT_TRACK) add(window.PULSE_CURRENT_TRACK);
