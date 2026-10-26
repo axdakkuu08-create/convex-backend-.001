@@ -88,9 +88,17 @@ function pulseTrackPayload(track) {
   if (!/^https?:\/\//i.test(sourceUrl)) return null;
   let source = track?.source || "direct";
   try {
-    const host = new URL(sourceUrl).hostname.toLowerCase().replace(/^www\./, "");
+    const host = new URL(sourceUrl).hostname
+      .toLowerCase()
+      .replace(/^www\./, "");
     if (!track?.source) {
-      if (host === "youtube.com" || host === "youtu.be" || host === "music.youtube.com" || host === "m.youtube.com") source = "youtube";
+      if (
+        host === "youtube.com" ||
+        host === "youtu.be" ||
+        host === "music.youtube.com" ||
+        host === "m.youtube.com"
+      )
+        source = "youtube";
       else if (host === "soundcloud.com") source = "soundcloud";
     }
   } catch (_) {
@@ -299,10 +307,13 @@ let jamendoTrackCounter = 0;
 async function searchJamendo(searchText) {
   const statusNode = $("jamendoStatus");
   const resultsNode = $("jamendoResults");
-  const clientId = String((window.PULSE_CONFIG || {}).jamendoClientId || "").trim();
+  const clientId = String(
+    (window.PULSE_CONFIG || {}).jamendoClientId || "",
+  ).trim();
   resultsNode.replaceChildren();
   if (!clientId) {
-    statusNode.textContent = "Jamendo search needs a public API client ID. Create an app in the Jamendo developer portal, then add jamendoClientId to config.js.";
+    statusNode.textContent =
+      "Jamendo search needs a public API client ID. Create an app in the Jamendo developer portal, then add jamendoClientId to config.js.";
     return;
   }
   const term = String(searchText || "").trim();
@@ -322,17 +333,26 @@ async function searchJamendo(searchText) {
       include: "musicinfo",
       order: "popularity_total",
     }).toString();
-    const response = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error("Jamendo API returned HTTP " + response.status);
+    const response = await fetch(url, {
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok)
+      throw new Error("Jamendo API returned HTTP " + response.status);
     const data = await response.json();
     if (data.headers?.status !== "success" || !Array.isArray(data.results)) {
-      throw new Error(data.headers?.error_message || "Jamendo returned an unexpected response.");
+      throw new Error(
+        data.headers?.error_message ||
+          "Jamendo returned an unexpected response.",
+      );
     }
     if (!data.results.length) {
-      statusNode.textContent = "No matching tracks found. Try another artist or title.";
+      statusNode.textContent =
+        "No matching tracks found. Try another artist or title.";
       return;
     }
-    statusNode.textContent = data.results.length + " Jamendo tracks found. Select Play to add one to Pulse's shared player.";
+    statusNode.textContent =
+      data.results.length +
+      " Jamendo tracks found. Select Play to add one to Pulse's shared player.";
     for (const item of data.results) {
       if (!item.audio || !item.id || !item.name) continue;
       const row = document.createElement("article");
@@ -349,14 +369,19 @@ async function searchJamendo(searchText) {
       const artist = document.createElement("small");
       artist.textContent = item.artist_name || "Unknown artist";
       const license = document.createElement("small");
-      license.textContent = "Jamendo · " + fmt(Number(item.duration) || 0) + (item.license_ccurl ? " · licence details available" : "");
+      license.textContent =
+        "Jamendo · " +
+        fmt(Number(item.duration) || 0) +
+        (item.license_ccurl ? " · licence details available" : "");
       details.append(title, artist, license);
       const playButton = document.createElement("button");
       playButton.type = "button";
       playButton.className = "secondary";
       playButton.textContent = "▶ Play";
       playButton.addEventListener("click", () => {
-        let track = tracks.find((candidate) => candidate.jamendoId === String(item.id));
+        let track = tracks.find(
+          (candidate) => candidate.jamendoId === String(item.id),
+        );
         if (!track) {
           track = {
             id: Date.now() + jamendoTrackCounter++,
@@ -374,15 +399,21 @@ async function searchJamendo(searchText) {
           };
           tracks.push(track);
         }
-        setTrack(tracks.findIndex((candidate) => candidate.id === track.id), true);
+        setTrack(
+          tracks.findIndex((candidate) => candidate.id === track.id),
+          true,
+        );
         window.PULSE_QUEUE?.add(track);
-        statusNode.textContent = "Playing " + track.title + " in Pulse's shared player.";
+        statusNode.textContent =
+          "Playing " + track.title + " in Pulse's shared player.";
       });
       row.append(artwork, details, playButton);
       resultsNode.append(row);
     }
   } catch (error) {
-    statusNode.textContent = "Jamendo search failed: " + (error?.message || "check your connection and client ID.");
+    statusNode.textContent =
+      "Jamendo search failed: " +
+      (error?.message || "check your connection and client ID.");
   }
 }
 $("jamendoForm")?.addEventListener("submit", (event) => {
