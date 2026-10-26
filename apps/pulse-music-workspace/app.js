@@ -62,7 +62,8 @@ const tracks = [
 ];
 const $ = (id) => document.getElementById(id),
   audio = $("audio");
-let sourceQueue = [],\n  index = 0,
+let sourceQueue = [],
+  index = 0,
   playing = false,
   shuffleOn = false,
   repeatOn = false,
@@ -543,8 +544,16 @@ function renderQueue() {
   if (!list) return;
   list.replaceChildren();
   const entries = [
-    ...tracks.map((track, trackIndex) => ({ kind: "local", track, trackIndex })),
-    ...sourceQueue.map((track, sourceIndex) => ({ kind: "source", track, sourceIndex })),
+    ...tracks.map((track, trackIndex) => ({
+      kind: "local",
+      track,
+      trackIndex,
+    })),
+    ...sourceQueue.map((track, sourceIndex) => ({
+      kind: "source",
+      track,
+      sourceIndex,
+    })),
   ];
   if (!entries.length) {
     const empty = document.createElement("p");
@@ -561,9 +570,10 @@ function renderQueue() {
     const name = document.createElement("span");
     name.textContent = entry.track.title || "Untitled source";
     const meta = document.createElement("small");
-    meta.textContent = entry.kind === "local"
-      ? (entry.track.artist || "Pulse audio")
-      : ((entry.track.source || "music") + " · opens official player");
+    meta.textContent =
+      entry.kind === "local"
+        ? entry.track.artist || "Pulse audio"
+        : (entry.track.source || "music") + " · opens official player";
     info.append(name, meta);
     const playButton = document.createElement("button");
     playButton.type = "button";
@@ -577,13 +587,21 @@ function renderQueue() {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.textContent = "×";
-    removeButton.setAttribute("aria-label", "Remove " + name.textContent + " from queue");
+    removeButton.setAttribute(
+      "aria-label",
+      "Remove " + name.textContent + " from queue",
+    );
     removeButton.addEventListener("click", () => {
       if (entry.kind === "source") sourceQueue.splice(entry.sourceIndex, 1);
       else {
         tracks.splice(entry.trackIndex, 1);
-        if (!tracks.length) { playing = false; audio.pause(); }
-        else { index = Math.min(index, tracks.length - 1); setTrack(index, false); }
+        if (!tracks.length) {
+          playing = false;
+          audio.pause();
+        } else {
+          index = Math.min(index, tracks.length - 1);
+          setTrack(index, false);
+        }
       }
       render();
       renderQueue();
@@ -596,7 +614,12 @@ $("queue").onclick = () => {
   const panel = $("queuePanel");
   panel.hidden = !panel.hidden;
   if (!panel.hidden) {
-    if (window.PULSE_CURRENT_TRACK && !sourceQueue.some((t) => t.sourceUrl === window.PULSE_CURRENT_TRACK.sourceUrl)) {
+    if (
+      window.PULSE_CURRENT_TRACK &&
+      !sourceQueue.some(
+        (t) => t.sourceUrl === window.PULSE_CURRENT_TRACK.sourceUrl,
+      )
+    ) {
       sourceQueue.push({ ...window.PULSE_CURRENT_TRACK });
     }
     renderQueue();
@@ -605,13 +628,23 @@ $("queue").onclick = () => {
 };
 $("queueAddCurrent").onclick = () => {
   const track = window.PULSE_CURRENT_TRACK;
-  if (!track || !track.sourceUrl) { toast("Load a supported music source first."); return; }
-  if (!sourceQueue.some((item) => item.sourceUrl === track.sourceUrl)) sourceQueue.push({ ...track });
+  if (!track || !track.sourceUrl) {
+    toast("Load a supported music source first.");
+    return;
+  }
+  if (!sourceQueue.some((item) => item.sourceUrl === track.sourceUrl))
+    sourceQueue.push({ ...track });
   renderQueue();
   toast("Added to queue. Provider links open in their official player.");
 };
-$("queueClear").onclick = () => { sourceQueue = []; renderQueue(); toast("External source queue cleared."); };
-$("queueClose").onclick = () => { $("queuePanel").hidden = true; };
+$("queueClear").onclick = () => {
+  sourceQueue = [];
+  renderQueue();
+  toast("External source queue cleared.");
+};
+$("queueClose").onclick = () => {
+  $("queuePanel").hidden = true;
+};
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
 document.addEventListener("click", (e) => {
   if (
@@ -723,21 +756,21 @@ $("addUrlButton").onclick = () => {
 };
 setTrack(0);
 
-
- 
 // Unified queue foundation for direct audio and provider links.
 (() => {
   const queue = [];
   let queueIndex = -1;
   const currentQueueItem = () => queue[queueIndex] || null;
   const esc = (value) =>
-    String(value ?? "").replace(/[&<>"]/g, (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-      })[c],
+    String(value ?? "").replace(
+      /[&<>"]/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+        })[c],
     );
   const panel = document.createElement("section");
   panel.id = "pulseQueuePanel";
@@ -763,7 +796,8 @@ setTrack(0);
         (i === queueIndex ? "▶ " : "") +
         item.title +
         (item.artist ? " — " + item.artist : "");
-      button.style.cssText = "max-width:100%;text-align:left;white-space:normal";
+      button.style.cssText =
+        "max-width:100%;text-align:left;white-space:normal";
       button.addEventListener("click", () => {
         queueIndex = i;
         playQueueItem();
@@ -784,9 +818,12 @@ setTrack(0);
           .replace(/^www\./, "");
         if (host === "open.spotify.com") source = "spotify";
         else if (
-          ["youtube.com", "youtu.be", "music.youtube.com", "m.youtube.com"].includes(
-            host,
-          )
+          [
+            "youtube.com",
+            "youtu.be",
+            "music.youtube.com",
+            "m.youtube.com",
+          ].includes(host)
         )
           source = "youtube";
         else if (host === "soundcloud.com") source = "soundcloud";
