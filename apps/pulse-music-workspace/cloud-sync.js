@@ -53,6 +53,7 @@ async function startCloud() {
     const addPlaylistTrack = makeFunctionReference("library:addPlaylistTrack");
     let stopPlaylistUpdates = null;
     let authenticated = false;
+    let migratedLocalLibrary = false;
 
     const renderPlaylists = (playlists) => {
       cloudList.replaceChildren();
@@ -109,13 +110,24 @@ async function startCloud() {
       signOutButton.hidden = !authenticated;
       createButton.hidden = !authenticated;
       if (!authenticated) {
+        migratedLocalLibrary = false;
         if (stopPlaylistUpdates) stopPlaylistUpdates();
         stopPlaylistUpdates = null;
         cloudList.replaceChildren();
         status("Signed out · local mode remains available.");
         return;
       }
-      status("Signed in · connecting cloud playlists…");
+      status("Signed in · connecting cloud library…");
+      if (!migratedLocalLibrary && typeof window.PULSE_EXPORT_LOCAL_LIBRARY === "function") {
+        migratedLocalLibrary = true;
+        const local = window.PULSE_EXPORT_LOCAL_LIBRARY();
+        for (const track of local.liked) {
+          try { await convex.mutation(saveTrack, track); } catch (error) { status("Some local favorites could not sync: " + (error?.message || "check connection")); }
+        }
+        for (const track of local.recent) {
+          try { await convex.mutation(recordPlayed, track); } catch (error) { status("Some listening history could not sync: " + (error?.message || "check connection")); }
+        }
+      }
       if (stopPlaylistUpdates) stopPlaylistUpdates();
       stopPlaylistUpdates = convex.onUpdate(listMine, {}, renderPlaylists, (error) => status("Cloud playlist error: " + (error?.message || "check configuration")));
       const savedNode = document.getElementById("cloudSavedTracks");
