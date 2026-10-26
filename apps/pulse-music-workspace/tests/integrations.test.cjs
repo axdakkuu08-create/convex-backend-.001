@@ -27,7 +27,9 @@ test("YouTube video and playlist links become privacy-enhanced embeds", () => {
     "https://www.youtube-nocookie.com/embed/abcdefghijk",
   );
   assert.match(
-    resolveMusicEmbed("https://music.youtube.com/watch?v=abcdefghijk&list=PL12345").url,
+    resolveMusicEmbed(
+      "https://music.youtube.com/watch?v=abcdefghijk&list=PL12345",
+    ).url,
     /youtube-nocookie\.com\/embed\/abcdefghijk\?list=PL12345/,
   );
   assert.match(
@@ -67,7 +69,10 @@ test("Jamendo search uses a public client ID and shared audio queue", () => {
 });
 
 test("cloud playlists, favourites and history use owner-scoped Convex functions", () => {
-  assert.match(cloudSource, /if \(!config\.convexUrl \|\| !config\.clerkPublishableKey\)/);
+  assert.match(
+    cloudSource,
+    /if \(!config\.convexUrl \|\| !config\.clerkPublishableKey\)/,
+  );
   assert.match(cloudSource, /playlists:listMine/);
   assert.match(cloudSource, /playlists:create/);
   assert.match(cloudSource, /playlists:remove/);
