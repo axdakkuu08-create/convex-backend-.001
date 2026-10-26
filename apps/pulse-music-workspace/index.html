@@ -45,6 +45,12 @@
             ＋ Cloud playlist
           </button>
           <div id="cloudPlaylists" class="cloud-playlists"></div>
+          <div class="cloud-library-section">
+            <strong>Saved across devices</strong>
+            <div id="cloudSavedTracks" class="cloud-playlists"></div>
+            <strong>Recently played</strong>
+            <div id="cloudRecentTracks" class="cloud-playlists"></div>
+          </div>
         </div>
         <div class="sidefoot">●　Local demo workspace <b>READY</b></div>
       </aside>
@@ -115,7 +121,10 @@
           <div id="embedWrap" class="embed-wrap" hidden>
             <div class="embed-head">
               <span id="embedTitle">Music player</span
-              ><button id="closeEmbed" class="textbutton" type="button">
+              ><button id="saveEmbedSource" class="textbutton" type="button">
+                ♡ Save source
+              </button>
+              <button id="closeEmbed" class="textbutton" type="button">
                 Close ×
               </button>
             </div>
@@ -157,99 +166,6 @@
             >
           </div>
         </section>
-        <section
-          class="spotify-panel"
-          id="spotifyPanel"
-          aria-labelledby="spotifyHeading"
-        >
-          <div class="sectionhead">
-            <div>
-              <small>OPTIONAL MUSIC SOURCE</small>
-              <h2 id="spotifyHeading">Connect Spotify</h2>
-            </div>
-            <span class="spotify-pill">OFFICIAL PLAYER</span>
-          </div>
-          <p class="spotify-copy">
-            Connect your account to browse your playlists and saved tracks.
-            Playback stays in Spotify’s official browser player.
-          </p>
-          <div class="spotify-config-row">
-            <label for="spotifyClientId">Spotify app Client ID</label>
-            <input
-              id="spotifyClientId"
-              type="text"
-              autocomplete="off"
-              placeholder="Paste your Spotify Client ID"
-            />
-            <button id="spotifySaveClient" class="secondary" type="button">
-              Save on this device
-            </button>
-          </div>
-          <p class="spotify-note">
-            Register this exact redirect address in your Spotify Developer app:
-            <code id="spotifyRedirectUri"></code>. A client ID is public; never
-            paste a client secret here.
-          </p>
-          <div class="spotify-actions">
-            <button id="spotifyConnect" class="primary" type="button">
-              Connect Spotify
-            </button>
-            <button
-              id="spotifyDisconnect"
-              class="secondary"
-              type="button"
-              hidden
-            >
-              Disconnect
-            </button>
-            <button id="spotifyRefresh" class="secondary" type="button" hidden>
-              Refresh library
-            </button>
-          </div>
-          <p
-            id="spotifyStatus"
-            class="spotify-status"
-            role="status"
-            aria-live="polite"
-          >
-            Not connected. Local Pulse playback works independently.
-          </p>
-          <div id="spotifyLibrary" class="spotify-library" hidden>
-            <div class="spotify-list">
-              <h3>Your playlists</h3>
-              <div id="spotifyPlaylists"></div>
-            </div>
-            <div class="spotify-list">
-              <h3>Saved tracks</h3>
-              <div id="spotifySavedTracks"></div>
-            </div>
-          </div>
-          <div id="spotifyPlayerWrap" class="spotify-player-wrap" hidden>
-            <div class="spotify-player-head">
-              <strong>Spotify browser player</strong
-              ><span id="spotifyDeviceStatus">Starting player…</span>
-            </div>
-            <div class="spotify-current" id="spotifyCurrent">
-              Choose a track from your Spotify playlists or saved tracks.
-            </div>
-            <div class="spotify-controls">
-              <button
-                id="spotifyPrev"
-                type="button"
-                aria-label="Previous track"
-              >
-                |◀</button
-              ><button id="spotifyPlayPause" type="button">Play</button
-              ><button id="spotifyNext" type="button" aria-label="Next track">
-                ▶|
-              </button>
-            </div>
-            <p class="spotify-note">
-              Full-track playback requires Spotify Premium and a supported
-              browser. If unavailable, open the track in Spotify.
-            </p>
-          </div>
-        </section>
         <section>
           <div class="sectionhead">
             <div>
@@ -273,6 +189,36 @@
               ><span>Slow burn · 11 tracks</span>
             </button>
           </div>
+        </section>
+        <section
+          id="queuePanel"
+          class="queue-panel"
+          hidden
+          aria-labelledby="queueHeading"
+        >
+          <div class="sectionhead">
+            <div>
+              <small>UP NEXT</small>
+              <h2 id="queueHeading">Playback queue</h2>
+            </div>
+            <div class="queue-actions">
+              <button id="queueAddCurrent" class="secondary" type="button">
+                ＋ Current source
+              </button>
+              <button id="queueClear" class="secondary" type="button">
+                Clear sources
+              </button>
+              <button id="queueClose" class="textbutton" type="button">
+                Close ×
+              </button>
+            </div>
+          </div>
+          <p class="queue-note">
+            Pulse audio tracks play here. Spotify, YouTube, and SoundCloud items
+            open in their official players; their playback controls remain
+            provider-managed.
+          </p>
+          <div id="queueItems" class="queue-items"></div>
         </section>
         <section class="tracks">
           <div class="sectionhead">
@@ -365,6 +311,5 @@
     <script src="config.js"></script>
     <script src="app.js"></script>
     <script type="module" src="cloud-sync.js"></script>
-    <script src="spotify.js"></script>
   </body>
 </html>

@@ -62,7 +62,8 @@ const tracks = [
 ];
 const $ = (id) => document.getElementById(id),
   audio = $("audio");
-let index = 0,
+let sourceQueue = [],
+  index = 0,
   playing = false,
   shuffleOn = false,
   repeatOn = false,
@@ -83,6 +84,49 @@ function save() {
   localStorage.setItem("pulse-liked", JSON.stringify([...liked]));
   localStorage.setItem("pulse-recent", JSON.stringify(recent));
 }
+function pulseTrackPayload(track) {
+  const sourceUrl = track?.src || track?.customUrl || "";
+  if (!/^https?:\/\//i.test(sourceUrl)) return null;
+  let source = "direct";
+  try {
+    const host = new URL(sourceUrl).hostname
+      .toLowerCase()
+      .replace(/^www\./, "");
+    if (host === "open.spotify.com") source = "spotify";
+    else if (
+      host === "youtube.com" ||
+      host === "youtu.be" ||
+      host === "music.youtube.com"
+    )
+      source = "youtube";
+    else if (host === "soundcloud.com") source = "soundcloud";
+  } catch (_) {
+    return null;
+  }
+  return {
+    id: track.id,
+    title: track.title || "Untitled track",
+    artist: track.artist || "",
+    source,
+    sourceUrl,
+  };
+}
+function emitPulseLibraryEvent(name, track) {
+  const payload = pulseTrackPayload(track);
+  if (payload) window.dispatchEvent(new CustomEvent(name, { detail: payload }));
+}
+window.PULSE_EXPORT_LOCAL_LIBRARY = () => ({
+  liked: [...liked]
+    .map((id) => tracks.find((track) => track.id === id))
+    .filter(Boolean)
+    .map(pulseTrackPayload)
+    .filter(Boolean),
+  recent: recent
+    .map((id) => tracks.find((track) => track.id === id))
+    .filter(Boolean)
+    .map(pulseTrackPayload)
+    .filter(Boolean),
+});
 function fmt(n) {
   return Number.isFinite(n)
     ? Math.floor(n / 60) + ":" + String(Math.floor(n % 60)).padStart(2, "0")
@@ -244,6 +288,27 @@ function loadMusicEmbed(raw) {
     frame = $("sourceFrame");
   try {
     const result = resolveMusicEmbed(raw);
+    const sourceUrl = new URL(raw.trim());
+    const host = sourceUrl.hostname.toLowerCase().replace(/^www\./, "");
+    const source =
+      host === "open.spotify.com"
+        ? "spotify"
+        : [
+              "youtube.com",
+              "m.youtube.com",
+              "music.youtube.com",
+              "youtu.be",
+            ].includes(host)
+          ? "youtube"
+          : host === "soundcloud.com"
+            ? "soundcloud"
+            : "direct";
+    window.PULSE_CURRENT_TRACK = {
+      title: result.title,
+      artist: "",
+      source,
+      sourceUrl: sourceUrl.href,
+    };
     frame.src = result.url;
     frame.title = result.title;
     wrap.classList.remove("compact", "video", "soundcloud");
@@ -264,6 +329,7 @@ function loadMusicEmbed(raw) {
 function setTrack(i, autoplay = false) {
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
+  window.PULSE_CURRENT_TRACK = pulseTrackPayload(t);
   audio.src = t.src;
   audio.load();
   $("audioStatus").textContent = t.localFile
@@ -292,6 +358,7 @@ async function play() {
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
     recent = recent.slice(0, 6);
     save();
+    emitPulseLibraryEvent("pulse:track-played", tracks[index]);
     render();
   } catch (e) {
     playing = false;
@@ -323,7 +390,14 @@ function next() {
   setTrack(n, true);
 }
 function like(id) {
+  const track = tracks.find((item) => item.id === id);
+  const wasLiked = liked.has(id);
   liked.has(id) ? liked.delete(id) : liked.add(id);
+  if (track)
+    emitPulseLibraryEvent(
+      wasLiked ? "pulse:track-unliked" : "pulse:track-liked",
+      track,
+    );
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
   $("like").classList.toggle("liked", liked.has(tracks[index].id));
@@ -465,8 +539,112 @@ $("newPlaylist").onclick = () => {
   $("playlists").append(b);
   toast("Playlist created for this session");
 };
-$("queue").onclick = () =>
-  toast("Queue: " + tracks.map((t) => t.title).join(" · "));
+function renderQueue() {
+  const list = $("queueItems");
+  if (!list) return;
+  list.replaceChildren();
+  const entries = [
+    ...tracks.map((track, trackIndex) => ({
+      kind: "local",
+      track,
+      trackIndex,
+    })),
+    ...sourceQueue.map((track, sourceIndex) => ({
+      kind: "source",
+      track,
+      sourceIndex,
+    })),
+  ];
+  if (!entries.length) {
+    const empty = document.createElement("p");
+    empty.className = "queue-empty";
+    empty.textContent = "Your queue is empty. Add a track or music source.";
+    list.append(empty);
+    return;
+  }
+  entries.forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "queue-row";
+    const info = document.createElement("div");
+    info.className = "queue-info";
+    const name = document.createElement("span");
+    name.textContent = entry.track.title || "Untitled source";
+    const meta = document.createElement("small");
+    meta.textContent =
+      entry.kind === "local"
+        ? entry.track.artist || "Pulse audio"
+        : (entry.track.source || "music") + " · opens official player";
+    info.append(name, meta);
+    const playButton = document.createElement("button");
+    playButton.type = "button";
+    playButton.textContent = entry.kind === "local" ? "Play" : "Open";
+    playButton.addEventListener("click", () => {
+      if (entry.kind === "local") setTrack(entry.trackIndex, true);
+      else if (/^https?:\/\//i.test(entry.track.sourceUrl || "")) {
+        window.open(entry.track.sourceUrl, "_blank", "noopener,noreferrer");
+      }
+    });
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "×";
+    removeButton.setAttribute(
+      "aria-label",
+      "Remove " + name.textContent + " from queue",
+    );
+    removeButton.addEventListener("click", () => {
+      if (entry.kind === "source") sourceQueue.splice(entry.sourceIndex, 1);
+      else {
+        tracks.splice(entry.trackIndex, 1);
+        if (!tracks.length) {
+          playing = false;
+          audio.pause();
+        } else {
+          index = Math.min(index, tracks.length - 1);
+          setTrack(index, false);
+        }
+      }
+      render();
+      renderQueue();
+    });
+    row.append(info, playButton, removeButton);
+    list.append(row);
+  });
+}
+$("queue").onclick = () => {
+  const panel = $("queuePanel");
+  panel.hidden = !panel.hidden;
+  if (!panel.hidden) {
+    if (
+      window.PULSE_CURRENT_TRACK &&
+      !sourceQueue.some(
+        (t) => t.sourceUrl === window.PULSE_CURRENT_TRACK.sourceUrl,
+      )
+    ) {
+      sourceQueue.push({ ...window.PULSE_CURRENT_TRACK });
+    }
+    renderQueue();
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+};
+$("queueAddCurrent").onclick = () => {
+  const track = window.PULSE_CURRENT_TRACK;
+  if (!track || !track.sourceUrl) {
+    toast("Load a supported music source first.");
+    return;
+  }
+  if (!sourceQueue.some((item) => item.sourceUrl === track.sourceUrl))
+    sourceQueue.push({ ...track });
+  renderQueue();
+  toast("Added to queue. Provider links open in their official player.");
+};
+$("queueClear").onclick = () => {
+  sourceQueue = [];
+  renderQueue();
+  toast("External source queue cleared.");
+};
+$("queueClose").onclick = () => {
+  $("queuePanel").hidden = true;
+};
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
 document.addEventListener("click", (e) => {
   if (
@@ -499,6 +677,18 @@ $("sourceForm").addEventListener("submit", (e) => {
   e.preventDefault();
   loadMusicEmbed($("sourceUrl").value);
 });
+$("saveEmbedSource").onclick = () => {
+  if (!window.PULSE_CURRENT_TRACK) {
+    toast("Load a supported music link first.");
+    return;
+  }
+  window.dispatchEvent(
+    new CustomEvent("pulse:track-liked", {
+      detail: window.PULSE_CURRENT_TRACK,
+    }),
+  );
+  toast("Source saved to your cloud library when signed in.");
+};
 $("closeEmbed").onclick = () => {
   $("sourceFrame").src = "about:blank";
   $("embedWrap").hidden = true;
@@ -565,3 +755,210 @@ $("addUrlButton").onclick = () => {
   toast("Audio link added");
 };
 setTrack(0);
+
+// Unified queue foundation for direct audio and provider links.
+(() => {
+  const queue = [];
+  let queueIndex = -1;
+  const currentQueueItem = () => queue[queueIndex] || null;
+  const esc = (value) =>
+    String(value ?? "").replace(
+      /[&<>"]/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+        })[c],
+    );
+  const panel = document.createElement("section");
+  panel.id = "pulseQueuePanel";
+  panel.hidden = true;
+  panel.setAttribute("aria-label", "Playback queue");
+  panel.style.cssText =
+    "position:fixed;right:16px;bottom:104px;z-index:1000;width:min(360px,calc(100vw - 32px));max-height:55vh;overflow:auto;padding:16px;border:1px solid #34363d;border-radius:16px;background:#15161b;color:#f4f4f6;box-shadow:0 12px 40px #0008";
+  panel.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><strong>Playback queue</strong><button type="button" id="pulseQueueClose" aria-label="Close queue">×</button></div><p id="pulseQueueNotice" role="status" style="font-size:12px;opacity:.8">Add tracks or source links to build your queue.</p><ol id="pulseQueueItems" style="padding-left:20px"></ol><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="pulseQueuePrev">Previous</button><button type="button" id="pulseQueuePlay">Play / Open</button><button type="button" id="pulseQueueNext">Next</button><button type="button" id="pulseQueueClear">Clear</button></div>';
+  document.body.append(panel);
+  const notice = (message) => {
+    document.getElementById("pulseQueueNotice").textContent = message;
+  };
+  function renderQueue() {
+    const list = document.getElementById("pulseQueueItems");
+    list.replaceChildren();
+    queue.forEach((item, i) => {
+      const li = document.createElement("li");
+      li.style.margin = "8px 0";
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent =
+        (i === queueIndex ? "▶ " : "") +
+        item.title +
+        (item.artist ? " — " + item.artist : "");
+      button.style.cssText =
+        "max-width:100%;text-align:left;white-space:normal";
+      button.addEventListener("click", () => {
+        queueIndex = i;
+        playQueueItem();
+      });
+      li.append(button);
+      list.append(li);
+    });
+    if (!queue.length) notice("Queue is empty. Add a track or source link.");
+  }
+  function normalize(item) {
+    if (!item || !item.title) return null;
+    const sourceUrl = item.sourceUrl || item.src || "";
+    let source = item.source || "direct";
+    if (sourceUrl) {
+      try {
+        const host = new URL(sourceUrl).hostname
+          .toLowerCase()
+          .replace(/^www\./, "");
+        if (host === "open.spotify.com") source = "spotify";
+        else if (
+          [
+            "youtube.com",
+            "youtu.be",
+            "music.youtube.com",
+            "m.youtube.com",
+          ].includes(host)
+        )
+          source = "youtube";
+        else if (host === "soundcloud.com") source = "soundcloud";
+      } catch (_) {
+        return null;
+      }
+    }
+    return {
+      title: String(item.title).slice(0, 200),
+      artist: String(item.artist || "").slice(0, 200),
+      source,
+      sourceUrl,
+      localId: item.id,
+      localOnly: Boolean(
+        item.localFile || (sourceUrl && sourceUrl.startsWith("blob:")),
+      ),
+    };
+  }
+  function add(item) {
+    const normalized = normalize(item);
+    if (!normalized) {
+      notice("This item cannot be added to the queue.");
+      return;
+    }
+    const duplicate = queue.findIndex(
+      (q) => q.sourceUrl && q.sourceUrl === normalized.sourceUrl,
+    );
+    if (duplicate >= 0) {
+      queueIndex = duplicate;
+      notice("That source is already queued.");
+    } else {
+      queue.push(normalized);
+      if (queueIndex < 0) queueIndex = 0;
+      notice("Added to queue.");
+    }
+    renderQueue();
+  }
+  function playQueueItem() {
+    const item = currentQueueItem();
+    if (!item) {
+      notice("Add a track first.");
+      return;
+    }
+    if (
+      item.localId !== undefined &&
+      tracks.some((t) => t.id === item.localId)
+    ) {
+      const idx = tracks.findIndex((t) => t.id === item.localId);
+      if (idx >= 0) {
+        setTrack(idx, true);
+        notice("Playing " + item.title);
+        return;
+      }
+    }
+    if (!item.sourceUrl || item.localOnly) {
+      notice(
+        "This local file is available only in the device session where it was added.",
+      );
+      return;
+    }
+    if (item.source === "direct") {
+      const track = {
+        id: Date.now(),
+        title: item.title,
+        artist: item.artist || "Queued audio",
+        mood: "Queue",
+        time: "—",
+        cover: "blue",
+        symbol: "♫",
+        src: item.sourceUrl,
+        customUrl: true,
+      };
+      tracks.push(track);
+      setTrack(tracks.length - 1, true);
+      notice("Playing " + item.title);
+      return;
+    }
+    if (typeof loadMusicEmbed === "function") {
+      loadMusicEmbed(item.sourceUrl);
+      notice(
+        item.source.toUpperCase() +
+          " opened. Use the provider's embedded controls; universal play/pause is not available for every embed.",
+      );
+    } else {
+      notice(
+        "Open this provider link in its official player: " + item.sourceUrl,
+      );
+    }
+  }
+  function move(delta) {
+    if (!queue.length) {
+      notice("Add a track first.");
+      return;
+    }
+    queueIndex = (queueIndex + delta + queue.length) % queue.length;
+    playQueueItem();
+    renderQueue();
+  }
+  window.PULSE_QUEUE = {
+    add,
+    list: () => queue.map((item) => ({ ...item })),
+    play: playQueueItem,
+    next: () => move(1),
+    previous: () => move(-1),
+    clear: () => {
+      queue.length = 0;
+      queueIndex = -1;
+      renderQueue();
+      notice("Queue cleared.");
+    },
+  };
+  document.getElementById("queue").onclick = () => {
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) {
+      if (window.PULSE_CURRENT_TRACK) add(window.PULSE_CURRENT_TRACK);
+      else renderQueue();
+    }
+  };
+  document.getElementById("pulseQueueClose").onclick = () => {
+    panel.hidden = true;
+  };
+  document.getElementById("pulseQueuePrev").onclick = () => move(-1);
+  document.getElementById("pulseQueueNext").onclick = () => move(1);
+  document.getElementById("pulseQueuePlay").onclick = playQueueItem;
+  document.getElementById("pulseQueueClear").onclick = () =>
+    window.PULSE_QUEUE.clear();
+  document.getElementById("sourceForm").addEventListener("submit", () => {
+    window.setTimeout(() => {
+      if (window.PULSE_CURRENT_TRACK) add(window.PULSE_CURRENT_TRACK);
+    }, 0);
+  });
+  document.getElementById("rows").addEventListener("click", (event) => {
+    const row = event.target.closest(".row");
+    if (!row || event.target.closest("[data-like]")) return;
+    const track = tracks.find((t) => t.id === Number(row.dataset.id));
+    if (track) add(track);
+  });
+})();

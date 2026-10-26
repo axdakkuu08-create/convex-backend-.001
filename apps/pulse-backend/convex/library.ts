@@ -191,3 +191,50 @@ export const removeFromPlaylist = mutation({
     await ctx.db.delete(args.trackId);
   },
 });
+
+export const listRecent = query({
+  args: {},
+  handler: async (ctx) => {
+    const ownerId = await requireUser(ctx);
+    return await ctx.db
+      .query("recentlyPlayed")
+      .withIndex("by_owner_played", (q) => q.eq("ownerId", ownerId))
+      .order("desc")
+      .take(50);
+  },
+});
+
+export const recordPlayed = mutation({
+  args: trackArgs,
+  handler: async (ctx, args) => {
+    const ownerId = await requireUser(ctx);
+    validateTrack(
+      args.title,
+      args.artist,
+      args.source,
+      args.sourceUrl,
+      args.artworkUrl,
+    );
+    const duplicate = await ctx.db
+      .query("recentlyPlayed")
+      .withIndex("by_owner_source_url", (q) =>
+        q.eq("ownerId", ownerId).eq("sourceUrl", args.sourceUrl),
+      )
+      .first();
+    if (duplicate) await ctx.db.delete(duplicate._id);
+    const id = await ctx.db.insert("recentlyPlayed", {
+      ...args,
+      title: args.title.trim(),
+      artist: args.artist?.trim(),
+      ownerId,
+      playedAt: Date.now(),
+    });
+    const all = await ctx.db
+      .query("recentlyPlayed")
+      .withIndex("by_owner_played", (q) => q.eq("ownerId", ownerId))
+      .order("desc")
+      .collect();
+    for (const old of all.slice(50)) await ctx.db.delete(old._id);
+    return id;
+  },
+});
