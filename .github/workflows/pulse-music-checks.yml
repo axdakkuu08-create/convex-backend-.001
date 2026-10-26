@@ -2,12 +2,17 @@ name: Pulse music workspace checks
 
 on:
   push:
-    branches: [convex-inspired-app]
+    branches:
+      [
+        convex-inspired-app,
+        feature/pulse-dev-clerk-convex-config,
+        pulse-jamendo-cloud-sync,
+      ]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-music-checks.yml"
   pull_request:
-    branches: [main, Main]
+    branches: [main, Main, feature/pulse-dev-clerk-convex-config]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-music-checks.yml"
@@ -49,7 +54,8 @@ jobs:
           parser = IDs()
           parser.feed(html)
           required = {'sourceForm', 'sourceUrl', 'sourceFrame', 'sourceError',
-                      'embedWrap', 'closeEmbed', 'audioFileInput', 'addFileButton',
+                      'embedWrap', 'closeEmbed', 'jamendoForm', 'jamendoQuery',
+                      'jamendoStatus', 'jamendoResults', 'audioFileInput', 'addFileButton',
                       'addUrlButton', 'audio', 'play', 'rows'}
           missing = required - parser.ids
           if missing:

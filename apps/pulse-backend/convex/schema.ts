@@ -1,8 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+// Keep the legacy Spotify value so existing saved records remain readable.
+// New frontend writes use Jamendo, YouTube, SoundCloud, or direct audio.
 export const musicSource = v.union(
   v.literal("spotify"),
+  v.literal("jamendo"),
   v.literal("youtube"),
   v.literal("soundcloud"),
   v.literal("direct"),
@@ -38,5 +41,16 @@ export default defineSchema({
     savedAt: v.number(),
   })
     .index("by_owner_saved", ["ownerId", "savedAt"])
+    .index("by_owner_source_url", ["ownerId", "sourceUrl"]),
+  recentlyPlayed: defineTable({
+    ownerId: v.string(),
+    title: v.string(),
+    artist: v.optional(v.string()),
+    source: musicSource,
+    sourceUrl: v.string(),
+    artworkUrl: v.optional(v.string()),
+    playedAt: v.number(),
+  })
+    .index("by_owner_played", ["ownerId", "playedAt"])
     .index("by_owner_source_url", ["ownerId", "sourceUrl"]),
 });

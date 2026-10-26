@@ -1,18 +1,28 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { musicSource } from "./schema";
 import { requireUser } from "./lib/auth";
 
+const activeMusicSource = v.union(
+  v.literal("jamendo"),
+  v.literal("youtube"),
+  v.literal("soundcloud"),
+  v.literal("direct"),
+);
 const trackArgs = {
   title: v.string(),
   artist: v.optional(v.string()),
-  source: musicSource,
+  source: activeMusicSource,
   sourceUrl: v.string(),
   artworkUrl: v.optional(v.string()),
 };
 
-const SOURCE_HOSTS: Record<"spotify" | "youtube" | "soundcloud", string[]> = {
+// Legacy Spotify records remain readable, but new writes no longer accept Spotify.
+const SOURCE_HOSTS: Record<
+  "spotify" | "jamendo" | "youtube" | "soundcloud",
+  string[]
+> = {
   spotify: ["spotify.com", "spotify.link"],
+  jamendo: ["jamendo.com"],
   youtube: ["youtube.com", "youtu.be"],
   soundcloud: ["soundcloud.com"],
 };
@@ -45,7 +55,7 @@ function validateHttpUrl(value: string, label: string): URL {
 function validateTrack(
   title: string,
   artist: string | undefined,
-  source: "spotify" | "youtube" | "soundcloud" | "direct",
+  source: "spotify" | "jamendo" | "youtube" | "soundcloud" | "direct",
   sourceUrl: string,
   artworkUrl: string | undefined,
 ): void {
@@ -189,5 +199,52 @@ export const removeFromPlaylist = mutation({
     if (!track || track.ownerId !== ownerId)
       throw new Error("Playlist track not found.");
     await ctx.db.delete(args.trackId);
+  },
+});
+
+export const listRecent = query({
+  args: {},
+  handler: async (ctx) => {
+    const ownerId = await requireUser(ctx);
+    return await ctx.db
+      .query("recentlyPlayed")
+      .withIndex("by_owner_played", (q) => q.eq("ownerId", ownerId))
+      .order("desc")
+      .take(50);
+  },
+});
+
+export const recordPlayed = mutation({
+  args: trackArgs,
+  handler: async (ctx, args) => {
+    const ownerId = await requireUser(ctx);
+    validateTrack(
+      args.title,
+      args.artist,
+      args.source,
+      args.sourceUrl,
+      args.artworkUrl,
+    );
+    const duplicate = await ctx.db
+      .query("recentlyPlayed")
+      .withIndex("by_owner_source_url", (q) =>
+        q.eq("ownerId", ownerId).eq("sourceUrl", args.sourceUrl),
+      )
+      .first();
+    if (duplicate) await ctx.db.delete(duplicate._id);
+    const id = await ctx.db.insert("recentlyPlayed", {
+      ...args,
+      title: args.title.trim(),
+      artist: args.artist?.trim(),
+      ownerId,
+      playedAt: Date.now(),
+    });
+    const all = await ctx.db
+      .query("recentlyPlayed")
+      .withIndex("by_owner_played", (q) => q.eq("ownerId", ownerId))
+      .order("desc")
+      .collect();
+    for (const old of all.slice(50)) await ctx.db.delete(old._id);
+    return id;
   },
 });
