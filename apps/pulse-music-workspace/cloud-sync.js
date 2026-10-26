@@ -50,7 +50,7 @@ async function startCloud() {
     const unsaveTrack = makeFunctionReference("library:unsaveTrack");
     const listRecent = makeFunctionReference("library:listRecent");
     const recordPlayed = makeFunctionReference("library:recordPlayed");
-    const addPlaylistTrack = makeFunctionReference("library:addPlaylistTrack");
+    const addPlaylistTrack = makeFunctionReference("library:addToPlaylist");
     let stopPlaylistUpdates = null;
     let authenticated = false;
     let migratedLocalLibrary = false;
@@ -179,7 +179,7 @@ async function startCloud() {
       catch (error) { status("Could not sync favorite: " + (error?.message || "local favorite is still saved")); }
     });
     window.addEventListener("pulse:track-unliked", async (event) => {
-      try { await convex.mutation(unsaveTrack, { sourceUrl: event.detail.sourceUrl }); }
+      try { const saved = await convex.query(listSaved, {}); const match = saved.find((item) => item.sourceUrl === event.detail.sourceUrl); if (match) await convex.mutation(unsaveTrack, { trackId: match._id }); }
       catch (error) { status("Could not remove cloud favorite: " + (error?.message || "unknown error")); }
     });
     window.addEventListener("pulse:track-played", async (event) => {
