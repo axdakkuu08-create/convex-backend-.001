@@ -92,18 +92,40 @@ function pulseTrackPayload(track) {
       .toLowerCase()
       .replace(/^www\./, "");
     if (host === "open.spotify.com") source = "spotify";
-    else if (host === "youtube.com" || host === "youtu.be" || host === "music.youtube.com") source = "youtube";
+    else if (
+      host === "youtube.com" ||
+      host === "youtu.be" ||
+      host === "music.youtube.com"
+    )
+      source = "youtube";
     else if (host === "soundcloud.com") source = "soundcloud";
-  } catch (_) { return null; }
-  return { id: track.id, title: track.title || "Untitled track", artist: track.artist || "", source, sourceUrl };
+  } catch (_) {
+    return null;
+  }
+  return {
+    id: track.id,
+    title: track.title || "Untitled track",
+    artist: track.artist || "",
+    source,
+    sourceUrl,
+  };
 }
 function emitPulseLibraryEvent(name, track) {
   const payload = pulseTrackPayload(track);
-  if (payload) window.dispatchEvent(new CustomEvent(name, { detail: payload }));
+  if (payload)
+    window.dispatchEvent(new CustomEvent(name, { detail: payload }));
 }
 window.PULSE_EXPORT_LOCAL_LIBRARY = () => ({
-  liked: [...liked].map((id) => tracks.find((track) => track.id === id)).filter(Boolean).map(pulseTrackPayload).filter(Boolean),
-  recent: recent.map((id) => tracks.find((track) => track.id === id)).filter(Boolean).map(pulseTrackPayload).filter(Boolean),
+  liked: [...liked]
+    .map((id) => tracks.find((track) => track.id === id))
+    .filter(Boolean)
+    .map(pulseTrackPayload)
+    .filter(Boolean),
+  recent: recent
+    .map((id) => tracks.find((track) => track.id === id))
+    .filter(Boolean)
+    .map(pulseTrackPayload)
+    .filter(Boolean),
 });
 function fmt(n) {
   return Number.isFinite(n)
