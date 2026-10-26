@@ -1,0 +1,45 @@
+name: Pulse unified library validation
+
+on:
+  push:
+    branches:
+      - pulse-unified-cloud-library
+  pull_request:
+    branches:
+      - main
+      - feature/pulse-dev-clerk-convex-config
+    paths:
+      - "apps/pulse-backend/**"
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-unified-library-checks.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check JavaScript syntax
+        run: |
+          node --check apps/pulse-music-workspace/app.js
+          node --check apps/pulse-music-workspace/cloud-sync.js
+          node --check apps/pulse-music-workspace/spotify.js
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/pulse-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install backend dependencies
+        run: npm install
+      - name: Type-check Convex backend
+        run: npm run typecheck
