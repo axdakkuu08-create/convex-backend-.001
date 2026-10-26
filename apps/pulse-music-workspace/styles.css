@@ -1249,17 +1249,80 @@ footer {
 }
 
 /* Source-aware playback queue */
-.queue-panel { margin: 18px 0; padding: 16px; border: 1px solid #30313a; border-radius: 12px; background: #17181d; }
-.queue-panel[hidden] { display: none; }
-.queue-actions { display: flex; gap: 7px; flex-wrap: wrap; }
-.queue-actions button { font-size: 11px; }
-.queue-note, .queue-empty { color: #9698a3; font-size: 11px; line-height: 1.6; }
-.queue-items { display: grid; gap: 6px; }
-.queue-row { display: flex; align-items: center; gap: 8px; padding: 9px; border: 1px solid #2e3038; border-radius: 7px; }
-.queue-info { min-width: 0; flex: 1; }
-.queue-info span, .queue-info small { display: block; overflow-wrap: anywhere; }
-.queue-info span { color: #eee; font-size: 12px; }
-.queue-info small { margin-top: 3px; color: #858793; font-size: 10px; }
-.queue-row button { border: 1px solid #383943; background: #22232a; color: #eee; border-radius: 6px; padding: 6px 9px; font-size: 10px; }
-.queue-row button:hover { border-color: var(--lime); }
-@media (max-width: 760px) { .queue-panel { padding: 12px; } .queue-row { gap: 5px; padding: 7px; } .queue-row button { padding: 7px; } }
+.queue-panel {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid #30313a;
+  border-radius: 12px;
+  background: #17181d;
+}
+.queue-panel[hidden] {
+  display: none;
+}
+.queue-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.queue-actions button {
+  font-size: 11px;
+}
+.queue-note,
+.queue-empty {
+  color: #9698a3;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.queue-items {
+  display: grid;
+  gap: 6px;
+}
+.queue-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #2e3038;
+  border-radius: 7px;
+}
+.queue-info {
+  min-width: 0;
+  flex: 1;
+}
+.queue-info span,
+.queue-info small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.queue-info span {
+  color: #eee;
+  font-size: 12px;
+}
+.queue-info small {
+  margin-top: 3px;
+  color: #858793;
+  font-size: 10px;
+}
+.queue-row button {
+  border: 1px solid #383943;
+  background: #22232a;
+  color: #eee;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 10px;
+}
+.queue-row button:hover {
+  border-color: var(--lime);
+}
+@media (max-width: 760px) {
+  .queue-panel {
+    padding: 12px;
+  }
+  .queue-row {
+    gap: 5px;
+    padding: 7px;
+  }
+  .queue-row button {
+    padding: 7px;
+  }
+}

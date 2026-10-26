@@ -283,16 +283,34 @@
             </button>
           </div>
         </section>
-        <section id="queuePanel" class="queue-panel" hidden aria-labelledby="queueHeading">
+        <section
+          id="queuePanel"
+          class="queue-panel"
+          hidden
+          aria-labelledby="queueHeading"
+        >
           <div class="sectionhead">
-            <div><small>UP NEXT</small><h2 id="queueHeading">Playback queue</h2></div>
+            <div>
+              <small>UP NEXT</small>
+              <h2 id="queueHeading">Playback queue</h2>
+            </div>
             <div class="queue-actions">
-              <button id="queueAddCurrent" class="secondary" type="button">＋ Current source</button>
-              <button id="queueClear" class="secondary" type="button">Clear sources</button>
-              <button id="queueClose" class="textbutton" type="button">Close ×</button>
+              <button id="queueAddCurrent" class="secondary" type="button">
+                ＋ Current source
+              </button>
+              <button id="queueClear" class="secondary" type="button">
+                Clear sources
+              </button>
+              <button id="queueClose" class="textbutton" type="button">
+                Close ×
+              </button>
             </div>
           </div>
-          <p class="queue-note">Pulse audio tracks play here. Spotify, YouTube, and SoundCloud items open in their official players; their playback controls remain provider-managed.</p>
+          <p class="queue-note">
+            Pulse audio tracks play here. Spotify, YouTube, and SoundCloud items
+            open in their official players; their playback controls remain
+            provider-managed.
+          </p>
           <div id="queueItems" class="queue-items"></div>
         </section>
         <section class="tracks">
