@@ -39,4 +39,15 @@ export default defineSchema({
   })
     .index("by_owner_saved", ["ownerId", "savedAt"])
     .index("by_owner_source_url", ["ownerId", "sourceUrl"]),
+  recentlyPlayed: defineTable({
+    ownerId: v.string(),
+    title: v.string(),
+    artist: v.optional(v.string()),
+    source: musicSource,
+    sourceUrl: v.string(),
+    artworkUrl: v.optional(v.string()),
+    playedAt: v.number(),
+  })
+    .index("by_owner_played", ["ownerId", "playedAt"])
+    .index("by_owner_source_url", ["ownerId", "sourceUrl"]),
 });
