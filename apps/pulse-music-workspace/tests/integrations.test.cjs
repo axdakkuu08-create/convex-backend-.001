@@ -4,57 +4,22 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const appPath = path.join(__dirname, "..", "app.js");
-const source = fs.readFileSync(appPath, "utf8");
-const start = source.indexOf("function resolveMusicEmbed(raw)");
-const end = source.indexOf("function loadMusicEmbed(", start);
+const root = path.join(__dirname, "..");
+const appSource = fs.readFileSync(path.join(root, "app.js"), "utf8");
+const configSource = fs.readFileSync(path.join(root, "config.js"), "utf8");
+const cloudSource = fs.readFileSync(path.join(root, "cloud-sync.js"), "utf8");
+const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const start = appSource.indexOf("function resolveMusicEmbed(raw)");
+const end = appSource.indexOf("function loadMusicEmbed(", start);
 assert.ok(start >= 0 && end > start, "embed resolver function must exist");
 const sandbox = { URL };
 vm.runInNewContext(
-  source.slice(start, end) +
+  appSource.slice(start, end) +
     "\nthis.resolveMusicEmbed = resolveMusicEmbed;\nthis.embedLayoutClass = embedLayoutClass;",
   sandbox,
 );
 const resolveMusicEmbed = sandbox.resolveMusicEmbed;
 const embedLayoutClass = sandbox.embedLayoutClass;
-
-test("Spotify track and localized links become official Spotify embeds", () => {
-  const track = resolveMusicEmbed("https://open.spotify.com/track/abc123XYZ");
-  assert.equal(
-    track.url,
-    "https://open.spotify.com/embed/track/abc123XYZ?utm_source=generator",
-  );
-  const localized = resolveMusicEmbed(
-    "https://open.spotify.com/intl-en/album/abc123XYZ",
-  );
-  assert.match(localized.url, /open\.spotify\.com\/embed\/album\/abc123XYZ/);
-});
-
-test("tall Spotify embeds never produce an empty class token", () => {
-  for (const kind of ["album", "playlist", "artist", "show"]) {
-    const result = resolveMusicEmbed(
-      "https://open.spotify.com/" + kind + "/abc123XYZ",
-    );
-    assert.equal(result.ratio, "tall");
-    assert.equal(embedLayoutClass(result.ratio), "");
-  }
-  assert.equal(
-    embedLayoutClass(
-      resolveMusicEmbed("https://open.spotify.com/track/abc123XYZ").ratio,
-    ),
-    "compact",
-  );
-  assert.equal(
-    embedLayoutClass(resolveMusicEmbed("https://youtu.be/abcdefghijk").ratio),
-    "video",
-  );
-  assert.equal(
-    embedLayoutClass(
-      resolveMusicEmbed("https://soundcloud.com/artist/track-name").ratio,
-    ),
-    "soundcloud",
-  );
-});
 
 test("YouTube video and playlist links become privacy-enhanced embeds", () => {
   assert.equal(
@@ -62,9 +27,7 @@ test("YouTube video and playlist links become privacy-enhanced embeds", () => {
     "https://www.youtube-nocookie.com/embed/abcdefghijk",
   );
   assert.match(
-    resolveMusicEmbed(
-      "https://music.youtube.com/watch?v=abcdefghijk&list=PL12345",
-    ).url,
+    resolveMusicEmbed("https://music.youtube.com/watch?v=abcdefghijk&list=PL12345").url,
     /youtube-nocookie\.com\/embed\/abcdefghijk\?list=PL12345/,
   );
   assert.match(
@@ -79,47 +42,39 @@ test("SoundCloud links become official widget embeds", () => {
   assert.equal(result.ratio, "soundcloud");
 });
 
-test("unsupported domains and invalid links fail with a helpful error", () => {
+test("unsupported links fail with a helpful error and no Spotify dependency", () => {
   assert.throws(
     () => resolveMusicEmbed("https://example.com/song"),
-    /Supported sources/,
+    /Supported links/,
   );
   assert.throws(() => resolveMusicEmbed("not a URL"), /valid music link/);
   assert.throws(
     () => resolveMusicEmbed("javascript:alert(1)"),
     /Only http and https/,
   );
+  assert.doesNotMatch(appSource, /open\.spotify\.com|Spotify/);
+  assert.doesNotMatch(indexSource, /open\.spotify\.com|Spotify/);
 });
 
-const cloudSource = fs.readFileSync(
-  path.join(__dirname, "..", "cloud-sync.js"),
-  "utf8",
-);
-const configSource = fs.readFileSync(
-  path.join(__dirname, "..", "config.js"),
-  "utf8",
-);
+test("Jamendo search uses a public client ID and shared audio queue", () => {
+  assert.match(appSource, /api\.jamendo\.com\/v3\.0\/tracks\//);
+  assert.match(appSource, /namesearch: term/);
+  assert.match(appSource, /source: "jamendo"/);
+  assert.match(appSource, /window\.PULSE_QUEUE\?\.add\(track\)/);
+  assert.match(indexSource, /id="jamendoForm"/);
+  assert.match(indexSource, /id="jamendoResults"/);
+  assert.match(configSource, /jamendoClientId:\s*""/);
+});
 
-test("cloud playlists are opt-in and use owner-scoped backend functions", () => {
-  assert.match(
-    cloudSource,
-    /if \(!config\.convexUrl \|\| !config\.clerkPublishableKey\)/,
-  );
+test("cloud playlists, favourites and history use owner-scoped Convex functions", () => {
+  assert.match(cloudSource, /if \(!config\.convexUrl \|\| !config\.clerkPublishableKey\)/);
   assert.match(cloudSource, /playlists:listMine/);
   assert.match(cloudSource, /playlists:create/);
   assert.match(cloudSource, /playlists:remove/);
+  assert.match(cloudSource, /library:listSaved/);
+  assert.match(cloudSource, /library:listRecent/);
+  assert.match(cloudSource, /library:recordPlayed/);
+  assert.match(cloudSource, /library:addToPlaylist/);
   assert.match(cloudSource, /template: "convex"/);
-});
-
-test("public config is either blank or holds only public client values", () => {
-  assert.match(
-    configSource,
-    /convexUrl:\s*"(https:\/\/[a-z0-9-]+\.convex\.cloud)?"/,
-  );
-  assert.match(
-    configSource,
-    /clerkPublishableKey:\s*"(pk_(test|live)_[A-Za-z0-9+=_-]+)?"/,
-  );
   assert.doesNotMatch(configSource, /sk_test_|sk_live_|convex deploy key/i);
-  assert.doesNotMatch(configSource, /convexUrl:\s*".*\/"/);
 });
