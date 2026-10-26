@@ -83,6 +83,22 @@ function save() {
   localStorage.setItem("pulse-liked", JSON.stringify([...liked]));
   localStorage.setItem("pulse-recent", JSON.stringify(recent));
 }
+function pulseTrackPayload(track) {
+  const sourceUrl = track?.src || track?.customUrl || "";
+  if (!/^https?:\/\//i.test(sourceUrl)) return null;
+  let source = "direct";
+  try {
+    const host = new URL(sourceUrl).hostname.toLowerCase().replace(/^www\./, "");
+    if (host === "open.spotify.com") source = "spotify";
+    else if (host === "youtube.com" || host === "youtu.be" || host === "music.youtube.com") source = "youtube";
+    else if (host === "soundcloud.com") source = "soundcloud";
+  } catch (_) { return null; }
+  return { id: track.id, title: track.title || "Untitled track", artist: track.artist || "", source, sourceUrl };
+}
+function emitPulseLibraryEvent(name, track) {
+  const payload = pulseTrackPayload(track);
+  if (payload) window.dispatchEvent(new CustomEvent(name, { detail: payload }));
+}
 function fmt(n) {
   return Number.isFinite(n)
     ? Math.floor(n / 60) + ":" + String(Math.floor(n % 60)).padStart(2, "0")
@@ -264,6 +280,7 @@ function loadMusicEmbed(raw) {
 function setTrack(i, autoplay = false) {
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
+  window.PULSE_CURRENT_TRACK = pulseTrackPayload(t);
   audio.src = t.src;
   audio.load();
   $("audioStatus").textContent = t.localFile
@@ -292,6 +309,7 @@ async function play() {
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
     recent = recent.slice(0, 6);
     save();
+    emitPulseLibraryEvent("pulse:track-played", tracks[index]);
     render();
   } catch (e) {
     playing = false;
@@ -323,7 +341,10 @@ function next() {
   setTrack(n, true);
 }
 function like(id) {
+  const track = tracks.find((item) => item.id === id);
+  const wasLiked = liked.has(id);
   liked.has(id) ? liked.delete(id) : liked.add(id);
+  if (track) emitPulseLibraryEvent(wasLiked ? "pulse:track-unliked" : "pulse:track-liked", track);
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
   $("like").classList.toggle("liked", liked.has(tracks[index].id));
