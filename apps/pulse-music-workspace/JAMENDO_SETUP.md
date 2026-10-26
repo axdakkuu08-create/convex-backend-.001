@@ -37,5 +37,5 @@ after backend changes merge to `feature/pulse-dev-clerk-convex-config`; verify
 its run succeeds before assuming the live preview is synced.
 
 Follow the [Jamendo API documentation](https://developer.jamendo.com/v3.0/docs)
-and the applicable track licence. Pulse does not bypass provider restrictions
-or add a download flow.
+and the applicable track licence. Pulse does not bypass provider restrictions or
+add a download flow.
