@@ -5,4 +5,6 @@ window.PULSE_CONFIG = Object.freeze({
   // Clerk development publishable key only. Never use a secret key here.
   clerkPublishableKey:
     "pk_test_c29jaWFsLXNuYWtlLTM0My5jbGVyay5hY2NvdW50cy5kZXYk",
+  // Public Jamendo API client ID. Create an app at developer.jamendo.com.
+  jamendoClientId: "",
 });

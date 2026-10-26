@@ -1,18 +1,28 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { musicSource } from "./schema";
 import { requireUser } from "./lib/auth";
 
+const activeMusicSource = v.union(
+  v.literal("jamendo"),
+  v.literal("youtube"),
+  v.literal("soundcloud"),
+  v.literal("direct"),
+);
 const trackArgs = {
   title: v.string(),
   artist: v.optional(v.string()),
-  source: musicSource,
+  source: activeMusicSource,
   sourceUrl: v.string(),
   artworkUrl: v.optional(v.string()),
 };
 
-const SOURCE_HOSTS: Record<"spotify" | "youtube" | "soundcloud", string[]> = {
+// Legacy Spotify records remain readable, but new writes no longer accept Spotify.
+const SOURCE_HOSTS: Record<
+  "spotify" | "jamendo" | "youtube" | "soundcloud",
+  string[]
+> = {
   spotify: ["spotify.com", "spotify.link"],
+  jamendo: ["jamendo.com"],
   youtube: ["youtube.com", "youtu.be"],
   soundcloud: ["soundcloud.com"],
 };
@@ -45,7 +55,7 @@ function validateHttpUrl(value: string, label: string): URL {
 function validateTrack(
   title: string,
   artist: string | undefined,
-  source: "spotify" | "youtube" | "soundcloud" | "direct",
+  source: "spotify" | "jamendo" | "youtube" | "soundcloud" | "direct",
   sourceUrl: string,
   artworkUrl: string | undefined,
 ): void {

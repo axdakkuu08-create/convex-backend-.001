@@ -1,8 +1,11 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+// Keep the legacy Spotify value so existing saved records remain readable.
+// New frontend writes use Jamendo, YouTube, SoundCloud, or direct audio.
 export const musicSource = v.union(
   v.literal("spotify"),
+  v.literal("jamendo"),
   v.literal("youtube"),
   v.literal("soundcloud"),
   v.literal("direct"),

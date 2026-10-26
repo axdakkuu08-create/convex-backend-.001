@@ -95,10 +95,40 @@
             <span class="source-badge">3 WEB PLAYERS</span>
           </div>
           <p class="source-copy">
-            Paste a Spotify, YouTube, or SoundCloud link. Playback opens in the
-            official embedded player—sign-in, ads, availability, and account
-            limits are controlled by each service.
+            Search Jamendo's licensed independent-music catalogue, or load a
+            YouTube or SoundCloud link. Jamendo audio plays in Pulse's shared
+            player; embedded providers keep their own controls.
           </p>
+          <div class="jamendo-search">
+            <form id="jamendoForm" class="source-form">
+              <label class="source-input-label" for="jamendoQuery"
+                >Search Jamendo tracks</label
+              >
+              <div class="source-input-row">
+                <input
+                  id="jamendoQuery"
+                  type="search"
+                  placeholder="Search artists, track names, moods…"
+                  autocomplete="off"
+                />
+                <button class="primary" type="submit">Search Jamendo</button>
+              </div>
+            </form>
+            <p
+              id="jamendoStatus"
+              class="source-error"
+              role="status"
+              aria-live="polite"
+            >
+              Add a Jamendo API client ID in config.js to enable catalogue
+              search.
+            </p>
+            <div
+              id="jamendoResults"
+              class="jamendo-results"
+              aria-live="polite"
+            ></div>
+          </div>
           <form id="sourceForm" class="source-form">
             <label class="source-input-label" for="sourceUrl">Music link</label>
             <div class="source-input-row">
@@ -106,7 +136,7 @@
                 id="sourceUrl"
                 type="url"
                 inputmode="url"
-                placeholder="Paste a Spotify, YouTube or SoundCloud URL"
+                placeholder="Paste a YouTube or SoundCloud URL"
                 autocomplete="url"
                 required
               /><button class="primary" type="submit">Load player ↗</button>
@@ -149,16 +179,18 @@
           </div>
           <div class="source-shortcuts">
             <a
-              href="https://open.spotify.com/"
+              href="https://developer.jamendo.com/v3.0/docs"
               target="_blank"
               rel="noopener noreferrer"
-              >Spotify ↗</a
-            ><a
+              >Jamendo API ↗</a
+            >
+            <a
               href="https://music.youtube.com/"
               target="_blank"
               rel="noopener noreferrer"
               >YouTube Music ↗</a
-            ><a
+            >
+            <a
               href="https://soundcloud.com/"
               target="_blank"
               rel="noopener noreferrer"
@@ -189,36 +221,6 @@
               ><span>Slow burn · 11 tracks</span>
             </button>
           </div>
-        </section>
-        <section
-          id="queuePanel"
-          class="queue-panel"
-          hidden
-          aria-labelledby="queueHeading"
-        >
-          <div class="sectionhead">
-            <div>
-              <small>UP NEXT</small>
-              <h2 id="queueHeading">Playback queue</h2>
-            </div>
-            <div class="queue-actions">
-              <button id="queueAddCurrent" class="secondary" type="button">
-                ＋ Current source
-              </button>
-              <button id="queueClear" class="secondary" type="button">
-                Clear sources
-              </button>
-              <button id="queueClose" class="textbutton" type="button">
-                Close ×
-              </button>
-            </div>
-          </div>
-          <p class="queue-note">
-            Pulse audio tracks play here. Spotify, YouTube, and SoundCloud items
-            open in their official players; their playback controls remain
-            provider-managed.
-          </p>
-          <div id="queueItems" class="queue-items"></div>
         </section>
         <section class="tracks">
           <div class="sectionhead">
