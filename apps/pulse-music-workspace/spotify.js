@@ -313,17 +313,30 @@
   async function loadLibrary() {
     setBusy(true);
     try {
-      const [playlists, saved] = await Promise.all([
+      // Load the two library sections independently. A Spotify 403 for saved
+      // tracks should not prevent playlists from appearing (or vice versa).
+      const [playlistResult, savedResult] = await Promise.allSettled([
         spotifyFetch("/me/playlists?limit=50"),
         spotifyFetch("/me/tracks?limit=50"),
       ]);
-      const playlistItems = (playlists.items || []).map((p) => ({
+      if (playlistResult.status === "rejected" && savedResult.status === "rejected") {
+        throw new Error(
+          "Spotify library loading failed. Playlists: " +
+            playlistResult.reason.message +
+            " Saved tracks: " +
+            savedResult.reason.message,
+        );
+      }
+      const playlists =
+        playlistResult.status === "fulfilled" ? playlistResult.value : null;
+      const saved = savedResult.status === "fulfilled" ? savedResult.value : null;
+      const playlistItems = (playlists?.items || []).map((p) => ({
         id: p.id,
         title: p.name,
         subtitle: (p.tracks?.total ?? 0) + " tracks · playlist",
         type: "playlist",
       }));
-      const savedItems = (saved.items || [])
+      const savedItems = (saved?.items || [])
         .map((row) => row.track)
         .filter(Boolean)
         .map((t) => ({
@@ -337,23 +350,36 @@
       renderItems(
         "spotifyPlaylists",
         playlistItems,
-        "No playlists were returned for this account.",
+        playlistResult.status === "rejected"
+          ? "Spotify could not load playlists: " + playlistResult.reason.message
+          : "No playlists were returned for this account.",
         openPlaylist,
       );
       renderItems(
         "spotifySavedTracks",
         savedItems,
-        "No saved tracks were returned for this account.",
+        savedResult.status === "rejected"
+          ? "Spotify could not load saved tracks: " + savedResult.reason.message
+          : "No saved tracks were returned for this account.",
         playTrack,
       );
       $("spotifyDisconnect").hidden = false;
       $("spotifyRefresh").hidden = false;
+      const failures = [
+        playlistResult.status === "rejected"
+          ? "Playlists unavailable: " + playlistResult.reason.message
+          : "",
+        savedResult.status === "rejected"
+          ? "Saved tracks unavailable: " + savedResult.reason.message
+          : "",
+      ].filter(Boolean);
       setStatus(
         "Connected · loaded " +
           playlistItems.length +
           " playlists and " +
           savedItems.length +
-          " saved tracks. Refresh to load the next page if needed.",
+          " saved tracks." +
+          (failures.length ? " " + failures.join(" ") : " Refresh to load the next page if needed."),
       );
       await startPlayer();
     } catch (error) {
