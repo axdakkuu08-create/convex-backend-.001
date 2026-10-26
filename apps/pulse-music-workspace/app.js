@@ -264,6 +264,12 @@ function loadMusicEmbed(raw) {
     frame = $("sourceFrame");
   try {
     const result = resolveMusicEmbed(raw);
+    const sourceUrl = new URL(raw.trim());
+    const host = sourceUrl.hostname.toLowerCase().replace(/^www\./, "");
+    const source = host === "open.spotify.com" ? "spotify" :
+      ["youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be"].includes(host) ? "youtube" :
+      host === "soundcloud.com" ? "soundcloud" : "direct";
+    window.PULSE_CURRENT_TRACK = { title: result.title, artist: "", source, sourceUrl: sourceUrl.href };
     frame.src = result.url;
     frame.title = result.title;
     wrap.classList.remove("compact", "video", "soundcloud");
@@ -491,7 +497,7 @@ $("newPlaylist").onclick = () => {
   toast("Playlist created for this session");
 };
 $("queue").onclick = () =>
-  toast("Queue: " + tracks.map((t) => t.title).join(" · "));
+  toast("Queue: " + tracks.map((t) => t.title).join(" · ") + (window.PULSE_CURRENT_TRACK ? " · Source: " + window.PULSE_CURRENT_TRACK.title : ""));
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
 document.addEventListener("click", (e) => {
   if (
@@ -524,6 +530,11 @@ $("sourceForm").addEventListener("submit", (e) => {
   e.preventDefault();
   loadMusicEmbed($("sourceUrl").value);
 });
+$("saveEmbedSource").onclick = () => {
+  if (!window.PULSE_CURRENT_TRACK) { toast("Load a supported music link first."); return; }
+  window.dispatchEvent(new CustomEvent("pulse:track-liked", { detail: window.PULSE_CURRENT_TRACK }));
+  toast("Source saved to your cloud library when signed in.");
+};
 $("closeEmbed").onclick = () => {
   $("sourceFrame").src = "about:blank";
   $("embedWrap").hidden = true;
