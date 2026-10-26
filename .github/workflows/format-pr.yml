@@ -1,0 +1,29 @@
+name: Format PR files
+on:
+  push:
+    branches: ["feature/pulse-spotify-sdk"]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Format with repository dprint version
+        run: npx --yes dprint@0.57.0 fmt
+      - name: Commit formatted files
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/pulse-music-workspace/index.html apps/pulse-music-workspace/spotify.js apps/pulse-music-workspace/styles.css
+          git commit -m "Format Spotify workspace files"
+          git push
