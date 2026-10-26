@@ -271,8 +271,7 @@ async function startCloud() {
         const match = saved.find(
           (item) => item.sourceUrl === event.detail.sourceUrl,
         );
-        if (match)
-          await convex.mutation(unsaveTrack, { trackId: match._id });
+        if (match) await convex.mutation(unsaveTrack, { trackId: match._id });
       } catch (error) {
         status(
           "Could not remove cloud favorite: " +

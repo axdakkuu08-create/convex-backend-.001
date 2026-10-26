@@ -112,8 +112,7 @@ function pulseTrackPayload(track) {
 }
 function emitPulseLibraryEvent(name, track) {
   const payload = pulseTrackPayload(track);
-  if (payload)
-    window.dispatchEvent(new CustomEvent(name, { detail: payload }));
+  if (payload) window.dispatchEvent(new CustomEvent(name, { detail: payload }));
 }
 window.PULSE_EXPORT_LOCAL_LIBRARY = () => ({
   liked: [...liked]
@@ -294,11 +293,11 @@ function loadMusicEmbed(raw) {
       host === "open.spotify.com"
         ? "spotify"
         : [
-            "youtube.com",
-            "m.youtube.com",
-            "music.youtube.com",
-            "youtu.be",
-          ].includes(host)
+              "youtube.com",
+              "m.youtube.com",
+              "music.youtube.com",
+              "youtu.be",
+            ].includes(host)
           ? "youtube"
           : host === "soundcloud.com"
             ? "soundcloud"
