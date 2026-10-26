@@ -1,6 +1,11 @@
 name: Sync Pulse Convex development backend
 
 on:
+  push:
+    branches: [feature/pulse-dev-clerk-convex-config]
+    paths:
+      - "apps/pulse-backend/**"
+      - ".github/workflows/pulse-convex-sync.yml"
   workflow_dispatch:
 
 permissions:
