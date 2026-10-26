@@ -1,6 +1,7 @@
 # Pulse cloud library sync
 
-This extends the existing Pulse workspace and Convex backend; it does not create a second app or deployment.
+This extends the existing Pulse workspace and Convex backend; it does not
+create a second app or deployment.
 
 ## Included in this change
 - Owner-scoped Convex functions for saved tracks, recently played metadata, and playlist track contents.
@@ -22,4 +23,6 @@ This extends the existing Pulse workspace and Convex backend; it does not create
 4. Sign out and confirm cloud playlist/saved/recent panels clear. Test with a second account to verify isolation.
 5. Confirm Spotify HTTP 403 does not stop YouTube/SoundCloud embeds or local audio.
 
-A green source check is not proof of a live Convex deployment or cross-device sign-in. Do not merge or claim the live cloud flow complete until those manual checks pass.
+A green source check is not proof of a live Convex deployment or cross-device
+sign-in. Do not merge or claim the live cloud flow complete until those manual
+checks pass.
