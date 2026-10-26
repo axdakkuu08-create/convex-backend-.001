@@ -62,7 +62,7 @@ const tracks = [
 ];
 const $ = (id) => document.getElementById(id),
   audio = $("audio");
-let index = 0,
+let sourceQueue = [],\n  index = 0,
   playing = false,
   shuffleOn = false,
   repeatOn = false,
@@ -538,14 +538,80 @@ $("newPlaylist").onclick = () => {
   $("playlists").append(b);
   toast("Playlist created for this session");
 };
-$("queue").onclick = () =>
-  toast(
-    "Queue: " +
-      tracks.map((t) => t.title).join(" · ") +
-      (window.PULSE_CURRENT_TRACK
-        ? " · Source: " + window.PULSE_CURRENT_TRACK.title
-        : ""),
-  );
+function renderQueue() {
+  const list = $("queueItems");
+  if (!list) return;
+  list.replaceChildren();
+  const entries = [
+    ...tracks.map((track, trackIndex) => ({ kind: "local", track, trackIndex })),
+    ...sourceQueue.map((track, sourceIndex) => ({ kind: "source", track, sourceIndex })),
+  ];
+  if (!entries.length) {
+    const empty = document.createElement("p");
+    empty.className = "queue-empty";
+    empty.textContent = "Your queue is empty. Add a track or music source.";
+    list.append(empty);
+    return;
+  }
+  entries.forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "queue-row";
+    const info = document.createElement("div");
+    info.className = "queue-info";
+    const name = document.createElement("span");
+    name.textContent = entry.track.title || "Untitled source";
+    const meta = document.createElement("small");
+    meta.textContent = entry.kind === "local"
+      ? (entry.track.artist || "Pulse audio")
+      : ((entry.track.source || "music") + " · opens official player");
+    info.append(name, meta);
+    const playButton = document.createElement("button");
+    playButton.type = "button";
+    playButton.textContent = entry.kind === "local" ? "Play" : "Open";
+    playButton.addEventListener("click", () => {
+      if (entry.kind === "local") setTrack(entry.trackIndex, true);
+      else if (/^https?:\/\//i.test(entry.track.sourceUrl || "")) {
+        window.open(entry.track.sourceUrl, "_blank", "noopener,noreferrer");
+      }
+    });
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "×";
+    removeButton.setAttribute("aria-label", "Remove " + name.textContent + " from queue");
+    removeButton.addEventListener("click", () => {
+      if (entry.kind === "source") sourceQueue.splice(entry.sourceIndex, 1);
+      else {
+        tracks.splice(entry.trackIndex, 1);
+        if (!tracks.length) { playing = false; audio.pause(); }
+        else { index = Math.min(index, tracks.length - 1); setTrack(index, false); }
+      }
+      render();
+      renderQueue();
+    });
+    row.append(info, playButton, removeButton);
+    list.append(row);
+  });
+}
+$("queue").onclick = () => {
+  const panel = $("queuePanel");
+  panel.hidden = !panel.hidden;
+  if (!panel.hidden) {
+    if (window.PULSE_CURRENT_TRACK && !sourceQueue.some((t) => t.sourceUrl === window.PULSE_CURRENT_TRACK.sourceUrl)) {
+      sourceQueue.push({ ...window.PULSE_CURRENT_TRACK });
+    }
+    renderQueue();
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+};
+$("queueAddCurrent").onclick = () => {
+  const track = window.PULSE_CURRENT_TRACK;
+  if (!track || !track.sourceUrl) { toast("Load a supported music source first."); return; }
+  if (!sourceQueue.some((item) => item.sourceUrl === track.sourceUrl)) sourceQueue.push({ ...track });
+  renderQueue();
+  toast("Added to queue. Provider links open in their official player.");
+};
+$("queueClear").onclick = () => { sourceQueue = []; renderQueue(); toast("External source queue cleared."); };
+$("queueClose").onclick = () => { $("queuePanel").hidden = true; };
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
 document.addEventListener("click", (e) => {
   if (
