@@ -2,7 +2,12 @@ name: Pulse music workspace checks
 
 on:
   push:
-    branches: [convex-inspired-app, feature/pulse-dev-clerk-convex-config, pulse-jamendo-cloud-sync]
+    branches:
+      [
+        convex-inspired-app,
+        feature/pulse-dev-clerk-convex-config,
+        pulse-jamendo-cloud-sync,
+      ]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-music-checks.yml"
