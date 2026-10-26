@@ -45,6 +45,12 @@ async function startCloud() {
     const listMine = makeFunctionReference("playlists:listMine");
     const createPlaylist = makeFunctionReference("playlists:create");
     const removePlaylist = makeFunctionReference("playlists:remove");
+    const listSaved = makeFunctionReference("library:listSaved");
+    const saveTrack = makeFunctionReference("library:saveTrack");
+    const unsaveTrack = makeFunctionReference("library:unsaveTrack");
+    const listRecent = makeFunctionReference("library:listRecent");
+    const recordPlayed = makeFunctionReference("library:recordPlayed");
+    const addPlaylistTrack = makeFunctionReference("library:addPlaylistTrack");
     let stopPlaylistUpdates = null;
     let authenticated = false;
 
@@ -72,7 +78,20 @@ async function startCloud() {
             );
           }
         });
-        row.append(name, remove);
+        const addCurrent = document.createElement("button");
+        addCurrent.type = "button";
+        addCurrent.className = "cloud-delete";
+        addCurrent.textContent = "+ current";
+        addCurrent.setAttribute("aria-label", "Add current track to " + playlist.name);
+        addCurrent.addEventListener("click", async () => {
+          const track = window.PULSE_CURRENT_TRACK;
+          if (!track) { status("Play a web audio track first to add it."); return; }
+          try {
+            await convex.mutation(addPlaylistTrack, { playlistId: playlist._id, title: track.title, artist: track.artist || undefined, source: track.source, sourceUrl: track.sourceUrl });
+            status("Track added to " + playlist.name + ".");
+          } catch (error) { status("Could not add track: " + (error?.message || "unknown error")); }
+        });
+        row.append(name, addCurrent, remove);
         cloudList.append(row);
       }
       if (!playlists.length) {
@@ -98,16 +117,21 @@ async function startCloud() {
       }
       status("Signed in · connecting cloud playlists…");
       if (stopPlaylistUpdates) stopPlaylistUpdates();
-      stopPlaylistUpdates = convex.onUpdate(
-        listMine,
-        {},
-        renderPlaylists,
-        (error) =>
-          status(
-            "Cloud playlist error: " +
-              (error?.message || "check configuration"),
-          ),
-      );
+      stopPlaylistUpdates = convex.onUpdate(listMine, {}, renderPlaylists, (error) => status("Cloud playlist error: " + (error?.message || "check configuration")));
+      const savedNode = document.getElementById("cloudSavedTracks");
+      const recentNode = document.getElementById("cloudRecentTracks");
+      const renderTrackLinks = (node, rows, emptyText) => {
+        node.replaceChildren();
+        if (!rows.length) { const p = document.createElement("p"); p.className = "cloud-empty"; p.textContent = emptyText; node.append(p); return; }
+        for (const track of rows) {
+          const a = document.createElement("a");
+          a.href = track.sourceUrl; a.target = "_blank"; a.rel = "noopener noreferrer";
+          a.textContent = track.title + (track.artist ? " — " + track.artist : "");
+          node.append(a);
+        }
+      };
+      convex.onUpdate(listSaved, {}, rows => renderTrackLinks(savedNode, rows, "No saved tracks yet."), error => status("Saved library unavailable: " + (error?.message || "check setup")));
+      convex.onUpdate(listRecent, {}, rows => renderTrackLinks(recentNode, rows, "No listening history yet."), error => status("Recent history unavailable: " + (error?.message || "check setup")));
     };
 
     const fetchToken = async ({ forceRefreshToken }) => {
@@ -138,6 +162,18 @@ async function startCloud() {
     });
     await updateAuth();
 
+    window.addEventListener("pulse:track-liked", async (event) => {
+      try { await convex.mutation(saveTrack, event.detail); status("Saved to your cloud library."); }
+      catch (error) { status("Could not sync favorite: " + (error?.message || "local favorite is still saved")); }
+    });
+    window.addEventListener("pulse:track-unliked", async (event) => {
+      try { await convex.mutation(unsaveTrack, { sourceUrl: event.detail.sourceUrl }); }
+      catch (error) { status("Could not remove cloud favorite: " + (error?.message || "unknown error")); }
+    });
+    window.addEventListener("pulse:track-played", async (event) => {
+      try { await convex.mutation(recordPlayed, event.detail); }
+      catch (error) { status("Listening history did not sync: " + (error?.message || "local playback continues")); }
+    });
     signInButton.addEventListener("click", () => clerk.openSignIn());
     signOutButton.addEventListener("click", async () => {
       await clerk.signOut();
