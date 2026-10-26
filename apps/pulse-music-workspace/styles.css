@@ -1190,7 +1190,8 @@ footer {
   flex: 1;
   min-width: 0;
 }
-.jamendo-result-info strong, .jamendo-result-info small {
+.jamendo-result-info strong,
+.jamendo-result-info small {
   display: block;
   overflow-wrap: anywhere;
 }
