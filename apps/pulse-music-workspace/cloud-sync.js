@@ -52,6 +52,8 @@ async function startCloud() {
     const recordPlayed = makeFunctionReference("library:recordPlayed");
     const addPlaylistTrack = makeFunctionReference("library:addToPlaylist");
     let stopPlaylistUpdates = null;
+    let stopSavedUpdates = null;
+    let stopRecentUpdates = null;
     let authenticated = false;
     let migratedLocalLibrary = false;
 
@@ -112,8 +114,14 @@ async function startCloud() {
       if (!authenticated) {
         migratedLocalLibrary = false;
         if (stopPlaylistUpdates) stopPlaylistUpdates();
+        if (stopSavedUpdates) stopSavedUpdates();
+        if (stopRecentUpdates) stopRecentUpdates();
         stopPlaylistUpdates = null;
+        stopSavedUpdates = null;
+        stopRecentUpdates = null;
         cloudList.replaceChildren();
+        document.getElementById("cloudSavedTracks")?.replaceChildren();
+        document.getElementById("cloudRecentTracks")?.replaceChildren();
         status("Signed out · local mode remains available.");
         return;
       }
@@ -129,6 +137,9 @@ async function startCloud() {
         }
       }
       if (stopPlaylistUpdates) stopPlaylistUpdates();
+      if (stopPlaylistUpdates) stopPlaylistUpdates();
+      if (stopSavedUpdates) stopSavedUpdates();
+      if (stopRecentUpdates) stopRecentUpdates();
       stopPlaylistUpdates = convex.onUpdate(listMine, {}, renderPlaylists, (error) => status("Cloud playlist error: " + (error?.message || "check configuration")));
       const savedNode = document.getElementById("cloudSavedTracks");
       const recentNode = document.getElementById("cloudRecentTracks");
@@ -142,8 +153,8 @@ async function startCloud() {
           node.append(a);
         }
       };
-      convex.onUpdate(listSaved, {}, rows => renderTrackLinks(savedNode, rows, "No saved tracks yet."), error => status("Saved library unavailable: " + (error?.message || "check setup")));
-      convex.onUpdate(listRecent, {}, rows => renderTrackLinks(recentNode, rows, "No listening history yet."), error => status("Recent history unavailable: " + (error?.message || "check setup")));
+      stopSavedUpdates = convex.onUpdate(listSaved, {}, rows => renderTrackLinks(savedNode, rows, "No saved tracks yet."), error => status("Saved library unavailable: " + (error?.message || "check setup")));
+      stopRecentUpdates = convex.onUpdate(listRecent, {}, rows => renderTrackLinks(recentNode, rows, "No listening history yet."), error => status("Recent history unavailable: " + (error?.message || "check setup")));
     };
 
     const fetchToken = async ({ forceRefreshToken }) => {
