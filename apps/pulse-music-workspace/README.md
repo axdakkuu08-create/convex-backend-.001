@@ -47,10 +47,12 @@ The **Connect a music source** panel supports these sources:
   privacy-enhanced embed host.
 - **SoundCloud** tracks and playlists using the SoundCloud widget.
 
-Search for audio in the Internet Archive panel, or paste a public share URL into **Music link** and tap **Load player**. These are official web embeds, not a bypass of provider playback rules. Sign-in,
-availability, ads, regional restrictions, and account limits remain controlled
-by each provider. Some content cannot be embedded. Spotify embeds may preview
-rather than play full tracks depending on provider policy and account status.
+Search for audio in the Internet Archive panel, or paste a public share URL into
+**Music link** and tap **Load player**. These are official web embeds, not a
+bypass of provider playback rules. Sign-in, availability, ads, regional
+restrictions, and account limits remain controlled by each provider. Some
+content cannot be embedded. Spotify embeds may preview rather than play full
+tracks depending on provider policy and account status.
 
 ## Play your own audio
 
