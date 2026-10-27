@@ -95,10 +95,10 @@
             <span class="source-badge">4 MUSIC SOURCES</span>
           </div>
           <p class="source-copy">
-            Search Jamendo or Internet Archive audio, or load a YouTube or SoundCloud
-            link. Direct audio sources use Pulse's shared player; embedded
-            providers keep their own controls. Internet Archive item rights and
-            streaming availability vary.
+            Search Jamendo or Internet Archive audio, or load a YouTube or
+            SoundCloud link. Direct audio sources use Pulse's shared player;
+            embedded providers keep their own controls. Internet Archive item
+            rights and streaming availability vary.
           </p>
           <div class="jamendo-search">
             <form id="jamendoForm" class="source-form">
@@ -132,7 +132,9 @@
           </div>
           <div class="jamendo-search archive-search">
             <form id="archiveForm" class="source-form">
-              <label class="source-input-label" for="archiveQuery">Search Internet Archive audio</label>
+              <label class="source-input-label" for="archiveQuery"
+              >Search Internet Archive audio</label
+            >
               <div class="source-input-row">
                 <input
                   id="archiveQuery"
@@ -143,12 +145,22 @@
                 <button class="primary" type="submit">Search Archive</button>
               </div>
             </form>
-            <p id="archiveStatus" class="source-error" role="status" aria-live="polite">
+            <p
+              id="archiveStatus"
+              class="source-error"
+              role="status"
+              aria-live="polite"
+            >
               Search public Internet Archive metadata without an API key.
             </p>
-            <div id="archiveResults" class="jamendo-results" aria-live="polite"></div>
+            <div
+              id="archiveResults"
+              class="jamendo-results"
+              aria-live="polite"
+            ></div>
             <p class="embed-note">
-              Playback depends on the item's files and access settings. Check each item's rights and licence before reuse.
+              Playback depends on the item's files and access settings. Check
+              each item's rights and licence before reuse.
             </p>
           </div>
           <form id="sourceForm" class="source-form">
