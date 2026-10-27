@@ -30,6 +30,8 @@ jobs:
         run: node --check apps/pulse-music-workspace/app.js
       - name: Check cloud integration module syntax
         run: node --check apps/pulse-music-workspace/cloud-sync.js
+      - name: Check Internet Archive provider syntax
+        run: node --check apps/pulse-music-workspace/internet-archive.js
       - name: Test music provider URL integrations
         run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs
       - name: Validate required interface elements
