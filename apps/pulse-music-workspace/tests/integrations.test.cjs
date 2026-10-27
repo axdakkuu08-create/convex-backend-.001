@@ -137,8 +137,8 @@ test("Internet Archive search rejects too-short queries without making a request
 });
 test("Internet Archive UI is included without replacing existing providers or cloud sync", () => {
   const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-  assert.match(html, /internet-archive\\.js/);
+  assert.match(html, /internet-archive\.js/);
   assert.match(html, /archiveSearchForm/);
-  assert.match(html, /cloud-sync\\.js/);
+  assert.match(html, /cloud-sync\.js/);
   assert.match(html, /sourceFrame/);
 });
