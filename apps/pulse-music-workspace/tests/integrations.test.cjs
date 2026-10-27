@@ -128,9 +128,7 @@ const archiveSandbox = {
 };
 vm.runInNewContext(archiveSource, archiveSandbox);
 
-test(
-  "Internet Archive provider sanitizes query text and selects playable audio files",
-  () => {
+test("Internet Archive provider sanitizes query text and selects playable audio files", () => {
     const api = archiveSandbox.window.PulseArchive;
     assert.equal(api.safeQuery('A/B: "test"'), "A B test");
     assert.equal(
@@ -145,9 +143,7 @@ test(
   },
 );
 
-test(
-  "Internet Archive search rejects too-short queries without making a request",
-  async () => {
+test("Internet Archive search rejects too-short queries without making a request", async () => {
     await assert.rejects(
       () => archiveSandbox.window.PulseArchive.search("x", 8),
       /at least two characters/,
@@ -155,9 +151,7 @@ test(
   },
 );
 
-test(
-  "Internet Archive UI is included without replacing existing providers or cloud sync",
-  () => {
+test("Internet Archive UI is included without replacing existing providers or cloud sync", () => {
     const html = fs.readFileSync(
       path.join(__dirname, "..", "index.html"),
       "utf8",
