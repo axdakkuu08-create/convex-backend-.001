@@ -8,7 +8,10 @@ const root = path.join(__dirname, "..");
 const appSource = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const configSource = fs.readFileSync(path.join(root, "config.js"), "utf8");
 const cloudSource = fs.readFileSync(path.join(root, "cloud-sync.js"), "utf8");
-const archiveSource = fs.readFileSync(path.join(root, "archive-source.js"), "utf8");
+const archiveSource = fs.readFileSync(
+  path.join(root, "archive-source.js"),
+  "utf8",
+);
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const start = appSource.indexOf("function resolveMusicEmbed(raw)");
 const end = appSource.indexOf("function loadMusicEmbed(", start);
@@ -99,7 +102,10 @@ test("Internet Archive adapter builds public search and resolves only supported 
     ]).name,
     "recording.mp3",
   );
-  assert.equal(adapter.chooseAudioFile([{ name: "scan.pdf", format: "PDF" }]), null);
+  assert.equal(
+    adapter.chooseAudioFile([{ name: "scan.pdf", format: "PDF" }]),
+    null,
+  );
 
   const requests = [];
   const mockFetch = async (url) => {
@@ -109,7 +115,13 @@ test("Internet Archive adapter builds public search and resolves only supported 
         ok: true,
         json: async () => ({
           response: {
-            docs: [{ identifier: "sample-recording", title: "Sample Recording", creator: "Archive Artist" }],
+            docs: [
+              {
+                identifier: "sample-recording",
+                title: "Sample Recording",
+                creator: "Archive Artist",
+              },
+            ],
           },
         }),
       };
@@ -117,7 +129,11 @@ test("Internet Archive adapter builds public search and resolves only supported 
     return {
       ok: true,
       json: async () => ({
-        metadata: { title: "Sample Recording", creator: "Archive Artist", licenseurl: "https://creativecommons.org/licenses/by/4.0/" },
+        metadata: {
+          title: "Sample Recording",
+          creator: "Archive Artist",
+          licenseurl: "https://creativecommons.org/licenses/by/4.0/",
+        },
         files: [
           { name: "cover.jpg", format: "JPEG" },
           { name: "recording.mp3", format: "VBR MP3", mimetype: "audio/mpeg" },
@@ -129,10 +145,19 @@ test("Internet Archive adapter builds public search and resolves only supported 
   assert.equal(results.length, 1);
   assert.equal(results[0].title, "Sample Recording");
   assert.equal(results[0].artist, "Archive Artist");
-  assert.equal(results[0].src, "https://archive.org/download/sample-recording/recording.mp3");
-  assert.equal(results[0].sourceUrl, "https://archive.org/details/sample-recording");
+  assert.equal(
+    results[0].src,
+    "https://archive.org/download/sample-recording/recording.mp3",
+  );
+  assert.equal(
+    results[0].sourceUrl,
+    "https://archive.org/details/sample-recording",
+  );
   assert.match(requests[0], /^https:\/\/archive\.org\/advancedsearch\.php\?/);
-  assert.match(requests[1], /^https:\/\/archive\.org\/metadata\/sample-recording$/);
+  assert.match(
+    requests[1],
+    /^https:\/\/archive\.org\/metadata\/sample-recording$/,
+  );
 });
 
 test("Internet Archive integration preserves shared queue, source attribution and cloud event payload", () => {
@@ -142,5 +167,8 @@ test("Internet Archive integration preserves shared queue, source attribution an
   assert.match(appSource, /source: "internet-archive"/);
   assert.match(appSource, /window\.PULSE_QUEUE\?\.add\(track\)/);
   assert.match(appSource, /track\?\.sourceUrl \|\| track\?\.src/);
-  assert.match(appSource, /emitPulseLibraryEvent\("pulse:track-played", tracks\[index\]\)/);
+  assert.match(
+    appSource,
+    /emitPulseLibraryEvent\("pulse:track-played", tracks\[index\]\)/,
+  );
 });
