@@ -8,7 +8,8 @@ and is not affiliated with Convex.
 
 - Responsive desktop sidebar and mobile drawer
 - Search tracks by title, artist, or mood
-- Search Internet Archive audio metadata without a client ID and play supported direct audio files
+- Search Internet Archive audio metadata without a client ID and play supported
+  direct audio files
 - Mood cards, curated track list, and saved library
 - Play/pause, previous/next, shuffle, repeat, volume, and seeking
 - Like/save tracks and recently played history via localStorage
@@ -39,7 +40,9 @@ build step or package installation is required.
 
 The **Connect a music source** panel supports these sources:
 
-- **Internet Archive** public audio search and direct audio files discovered from each item's metadata. Search results link back to the original item; file formats and streaming/seek behavior vary.
+- **Internet Archive** public audio search and direct audio files discovered
+  from each item's metadata. Search results link back to the original item; file
+  formats and streaming/seek behavior vary.
 - **YouTube / YouTube Music** videos and playlists using YouTube's
   privacy-enhanced embed host.
 - **SoundCloud** tracks and playlists using the SoundCloud widget.
@@ -65,14 +68,18 @@ uses official embeds instead.
 
 ## Checks
 
-GitHub Actions runs a JavaScript syntax check, URL resolver tests, Internet Archive adapter tests using mocked API responses, and an HTML interface smoke test. Mocked tests validate parsing and integration contracts but do not prove the live Internet Archive API or every item's playback will work.
+GitHub Actions runs a JavaScript syntax check, URL resolver tests, Internet
+Archive adapter tests using mocked API responses, and an HTML interface smoke
+test. Mocked tests validate parsing and integration contracts but do not prove
+the live Internet Archive API or every item's playback will work.
 
 ## Files
 
 - index.html — layout and controls
 - styles.css — theme and responsive styling
 - app.js — playback, search, local library state, and interactions
-- archive-source.js — Internet Archive search, metadata lookup, and supported audio-file selection
+- archive-source.js — Internet Archive search, metadata lookup, and supported
+  audio-file selection
 - config.js — public Convex URL and Clerk publishable-key placeholders
 - cloud-sync.js — optional cloud playlist sign-in and CRUD
 - manifest.webmanifest — install metadata
