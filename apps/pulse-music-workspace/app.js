@@ -573,24 +573,44 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
   const status = $("archiveStatus");
   const results = $("archiveResults");
   const query = $("archiveQuery").value.trim();
-  status.textContent = "Searching Internet Archive and checking for playable audio files…";
+  status.textContent =
+    "Searching Internet Archive and checking for playable audio files…";
   results.innerHTML = "";
   try {
     archiveItems = await window.PulseArchive.search(query, 8);
     if (!archiveItems.length) {
-      status.textContent = "No playable audio files were found for that search. Try a broader title or artist.";
+      status.textContent =
+        "No playable audio files were found for that search. Try a broader title or artist.";
       return;
     }
-    status.textContent = archiveItems.length + " playable archive item(s) found. Check each item's rights before reuse.";
-    results.innerHTML = archiveItems.map((item, i) =>
-      '<article class="archive-result"><div><strong>' + escapeHTML(item.title) +
-      '</strong><small>' + escapeHTML(item.artist) + (item.year ? ' · ' + escapeHTML(item.year) : '') +
-      '</small><small class="archive-rights">' + (item.license ? 'Rights/licence: ' + escapeHTML(item.license) : 'No licence statement found in metadata; check item page') +
-      '</small><a href="' + escapeHTML(item.pageUrl) + '" target="_blank" rel="noopener noreferrer">View item & rights ↗</a></div>' +
-      '<button class="primary archive-play" type="button" data-archive-index="' + i + '">▶ Play</button></article>'
-    ).join("");
+    status.textContent =
+      archiveItems.length +
+      " playable archive item(s) found. Check each item's rights before reuse.";
+    results.innerHTML = archiveItems
+      .map(
+        (item, i) =>
+          '<article class="archive-result"><div><strong>' +
+          escapeHTML(item.title) +
+          "</strong><small>" +
+          escapeHTML(item.artist) +
+          (item.year ? " · " + escapeHTML(item.year) : "") +
+          '</small><small class="archive-rights">' +
+          (item.license
+            ? "Rights/licence: " + escapeHTML(item.license)
+            : "No licence statement found in metadata; check item page") +
+          '</small><a href="' +
+          escapeHTML(item.pageUrl) +
+          '" target="_blank" rel="noopener noreferrer">View item & rights ↗</a></div>' +
+          '<button class="primary archive-play" type="button" data-archive-index="' +
+          i +
+          '">▶ Play</button></article>',
+      )
+      .join("");
   } catch (error) {
-    status.textContent = error && error.message ? error.message : "Archive search failed. Please try again.";
+    status.textContent =
+      error && error.message
+        ? error.message
+        : "Archive search failed. Please try again.";
   }
 });
 $("archiveResults").addEventListener("click", (e) => {
@@ -609,7 +629,7 @@ $("archiveResults").addEventListener("click", (e) => {
     src: item.audioUrl,
     customUrl: true,
     archivePage: item.pageUrl,
-    archiveLicense: item.license
+    archiveLicense: item.license,
   };
   tracks.push(track);
   setTrack(tracks.length - 1, true);
