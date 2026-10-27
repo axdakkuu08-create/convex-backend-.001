@@ -88,7 +88,6 @@ test("cloud playlists, favourites and history use owner-scoped Convex functions"
   assert.doesNotMatch(configSource, /sk_test_|sk_live_|convex deploy key/i);
 });
 
-
 test("Internet Archive adapter builds public search and resolves only supported audio files", async () => {
   const sandbox = { URL, URLSearchParams, window: {} };
   vm.runInNewContext(archiveSource, sandbox);
