@@ -1100,7 +1100,7 @@ footer {
   padding: 0.9rem;
   border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
   border-radius: 12px;
-  background: rgba(255,255,255,.025);
+  background: rgba(255, 255, 255, 0.025);
 }
 .archive-result > div {
   display: grid;
