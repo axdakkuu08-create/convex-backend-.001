@@ -52,9 +52,16 @@ rather than play full tracks depending on provider policy and account status.
 
 ## Internet Archive audio search
 
-The optional Internet Archive provider searches the public Advanced Search API for audio items, then checks each item's metadata for a direct playable audio file. It does not require an API key and is separate from the Easy Song Licensing API. Easy Song is a licensing workflow, not a song catalogue or streaming source.
+The optional Internet Archive provider searches the public Advanced Search API
+for audio items, then checks each item's metadata for a direct playable audio
+file. It does not require an API key and is separate from the Easy Song Licensing
+API. Easy Song is a licensing workflow, not a song catalogue or streaming source.
 
-Search results link back to the Internet Archive item page. Rights/licence metadata can be missing or vary by file, so users should inspect the item's page and stated terms before reuse. Search/playback success depends on the Archive being reachable and the item retaining a compatible audio file. This provider is not a guarantee that every commercial song is available.
+Search results link back to the Internet Archive item page. Rights/licence
+metadata can be missing or vary by file, so users should inspect the item's page
+and stated terms before reuse. Search/playback success depends on the Archive
+being reachable and the item retaining a compatible audio file. This provider is
+not a guarantee that every commercial song is available.
 
 ## Play your own audio
 
