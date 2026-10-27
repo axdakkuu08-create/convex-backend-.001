@@ -5,7 +5,7 @@
   const AUDIO_EXTENSIONS = /\.(mp3|m4a|ogg|oga|opus|wav|flac)$/i;
 
   function safeQuery(value) {
-    return String(value || "").trim().replace(/[\\+\-!(){}\[\]^"~*?:/]/g, " ").replace(/\s+/g, " ").slice(0, 100);
+    return String(value || "").trim().replace(/[\\+\-!(){}\[\]^"~*?:\/]/g, " ").replace(/\s+/g, " ").slice(0, 100);
   }
 
   function pickAudioFile(files) {
