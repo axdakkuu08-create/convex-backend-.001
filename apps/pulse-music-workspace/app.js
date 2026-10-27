@@ -73,6 +73,7 @@ let index = 0,
   liked = new Set(JSON.parse(localStorage.getItem("pulse-liked") || "[]")),
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
+let archiveItems = [];
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -266,11 +267,13 @@ function setTrack(i, autoplay = false) {
   let t = tracks[index];
   audio.src = t.src;
   audio.load();
-  $("audioStatus").textContent = t.localFile
-    ? "Playing a file selected from this device."
-    : t.customUrl
-      ? "Using your direct audio link."
-      : "Demo preview · internet connection required.";
+  $("audioStatus").textContent = t.archivePage
+    ? "Internet Archive audio · verify item rights before reuse. Open the item page for details."
+    : t.localFile
+      ? "Playing a file selected from this device."
+      : t.customUrl
+        ? "Using your direct audio link."
+        : "Demo preview · internet connection required.";
   $("nowTitle").textContent = t.title;
   $("nowArtist").textContent = t.artist;
   $("cover").className = "cover " + t.cover;
@@ -564,4 +567,73 @@ $("addUrlButton").onclick = () => {
   setTrack(tracks.length - 1, true);
   toast("Audio link added");
 };
+
+$("archiveSearchForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const status = $("archiveStatus");
+  const results = $("archiveResults");
+  const query = $("archiveQuery").value.trim();
+  status.textContent =
+    "Searching Internet Archive and checking for playable audio files…";
+  results.innerHTML = "";
+  try {
+    archiveItems = await window.PulseArchive.search(query, 8);
+    if (!archiveItems.length) {
+      status.textContent =
+        "No playable audio files were found for that search. Try a broader title or artist.";
+      return;
+    }
+    status.textContent =
+      archiveItems.length +
+      " playable archive item(s) found. Check each item's rights before reuse.";
+    results.innerHTML = archiveItems
+      .map(
+        (item, i) =>
+          '<article class="archive-result"><div><strong>' +
+          escapeHTML(item.title) +
+          "</strong><small>" +
+          escapeHTML(item.artist) +
+          (item.year ? " · " + escapeHTML(item.year) : "") +
+          '</small><small class="archive-rights">' +
+          (item.license
+            ? "Rights/licence: " + escapeHTML(item.license)
+            : "No licence statement found in metadata; check item page") +
+          '</small><a href="' +
+          escapeHTML(item.pageUrl) +
+          '" target="_blank" rel="noopener noreferrer">View item & rights ↗</a></div>' +
+          '<button class="primary archive-play" type="button" data-archive-index="' +
+          i +
+          '">▶ Play</button></article>',
+      )
+      .join("");
+  } catch (error) {
+    status.textContent =
+      error && error.message
+        ? error.message
+        : "Archive search failed. Please try again.";
+  }
+});
+$("archiveResults").addEventListener("click", (e) => {
+  const button = e.target.closest("[data-archive-index]");
+  if (!button) return;
+  const item = archiveItems[Number(button.dataset.archiveIndex)];
+  if (!item) return;
+  const track = {
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    title: item.title,
+    artist: item.artist,
+    mood: "Internet Archive",
+    time: "—",
+    cover: "blue",
+    symbol: "♫",
+    src: item.audioUrl,
+    customUrl: true,
+    archivePage: item.pageUrl,
+    archiveLicense: item.license,
+  };
+  tracks.push(track);
+  setTrack(tracks.length - 1, true);
+  toast("Playing archive audio");
+});
+
 setTrack(0);

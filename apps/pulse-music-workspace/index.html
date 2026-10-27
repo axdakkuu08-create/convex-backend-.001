@@ -138,6 +138,44 @@
               website. Some tracks require sign-in or may not be embeddable.
             </p>
           </div>
+          <div class="archive-search-panel">
+            <div class="sectionhead">
+              <div>
+                <small>OPEN AUDIO CATALOG</small>
+                <h3>Internet Archive audio</h3>
+              </div>
+              <span class="source-badge">PUBLIC SEARCH</span>
+            </div>
+            <p class="source-copy">
+              Search archive items with playable audio files. Availability and
+              reuse rights vary by item; check the item page and its stated
+              licence before reusing or sharing.
+            </p>
+            <form id="archiveSearchForm" class="source-form">
+              <label class="source-input-label" for="archiveQuery"
+                >Song, artist, or recording</label
+              >
+              <div class="source-input-row">
+                <input
+                  id="archiveQuery"
+                  type="search"
+                  placeholder="Try a title or artist"
+                  autocomplete="off"
+                  required
+                />
+                <button class="primary" type="submit">Search archive</button>
+              </div>
+            </form>
+            <p
+              id="archiveStatus"
+              class="audio-status"
+              role="status"
+              aria-live="polite"
+            >
+              Search public audio records. Results appear here.
+            </p>
+            <div id="archiveResults" class="archive-results"></div>
+          </div>
           <div class="source-shortcuts">
             <a
               href="https://open.spotify.com/"
@@ -270,6 +308,7 @@
     </section>
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
+    <script src="internet-archive.js"></script>
     <script src="app.js"></script>
     <script type="module" src="cloud-sync.js"></script>
   </body>
