@@ -114,7 +114,6 @@ test("cloud playlists are opt-in and use owner-scoped backend functions", () => 
   assert.doesNotMatch(configSource, /sk_test_|sk_live_|convex deploy key/i);
 });
 
-
 const archiveSource = fs.readFileSync(
   path.join(__dirname, "..", "internet-archive.js"),
   "utf8",
