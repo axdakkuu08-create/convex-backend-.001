@@ -54,8 +54,9 @@ rather than play full tracks depending on provider policy and account status.
 
 The optional Internet Archive provider searches the public Advanced Search API
 for audio items, then checks each item's metadata for a direct playable audio
-file. It does not require an API key and is separate from the Easy Song Licensing
-API. Easy Song is a licensing workflow, not a song catalogue or streaming source.
+file. It does not require an API key and is separate from the Easy Song
+Licensing API. Easy Song is a licensing workflow, not a song catalogue or
+streaming source.
 
 Search results link back to the Internet Archive item page. Rights/licence
 metadata can be missing or vary by file, so users should inspect the item's page
