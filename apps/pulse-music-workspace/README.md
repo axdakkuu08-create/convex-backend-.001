@@ -56,11 +56,11 @@ content cannot be embedded.
 ### Why the supplied YouTube downloader snippet is not used
 
 Pulse reuses the useful metadata idea (showing a title and artwork alongside a
-provider result), but does not call the snippet's unverified third-party
-MP3/MP4 extraction endpoint. The snippet is a messaging-bot command and does
-not fit Pulse's browser player or source interface. YouTube links stay on the
-official embed path; supported direct-audio and Internet Archive tracks continue
-through Pulse's shared queue. See
+provider result), but does not call the snippet's unverified third-party MP3/MP4
+extraction endpoint. The snippet is a messaging-bot command and does not fit
+Pulse's browser player or source interface. YouTube links stay on the official
+embed path; supported direct-audio and Internet Archive tracks continue through
+Pulse's shared queue. See
 [YOUTUBE_DOWNLOADER_REVIEW.md](YOUTUBE_DOWNLOADER_REVIEW.md) for the review and
 verification limits.
 
