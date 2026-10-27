@@ -113,3 +113,32 @@ test("cloud playlists are opt-in and use owner-scoped backend functions", () => 
   assert.match(configSource, /clerkPublishableKey: ""/);
   assert.doesNotMatch(configSource, /sk_test_|sk_live_|convex deploy key/i);
 });
+
+
+const archiveSource = fs.readFileSync(
+  path.join(__dirname, "..", "internet-archive.js"),
+  "utf8",
+);
+const archiveSandbox = { window: {}, URLSearchParams, fetch: async () => { throw new Error("network disabled in unit test"); } };
+vm.runInNewContext(archiveSource, archiveSandbox);
+test("Internet Archive provider sanitizes query text and selects playable audio files", () => {
+  const api = archiveSandbox.window.PulseArchive;
+  assert.equal(api.safeQuery('A/B: "test"'), "A B test");
+  assert.equal(api.pickAudioFile([
+    { name: "cover.jpg" }, { name: "item.xml" }, { name: "recording.mp3" }
+  ]).name, "recording.mp3");
+  assert.equal(api.pickAudioFile([{ name: "poster.png" }]), null);
+});
+test("Internet Archive search rejects too-short queries without making a request", async () => {
+  await assert.rejects(
+    () => archiveSandbox.window.PulseArchive.search("x", 8),
+    /at least two characters/
+  );
+});
+test("Internet Archive UI is included without replacing existing providers or cloud sync", () => {
+  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  assert.match(html, /internet-archive\\.js/);
+  assert.match(html, /archiveSearchForm/);
+  assert.match(html, /cloud-sync\\.js/);
+  assert.match(html, /sourceFrame/);
+});
