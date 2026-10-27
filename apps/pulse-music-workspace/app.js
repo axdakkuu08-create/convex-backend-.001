@@ -84,7 +84,7 @@ function save() {
   localStorage.setItem("pulse-recent", JSON.stringify(recent));
 }
 function pulseTrackPayload(track) {
-  const sourceUrl = track?.src || track?.customUrl || "";
+  const sourceUrl = track?.sourceUrl || track?.src || track?.customUrl || "";
   if (!/^https?:\/\//i.test(sourceUrl)) return null;
   let source = track?.source || "direct";
   try {
@@ -419,6 +419,88 @@ async function searchJamendo(searchText) {
 $("jamendoForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
   void searchJamendo($("jamendoQuery").value);
+});
+
+let archiveTrackCounter = 0;
+async function searchInternetArchive(searchText) {
+  const statusNode = $("archiveStatus");
+  const resultsNode = $("archiveResults");
+  resultsNode.replaceChildren();
+  const term = String(searchText || "").trim();
+  if (term.length < 2) {
+    statusNode.textContent = "Enter at least two characters to search Internet Archive.";
+    return;
+  }
+  if (!window.PULSE_ARCHIVE?.search) {
+    statusNode.textContent = "Internet Archive search module did not load. Refresh and try again.";
+    return;
+  }
+  statusNode.textContent = "Searching Internet Archive and checking playable audio files…";
+  try {
+    const items = await window.PULSE_ARCHIVE.search(term);
+    if (!items.length) {
+      statusNode.textContent = "No items with a supported audio file were found. Try another search.";
+      return;
+    }
+    statusNode.textContent = items.length + " items with supported audio found. Rights and availability vary by item.";
+    for (const item of items) {
+      const row = document.createElement("article");
+      row.className = "jamendo-result";
+      const details = document.createElement("div");
+      details.className = "jamendo-result-info";
+      const title = document.createElement("strong");
+      title.textContent = item.title;
+      const artist = document.createElement("small");
+      artist.textContent = item.artist + (item.year ? " · " + item.year : "");
+      const rights = document.createElement("small");
+      rights.textContent = item.licenseUrl
+        ? "Internet Archive · " + item.format + " · licence details available"
+        : "Internet Archive · " + item.format + " · check item rights before reuse";
+      const sourceLink = document.createElement("a");
+      sourceLink.href = item.sourceUrl;
+      sourceLink.target = "_blank";
+      sourceLink.rel = "noopener noreferrer";
+      sourceLink.textContent = "View item ↗";
+      details.append(title, artist, rights, sourceLink);
+      const playButton = document.createElement("button");
+      playButton.type = "button";
+      playButton.className = "secondary";
+      playButton.textContent = "▶ Play";
+      playButton.addEventListener("click", () => {
+        let track = tracks.find((candidate) => candidate.archiveId === item.id);
+        if (!track) {
+          track = {
+            id: Date.now() + archiveTrackCounter++,
+            archiveId: item.id,
+            title: item.title,
+            artist: item.artist,
+            mood: "Archive",
+            time: "—",
+            cover: "blue",
+            symbol: "♫",
+            src: item.src,
+            sourceUrl: item.sourceUrl,
+            source: "internet-archive",
+            artworkUrl: undefined,
+            licenseUrl: item.licenseUrl || undefined,
+            rights: item.rights || undefined,
+          };
+          tracks.push(track);
+        }
+        setTrack(tracks.findIndex((candidate) => candidate.id === track.id), true);
+        window.PULSE_QUEUE?.add(track);
+        statusNode.textContent = "Selected " + track.title + ". If playback fails, the item may restrict streaming or seeking.";
+      });
+      row.append(details, playButton);
+      resultsNode.append(row);
+    }
+  } catch (error) {
+    statusNode.textContent = "Internet Archive search failed: " + (error?.message || "check your connection and try again.");
+  }
+}
+$("archiveForm")?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  void searchInternetArchive($("archiveQuery").value);
 });
 
 function setTrack(i, autoplay = false) {
