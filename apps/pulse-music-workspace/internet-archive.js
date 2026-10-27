@@ -27,7 +27,9 @@
     );
     return (
       candidates.find((file) => /\.mp3$/i.test(file.name)) ||
-      candidates.find((file) => /\.(m4a|ogg|oga|opus|wav|flac)$/i.test(file.name)) ||
+      candidates.find((file) =>
+        /\.(m4a|ogg|oga|opus|wav|flac)$/i.test(file.name),
+      ) ||
       null
     );
   }
@@ -107,8 +109,7 @@
                 "Internet Archive contributor",
             ),
             year: String(
-              (meta.metadata &&
-                (meta.metadata.year || meta.metadata.date)) ||
+              (meta.metadata && (meta.metadata.year || meta.metadata.date)) ||
                 doc.year ||
                 doc.date ||
                 "",
