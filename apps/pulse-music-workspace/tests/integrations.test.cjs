@@ -62,6 +62,14 @@ test("unsupported links fail with a helpful error and no Spotify dependency", ()
   assert.doesNotMatch(indexSource, /open\.spotify\.com|Spotify/);
 });
 
+test("Pulse does not depend on the pasted third-party YouTube downloader", () => {
+  assert.doesNotMatch(appSource, /arun-music\.onrender\.com/i);
+  assert.doesNotMatch(appSource, /yt-search/);
+  assert.doesNotMatch(appSource, /\/download\?url=/);
+  assert.match(appSource, /youtube-nocookie\.com\/embed/);
+  assert.match(indexSource, /id="sourceFrame"/);
+});
+
 test("Jamendo search uses a public client ID and shared audio queue", () => {
   assert.match(appSource, /api\.jamendo\.com\/v3\.0\/tracks\//);
   assert.match(appSource, /namesearch: term/);
