@@ -1,0 +1,70 @@
+name: Pulse Internet Archive smoke test
+
+on:
+  push:
+    branches: [feature/pulse-internet-archive]
+    paths:
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-archive-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  archive-api-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check adapter syntax
+        run: node --check apps/pulse-music-workspace/archive-source.js
+      - name: Test provider integrations
+        run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs
+      - name: Smoke-test the live public Internet Archive APIs
+        run: |
+          python3 - <<'PY'
+          import json
+          import urllib.parse
+          import urllib.request
+
+          params = urllib.parse.urlencode([
+              ("q", "mediatype:audio"),
+              ("fl[]", "identifier,title"),
+              ("rows", "1"),
+              ("page", "1"),
+              ("output", "json"),
+          ])
+          search_url = "https://archive.org/advancedsearch.php?" + params
+          request = urllib.request.Request(
+              search_url, headers={"Accept": "application/json", "User-Agent": "Pulse-Archive-Smoke/1.0"}
+          )
+          with urllib.request.urlopen(request, timeout=20) as response:
+              if response.status != 200:
+                  raise SystemExit(f"Search API HTTP {response.status}")
+              payload = json.load(response)
+
+          docs = payload.get("response", {}).get("docs")
+          if not isinstance(docs, list):
+              raise SystemExit("Search API response shape was unexpected")
+          if not docs or not docs[0].get("identifier"):
+              raise SystemExit("Search API returned no audio items to inspect")
+
+          identifier = docs[0]["identifier"]
+          metadata_url = "https://archive.org/metadata/" + urllib.parse.quote(identifier, safe="")
+          request = urllib.request.Request(
+              metadata_url, headers={"Accept": "application/json", "User-Agent": "Pulse-Archive-Smoke/1.0"}
+          )
+          with urllib.request.urlopen(request, timeout=20) as response:
+              if response.status != 200:
+                  raise SystemExit(f"Metadata API HTTP {response.status}")
+              metadata = json.load(response)
+
+          if not isinstance(metadata.get("files"), list):
+              raise SystemExit("Metadata API response did not include a files list")
+          print(f"Live API smoke test passed: search returned {len(docs)} item; metadata returned {len(metadata['files'])} file entries.")
+          print("This verifies API reachability and response shape, not audio playback or item rights.")
+          PY
