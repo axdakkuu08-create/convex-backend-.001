@@ -1081,30 +1081,30 @@ footer {
 .archive-search-panel {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--line, rgba(255,255,255,.12));
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.12));
 }
 .archive-search-panel h3 {
-  margin: .35rem 0;
+  margin: 0.35rem 0;
   font-size: 1.1rem;
 }
 .archive-results {
   display: grid;
-  gap: .65rem;
-  margin-top: .85rem;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
 }
 .archive-result {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: .9rem;
-  border: 1px solid var(--line, rgba(255,255,255,.12));
+  padding: 0.9rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
   border-radius: 12px;
   background: rgba(255,255,255,.025);
 }
 .archive-result > div {
   display: grid;
-  gap: .25rem;
+  gap: 0.25rem;
   min-width: 0;
 }
 .archive-result strong {
@@ -1113,7 +1113,7 @@ footer {
 .archive-result small,
 .archive-result a {
   color: var(--muted, #a4a4ad);
-  font-size: .82rem;
+  font-size: 0.82rem;
   overflow-wrap: anywhere;
 }
 .archive-result .archive-rights {
