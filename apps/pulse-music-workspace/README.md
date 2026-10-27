@@ -51,8 +51,18 @@ Search for audio in the Internet Archive panel, or paste a public share URL into
 **Music link** and tap **Load player**. These are official web embeds, not a
 bypass of provider playback rules. Sign-in, availability, ads, regional
 restrictions, and account limits remain controlled by each provider. Some
-content cannot be embedded. Spotify embeds may preview rather than play full
-tracks depending on provider policy and account status.
+content cannot be embedded.
+
+### Why the supplied YouTube downloader snippet is not used
+
+Pulse reuses the useful metadata idea (showing a title and artwork alongside a
+provider result), but does not call the snippet's unverified third-party
+MP3/MP4 extraction endpoint. The snippet is a messaging-bot command and does
+not fit Pulse's browser player or source interface. YouTube links stay on the
+official embed path; supported direct-audio and Internet Archive tracks continue
+through Pulse's shared queue. See
+[YOUTUBE_DOWNLOADER_REVIEW.md](YOUTUBE_DOWNLOADER_REVIEW.md) for the review and
+verification limits.
 
 ## Play your own audio
 
@@ -63,14 +73,12 @@ tracks depending on provider policy and account status.
 - Read the status message below the track list for playback errors.
 
 The built-in demo uses sample MP3 URLs from SoundHelix and requires internet
-access. No Spotify credentials or secret API keys are stored in the browser. A
-full Spotify Web Playback SDK integration would require Spotify developer
-configuration, OAuth, and plan/eligibility checks; this prototype deliberately
-uses official embeds instead.
+access. No provider secrets should be stored in browser code. Official embedded
+players remain subject to provider restrictions.
 
 ## Checks
 
-GitHub Actions runs a JavaScript syntax check, URL resolver tests, Internet
+GitHub Actions runs JavaScript syntax checks, URL resolver tests, Internet
 Archive adapter tests using mocked API responses, and an HTML interface smoke
 test. Mocked tests validate parsing and integration contracts but do not prove
 the live Internet Archive API or every item's playback will work.
@@ -85,6 +93,8 @@ the live Internet Archive API or every item's playback will work.
 - config.js — public Convex URL and Clerk publishable-key placeholders
 - cloud-sync.js — optional cloud playlist sign-in and CRUD
 - manifest.webmanifest — install metadata
+- YOUTUBE_DOWNLOADER_REVIEW.md — decision and limitations for the supplied bot
+  downloader snippet
 
 ## Run checks locally
 
