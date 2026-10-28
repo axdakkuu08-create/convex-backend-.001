@@ -232,6 +232,12 @@
               website. Some tracks require sign-in or may not be embeddable.
             </p>
           </div>
+          <div class="unified-search-panel">
+            <div class="sectionhead"><div><small>UNIFIED DISCOVERY</small><h3>Search all music</h3></div><span class="source-badge">LIVE CATALOGUES</span></div>
+            <p class="source-copy">Search track metadata and real album artwork alongside open-audio results. Commercial catalogue previews and full playback remain subject to each provider's rules.</p>
+            <form id="unifiedSearchForm" class="source-form"><label class="source-input-label" for="unifiedQuery">Song, artist or album</label><div class="source-input-row"><input id="unifiedQuery" type="search" placeholder="Search a song or artist…" autocomplete="off" required /><button class="primary" type="submit">Search music</button></div></form>
+            <p id="unifiedSearchStatus" class="unified-search-status" role="status" aria-live="polite">Search music metadata and open-audio catalogues in one place.</p><div id="unifiedSearchResults" class="unified-search-results"></div>
+          </div>
           <div class="archive-search-panel">
             <div class="sectionhead">
               <div>
@@ -403,6 +409,7 @@
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
     <script src="internet-archive.js"></script>
+    <script src="catalog-search.js"></script>
     <script src="app.js"></script>
     <script type="module" src="cloud-sync.js"></script>
     <script src="home-refresh.js"></script>
