@@ -636,4 +636,34 @@ $("archiveResults").addEventListener("click", (e) => {
   toast("Playing archive audio");
 });
 
+window.addEventListener("pulse:play-catalog-track", (event) => {
+  const item = event.detail || {};
+  if (!item.src || !/^https?:/.test(item.src)) return;
+  const track = {
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    title: String(item.title || "Catalogue track"),
+    artist: String(item.artist || "Unknown artist"),
+    mood: item.source || "Catalogue",
+    time: "Preview",
+    cover: "violet",
+    symbol: "♫",
+    src: item.src,
+    customUrl: true,
+    artwork: item.artwork || "",
+    sourcePage: item.url || "",
+    archiveLicense: item.license || "",
+  };
+  tracks.push(track);
+  setTrack(tracks.length - 1, true);
+  if (item.artwork) {
+    $("cover").style.backgroundImage = 'url("' + item.artwork.replace(/["\\]/g, "") + '")';
+    $("cover").style.backgroundSize = "cover";
+    $("cover").textContent = "";
+  }
+  $("audioStatus").textContent = item.source === "Apple/iTunes catalogue"
+    ? "Playing the available catalogue preview. Open the provider page for full-track options."
+    : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
+  toast("Loading " + track.title);
+});
+
 setTrack(0);
