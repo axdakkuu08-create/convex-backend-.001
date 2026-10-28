@@ -326,7 +326,14 @@ function next() {
   setTrack(n, true);
 }
 function like(id) {
-  liked.has(id) ? liked.delete(id) : liked.add(id);
+  const wasLiked = liked.has(id);
+  wasLiked ? liked.delete(id) : liked.add(id);
+  const track = tracks.find((item) => item.id === id);
+  if (track) {
+    window.dispatchEvent(new CustomEvent("pulse:favourite-change", {
+      detail: { saved: !wasLiked, track },
+    }));
+  }
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
   $("like").classList.toggle("liked", liked.has(tracks[index].id));
