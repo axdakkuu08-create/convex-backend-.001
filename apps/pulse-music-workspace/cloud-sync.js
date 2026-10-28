@@ -91,6 +91,9 @@ async function startCloud() {
 
     const renderSavedTracks = (savedTracks) => {
       savedByUrl = new Map(savedTracks.map((track) => [track.sourceUrl, track]));
+      window.dispatchEvent(new CustomEvent("pulse:cloud-favourites", {
+        detail: { urls: savedTracks.map((track) => track.sourceUrl) },
+      }));
       if (!cloudSavedList) return;
       cloudSavedList.replaceChildren();
       for (const track of savedTracks) {
@@ -195,17 +198,23 @@ async function startCloud() {
       }
       try {
         if (detail.saved) {
-          await convex.mutation(saveTrack, {
+          const trackId = await convex.mutation(saveTrack, {
             title: String(track.title || "Untitled track").slice(0, 200),
             artist: String(track.artist || "").slice(0, 200),
             source: "direct",
             sourceUrl,
             ...(track.artwork ? { artworkUrl: track.artwork } : {}),
           });
+          savedByUrl.set(sourceUrl, { _id: trackId, title: track.title, artist: track.artist, sourceUrl });
           status("Favourite saved to your cloud library.");
         } else {
-          const saved = savedByUrl.get(sourceUrl);
+          let saved = savedByUrl.get(sourceUrl);
+          if (!saved) {
+            const current = await convex.query(listSaved, {});
+            saved = current.find((item) => item.sourceUrl === sourceUrl);
+          }
           if (saved) await convex.mutation(unsaveTrack, { trackId: saved._id });
+          savedByUrl.delete(sourceUrl);
           status("Favourite removed from your cloud library.");
         }
       } catch (error) {
