@@ -165,4 +165,6 @@ async function startCloud() {
 }
 
 // Load device-local custom playlists/albums without changing existing Convex sync.
-import("./collections.js").catch((error) => console.error("Pulse collections failed to load", error));
+import("./collections.js").catch((error) =>
+  console.error("Pulse collections failed to load", error),
+);
