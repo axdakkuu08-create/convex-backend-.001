@@ -211,13 +211,11 @@ async function runSearch(query = "", artistId = "") {
     } else if (activeTab === "playlists") {
       const params = { limit: 12, order: "creationdate_desc" };
       if (query) params.namesearch = query;
-      else params.namesearch = "featured";
       renderPlaylists(await request("playlists", params));
     } else {
       const params = { limit: 12 };
       if (artistId) params.id = artistId;
       else if (query) params.namesearch = query;
-      else params.namesearch = "a";
       renderArtists(await request("artists", params));
     }
   } catch (error) {
