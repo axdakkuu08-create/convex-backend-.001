@@ -171,7 +171,7 @@ function render() {
         '<div class="row ' +
         (tracks[index].id === t.id ? "playing" : "") +
         '" data-id="' +
-        t.id +
+        escapeHTML(t.id) +
         '"><div class="num"><button class="rowplay" aria-label="Play">' +
         (tracks[index].id === t.id && playing
           ? "Ⅱ"
