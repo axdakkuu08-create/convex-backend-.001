@@ -1079,17 +1079,19 @@ function setView(v) {
 $("rows").addEventListener("click", (e) => {
   let r = e.target.closest(".row");
   if (!r) return;
-  let id = Number(r.dataset.id);
+  const id = r.dataset.id;
+  const track = tracks.find((t) => String(t.id) === id);
+  if (!track) return;
   if (e.target.closest("[data-playlist-add]")) {
-    window.PULSE_PLAYLISTS?.add(tracks.find((t) => t.id === id));
+    window.PULSE_PLAYLISTS?.add(track);
     return;
   }
   if (e.target.closest("[data-like]")) {
-    like(id);
+    like(track.id);
     return;
   }
   setTrack(
-    tracks.findIndex((t) => t.id === id),
+    tracks.findIndex((t) => t.id === track.id),
     true,
   );
 });
