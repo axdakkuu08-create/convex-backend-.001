@@ -213,12 +213,13 @@
         ? "jamendo:" + track.jamendoId
         : track.src;
     if (
-      playlist.tracks.some((t) =>
-        (t.archiveId
-          ? "archive:" + t.archiveId
-          : t.jamendoId
-            ? "jamendo:" + t.jamendoId
-            : t.src) === identity,
+      playlist.tracks.some(
+        (t) =>
+          (t.archiveId
+            ? "archive:" + t.archiveId
+            : t.jamendoId
+              ? "jamendo:" + t.jamendoId
+              : t.src) === identity,
       )
     ) {
       toast("That song is already in " + playlist.name + ".");
