@@ -656,13 +656,15 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   tracks.push(track);
   setTrack(tracks.length - 1, true);
   if (item.artwork) {
-    $("cover").style.backgroundImage = 'url("' + item.artwork.replace(/["\\]/g, "") + '")';
+    $("cover").style.backgroundImage =
+      'url("' + item.artwork.replace(/["\\]/g, "") + '")';
     $("cover").style.backgroundSize = "cover";
     $("cover").textContent = "";
   }
-  $("audioStatus").textContent = item.source === "Apple/iTunes catalogue"
-    ? "Playing the available catalogue preview. Open the provider page for full-track options."
-    : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
+  $("audioStatus").textContent =
+    item.source === "Apple/iTunes catalogue"
+      ? "Playing the available catalogue preview. Open the provider page for full-track options."
+      : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
   toast("Loading " + track.title);
 });
 
