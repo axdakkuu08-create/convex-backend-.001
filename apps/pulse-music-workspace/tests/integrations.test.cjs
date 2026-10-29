@@ -279,6 +279,9 @@ test("main search can query regional catalogs and add online results", () => {
   assert.match(appSource, /async function searchOnlineCatalog/);
   assert.match(appSource, /searchRegionalCatalog\(prefs, cleanTerm\)/);
   assert.match(appSource, /onlineSearchIds\.add\(track\.id\)/);
+  assert.match(appSource, /onlineSearchIds\.has\(t\.id\)/);
+  assert.match(appSource, /String\(t\.id\) === id/);
+  assert.match(appSource, /escapeHTML\(t\.id\)/);
   assert.match(indexSource, /press Enter for online results/);
 });
 
