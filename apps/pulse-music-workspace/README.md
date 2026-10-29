@@ -13,7 +13,7 @@ and is not affiliated with Convex.
 - Mood cards, curated track list, and saved library
 - Play/pause, previous/next, shuffle, repeat, volume, and seeking
 - Like/save tracks and recently played history via localStorage
-- Create, rename by recreating, open, and delete device-local playlists with saved track lists
+- Create, open, and delete device-local playlists with saved track lists
 - Add demo, Jamendo, and Internet Archive tracks to playlists; play playlist tracks through the shared audio player
 - Keyboard shortcut / to focus search; Space toggles playback
 - PWA install metadata
@@ -83,6 +83,7 @@ the live Internet Archive API or every item's playback will work.
 - app.js — playback, search, local library state, and interactions
 - archive-source.js — Internet Archive search, metadata lookup, and supported
   audio-file selection
+- playlist-manager.js — device-local playlist creation, saved track lists, and playback integration
 - config.js — public Convex URL and Clerk publishable-key placeholders
 - cloud-sync.js — optional cloud playlist sign-in and CRUD
 - manifest.webmanifest — install metadata
