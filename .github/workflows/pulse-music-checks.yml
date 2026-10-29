@@ -7,12 +7,19 @@ on:
         convex-inspired-app,
         feature/pulse-dev-clerk-convex-config,
         pulse-jamendo-cloud-sync,
+        feature/pulse-convx-glass-adaptation,
       ]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-music-checks.yml"
   pull_request:
-    branches: [main, Main, feature/pulse-dev-clerk-convex-config]
+    branches:
+      [
+        main,
+        Main,
+        feature/pulse-dev-clerk-convex-config,
+        feature/pulse-discovery-polish,
+      ]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-music-checks.yml"
@@ -35,6 +42,8 @@ jobs:
         run: node --check apps/pulse-music-workspace/app.js
       - name: Check cloud integration module syntax
         run: node --check apps/pulse-music-workspace/cloud-sync.js
+      - name: Check iTunes catalog module syntax
+        run: node --check apps/pulse-music-workspace/itunes-source.js
       - name: Check Internet Archive source module syntax
         run: node --check apps/pulse-music-workspace/archive-source.js
       - name: Test music provider URL integrations
@@ -57,7 +66,8 @@ jobs:
           parser.feed(html)
           required = {'sourceForm', 'sourceUrl', 'sourceFrame', 'sourceError',
                       'embedWrap', 'closeEmbed', 'jamendoForm', 'jamendoQuery',
-                      'jamendoStatus', 'jamendoResults', 'audioFileInput', 'addFileButton',
+                      'jamendoStatus', 'jamendoResults', 'discoveryCountry', 'discoveryGenre',
+                      'discoveryLatest', 'saveDiscoveryPreferences', 'audioFileInput', 'addFileButton',
                       'addUrlButton', 'audio', 'play', 'rows'}
           missing = required - parser.ids
           if missing:
