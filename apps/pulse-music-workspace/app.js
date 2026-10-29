@@ -902,7 +902,7 @@ function setView(v) {
         ? "Recently played"
         : "Made for the moment";
   $("heading").innerHTML =
-    v === "library" ? "Your music, <span>your rules.</span>" : v === "recent" ? "Pick up <span>where you left off.</span>" : v === "sources" ? "Every source, <span>one place.</span>" : "Find your <span>next favorite.</span>";
+    v === "library" ? "Your music, <span>your rules.</span>" : v === "recent" ? "Pick up <span>where you left off.</span>" : v === "sources" ? "Every source, <span>one place.</span>" : "Find your <span>next favourite.</span>";
   document
     .querySelectorAll(".nav")
     .forEach((b) => b.classList.toggle("active", b.dataset.view === v));
@@ -934,6 +934,9 @@ document.querySelectorAll("[data-mood]").forEach(
     (b.onclick = () => {
       mood = b.dataset.mood;
       view = "discover";
+      document.querySelectorAll("[data-mood]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.mood === mood);
+      });
       $("crumb").textContent = mood;
       $("trackHeading").textContent = mood + " selection";
       render();
