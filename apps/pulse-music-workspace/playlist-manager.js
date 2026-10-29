@@ -212,6 +212,13 @@
     toast("Created playlist: " + clean);
   }
 
+  function trackIdentity(track) {
+    if (track?.catalogId) return "catalog:" + track.catalogId;
+    if (track?.archiveId) return "archive:" + track.archiveId;
+    if (track?.jamendoId) return "jamendo:" + track.jamendoId;
+    return track?.src || "";
+  }
+
   function add(track) {
     if (!track || !track.src || !/^https?:\/\//i.test(track.src)) {
       toast("This item has no reusable web audio URL.");
@@ -227,21 +234,8 @@
     const selected = $("playlistTarget")?.value;
     const playlist =
       playlists.find((p) => p.id === selected) || active() || playlists[0];
-    const identity = track.archiveId
-      ? "archive:" + track.archiveId
-      : track.jamendoId
-        ? "jamendo:" + track.jamendoId
-        : track.src;
-    if (
-      playlist.tracks.some(
-        (t) =>
-          (t.archiveId
-            ? "archive:" + t.archiveId
-            : t.jamendoId
-              ? "jamendo:" + t.jamendoId
-              : t.src) === identity,
-      )
-    ) {
+    const identity = trackIdentity(track);
+    if (playlist.tracks.some((savedTrack) => trackIdentity(savedTrack) === identity)) {
       toast("That song is already in " + playlist.name + ".");
       return;
     }
