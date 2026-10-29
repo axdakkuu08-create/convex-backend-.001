@@ -284,7 +284,6 @@ test("Worldwide discovery combines regional catalogs", () => {
   assert.match(indexSource, /FRESH FINDS/);
 });
 
-
 test("playlist manager creates, persists, and emits songs in order", () => {
   const elements = new Map();
   const events = [];
