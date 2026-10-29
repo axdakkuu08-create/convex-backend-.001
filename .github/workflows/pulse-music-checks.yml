@@ -13,7 +13,13 @@ on:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-music-checks.yml"
   pull_request:
-    branches: [main, Main, feature/pulse-dev-clerk-convex-config, feature/pulse-discovery-polish]
+    branches:
+      [
+        main,
+        Main,
+        feature/pulse-dev-clerk-convex-config,
+        feature/pulse-discovery-polish,
+      ]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-music-checks.yml"
