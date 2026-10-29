@@ -275,6 +275,13 @@ test("country-aware catalog returns recent song previews ordered by release date
   assert.equal(results[0].source, "itunes-preview");
 });
 
+test("main search can query regional catalogs and add online results", () => {
+  assert.match(appSource, /async function searchOnlineCatalog/);
+  assert.match(appSource, /searchRegionalCatalog\(prefs, cleanTerm\)/);
+  assert.match(appSource, /onlineSearchIds\.add\(track\.id\)/);
+  assert.match(indexSource, /press Enter for online results/);
+});
+
 test("Worldwide discovery combines regional catalogs", () => {
   assert.match(appSource, /async function searchRegionalCatalog/);
   assert.match(
