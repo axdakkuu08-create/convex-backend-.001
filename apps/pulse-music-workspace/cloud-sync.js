@@ -163,3 +163,8 @@ async function startCloud() {
     status("Cloud setup unavailable · local mode still works.");
   }
 }
+
+// Load device-local custom playlists/albums without changing existing Convex sync.
+import("./collections.js").catch((error) =>
+  console.error("Pulse collections failed to load", error),
+);
