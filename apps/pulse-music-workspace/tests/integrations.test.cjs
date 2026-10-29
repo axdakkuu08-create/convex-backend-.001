@@ -272,3 +272,80 @@ test("Worldwide discovery combines regional catalogs", () => {
   );
   assert.match(indexSource, /FRESH FINDS/);
 });
+
+
+test("playlist manager creates, persists, and emits songs in order", () => {
+  const elements = new Map();
+  const events = [];
+  const storage = new Map();
+  class Element {
+    constructor(id = "") {
+      this.id = id;
+      this.children = [];
+      this.listeners = {};
+      this.classList = { add() {} };
+      this.value = "";
+      this.textContent = "";
+      this.disabled = false;
+      this.hidden = false;
+    }
+    addEventListener(type, callback) {
+      (this.listeners[type] ||= []).push(callback);
+    }
+    dispatch(type, event = {}) {
+      for (const callback of this.listeners[type] || []) callback(event);
+    }
+    click() {
+      this.dispatch("click", { preventDefault() {} });
+    }
+    append(...children) {
+      this.children.push(...children);
+    }
+    replaceChildren(...children) {
+      this.children = [...children];
+    }
+    setAttribute() {}
+    scrollIntoView() {}
+  }
+  const document = {
+    getElementById(id) {
+      if (!elements.has(id)) elements.set(id, new Element(id));
+      return elements.get(id);
+    },
+    createElement(tag) {
+      return new Element(tag);
+    },
+  };
+  const sandbox = {
+    document,
+    localStorage: {
+      getItem: (key) => storage.get(key) || null,
+      setItem: (key, value) => storage.set(key, value),
+    },
+    window: {
+      dispatchEvent: (event) => events.push(event),
+    },
+    CustomEvent: class CustomEvent {
+      constructor(type, init = {}) {
+        this.type = type;
+        this.detail = init.detail;
+      }
+    },
+    prompt: () => "",
+    confirm: () => true,
+    Date,
+    Math,
+  };
+  vm.runInNewContext(playlistSource, sandbox);
+  const manager = sandbox.window.PULSE_PLAYLISTS;
+  manager.create("Latest Pop");
+  manager.add({ id: "t1", title: "First", artist: "A", src: "https://audio.example/1.mp3", source: "itunes-preview" });
+  manager.add({ id: "t2", title: "Second", artist: "B", src: "https://audio.example/2.mp3", source: "itunes-preview" });
+  const playlist = manager.list()[0];
+  assert.equal(playlist.name, "Latest Pop");
+  assert.deepEqual(Array.from(playlist.tracks, (track) => track.title), ["First", "Second"]);
+  assert.equal(JSON.parse(storage.get("pulse-playlists-v1"))[0].tracks.length, 2);
+  document.getElementById("playlistPlayAll").click();
+  assert.equal(events.at(-1).type, "pulse:playlist-start");
+  assert.deepEqual(Array.from(events.at(-1).detail, (track) => track.title), ["First", "Second"]);
+});
