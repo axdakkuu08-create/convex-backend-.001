@@ -1,7 +1,9 @@
 /* Mobile home interactions bridge into Pulse's existing player actions. */
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const $$ = (selector, root = document) => [
+    ...root.querySelectorAll(selector),
+  ];
 
   function playTrack(id) {
     const row = $('.row[data-id="' + String(id).replace(/[^0-9]/g, "") + '"]');
@@ -57,9 +59,11 @@
       );
       if (view === "search") {
         const source = $("#sourceHub");
-        if (source) source.scrollIntoView({ block: "start", behavior: "smooth" });
+        if (source)
+          source.scrollIntoView({ block: "start", behavior: "smooth" });
         const search = $("#unifiedQuery") || $("#search");
-        if (search) setTimeout(() => search.focus({ preventScroll: true }), 250);
+        if (search)
+          setTimeout(() => search.focus({ preventScroll: true }), 250);
       }
       if (view === "library") {
         const library = $('.nav[data-view="library"]');
@@ -89,33 +93,47 @@
     const terms = cards.map((card) => {
       const title = $(".featured-caption b", card);
       const artist = $(".featured-caption small", card);
-      return { card, query: [title?.textContent, artist?.textContent].filter(Boolean).join(" ") };
+      return {
+        card,
+        query: [title?.textContent, artist?.textContent]
+          .filter(Boolean)
+          .join(" "),
+      };
     });
-    await Promise.allSettled(terms.map(async ({ card, query }) => {
-      const response = await fetch(
-        "https://itunes.apple.com/search?term=" + encodeURIComponent(query) + "&entity=song&limit=5&media=music",
-        { headers: { Accept: "application/json" } },
-      );
-      if (!response.ok) throw new Error("Artwork lookup unavailable");
-      const data = await response.json();
-      const expectedTitle = ($(".featured-caption b", card)?.textContent || "").toLowerCase();
-      const match = (data.results || []).find((item) =>
-        (item.trackName || "").toLowerCase() === expectedTitle && item.artworkUrl100,
-      ) || (data.results || []).find((item) => item.artworkUrl100);
-      if (!match) return;
-      const artwork = match.artworkUrl100.replace("100x100bb", "600x600bb");
-      const image = document.createElement("img");
-      image.className = "home-real-artwork";
-      image.src = artwork;
-      image.alt = "";
-      image.loading = "lazy";
-      image.decoding = "async";
-      image.addEventListener("error", () => image.remove(), { once: true });
-      const existing = $(".home-real-artwork", card);
-      if (existing) existing.remove();
-      card.prepend(image);
-      card.dataset.artworkSource = "itunes";
-    }));
+    await Promise.allSettled(
+      terms.map(async ({ card, query }) => {
+        const response = await fetch(
+          "https://itunes.apple.com/search?term=" +
+            encodeURIComponent(query) +
+            "&entity=song&limit=5&media=music",
+          { headers: { Accept: "application/json" } },
+        );
+        if (!response.ok) throw new Error("Artwork lookup unavailable");
+        const data = await response.json();
+        const expectedTitle = (
+          $(".featured-caption b", card)?.textContent || ""
+        ).toLowerCase();
+        const match =
+          (data.results || []).find(
+            (item) =>
+              (item.trackName || "").toLowerCase() === expectedTitle &&
+              item.artworkUrl100,
+          ) || (data.results || []).find((item) => item.artworkUrl100);
+        if (!match) return;
+        const artwork = match.artworkUrl100.replace("100x100bb", "600x600bb");
+        const image = document.createElement("img");
+        image.className = "home-real-artwork";
+        image.src = artwork;
+        image.alt = "";
+        image.loading = "lazy";
+        image.decoding = "async";
+        image.addEventListener("error", () => image.remove(), { once: true });
+        const existing = $(".home-real-artwork", card);
+        if (existing) existing.remove();
+        card.prepend(image);
+        card.dataset.artworkSource = "itunes";
+      }),
+    );
   }
 
   const artworkStyle = document.createElement("style");
@@ -142,7 +160,9 @@
   `;
   document.head.append(artworkStyle);
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadHomeArtwork, { once: true });
+    document.addEventListener("DOMContentLoaded", loadHomeArtwork, {
+      once: true,
+    });
   } else {
     void loadHomeArtwork();
   }
