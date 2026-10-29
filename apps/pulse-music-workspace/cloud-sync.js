@@ -45,6 +45,13 @@ async function startCloud() {
     const listMine = makeFunctionReference("playlists:listMine");
     const createPlaylist = makeFunctionReference("playlists:create");
     const removePlaylist = makeFunctionReference("playlists:remove");
+    const getEasySongRequestStatus = makeFunctionReference("easySong:getRequestStatus");
+    const licensingPanel = document.getElementById("licensingPanel");
+    const licensingForm = document.getElementById("licensingStatusForm");
+    const licensingInput = document.getElementById("licensingRequestId");
+    const licensingStatus = document.getElementById("licensingStatus");
+    const licensingButton = document.getElementById("licensingStatusButton");
+    if (licensingPanel) licensingPanel.hidden = false;
     let stopPlaylistUpdates = null;
     let authenticated = false;
 
@@ -90,6 +97,8 @@ async function startCloud() {
       signOutButton.hidden = !authenticated;
       createButton.hidden = !authenticated;
       if (!authenticated) {
+        if (licensingStatus) licensingStatus.textContent = "Sign in to check existing licensing request statuses.";
+        if (licensingForm) licensingForm.hidden = true;
         if (stopPlaylistUpdates) stopPlaylistUpdates();
         stopPlaylistUpdates = null;
         cloudList.replaceChildren();
@@ -97,6 +106,8 @@ async function startCloud() {
         return;
       }
       status("Signed in · connecting cloud playlists…");
+      if (licensingForm) licensingForm.hidden = false;
+      if (licensingStatus) licensingStatus.textContent = "Ready to check an existing request. Server credentials are never sent to this browser.";
       if (stopPlaylistUpdates) stopPlaylistUpdates();
       stopPlaylistUpdates = convex.onUpdate(
         listMine,
@@ -137,6 +148,28 @@ async function startCloud() {
       });
     });
     await updateAuth();
+
+    if (licensingForm) {
+      licensingForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const requestId = licensingInput?.value.trim() || "";
+        if (!requestId) return;
+        if (!clerk.session) {
+          licensingStatus.textContent = "Sign in before checking a licensing request.";
+          return;
+        }
+        licensingButton.disabled = true;
+        licensingStatus.textContent = "Checking request status…";
+        try {
+          const result = await convex.action(getEasySongRequestStatus, { requestId });
+          licensingStatus.textContent = "Request " + result.requestId + " status: " + result.status;
+        } catch (error) {
+          licensingStatus.textContent = error?.message || "Could not check the request status.";
+        } finally {
+          licensingButton.disabled = false;
+        }
+      });
+    }
 
     signInButton.addEventListener("click", () => clerk.openSignIn());
     signOutButton.addEventListener("click", async () => {
