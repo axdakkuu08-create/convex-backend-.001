@@ -1140,13 +1140,12 @@ async function searchOnlineCatalog(term) {
         "No online matches found. Try another title, artist, or genre.";
       return;
     }
-    let added = 0;
     for (const item of items) {
       if (!item.src) continue;
       const existing = tracks.find(
         (track) =>
           (item.catalogId && track.catalogId === item.catalogId) ||
-          (item.id && item.archiveId === item.id && track.archiveId === item.id) ||
+          (item.id && !item.catalogId && track.archiveId === item.id) ||
           track.src === item.src,
       );
       const track =
@@ -1174,7 +1173,6 @@ async function searchOnlineCatalog(term) {
         };
       if (!existing) {
         tracks.push(track);
-        added += 1;
       }
       onlineSearchIds.add(track.id);
     }
