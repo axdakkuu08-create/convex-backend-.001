@@ -1714,3 +1714,98 @@ select:focus-visible {
     border-radius: 18px;
   }
 }
+
+
+/* Convex-dashboard-inspired restraint: crisp hierarchy, calm surfaces, fast scanning. */
+.sidebar-moods {
+  padding-top: 2px;
+}
+.sidebar-moods > small {
+  color: #8e95a4;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+.mood-link {
+  border-radius: 8px;
+  min-height: 38px;
+}
+.mood-link span {
+  flex: 0 0 23px;
+}
+.sectionhead h2,
+.playlist-detail-head h2 {
+  letter-spacing: -0.035em;
+}
+.archive-discovery,
+.sourcehub,
+.saved-for-later,
+.playlist-detail {
+  border-color: rgba(171, 183, 204, 0.15);
+  background: linear-gradient(145deg, rgba(25, 29, 38, 0.94), rgba(17, 20, 27, 0.97));
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14), inset 0 1px rgba(255, 255, 255, 0.045);
+}
+.archive-discovery-card {
+  border-radius: 10px;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.018);
+}
+.archive-discovery-card:hover {
+  transform: none;
+  background: rgba(255, 255, 255, 0.045);
+}
+.playlist-card {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 7px;
+  padding: 16px;
+  text-align: left;
+}
+.playlist-card .playlist-art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 76px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font: 800 30px Manrope, sans-serif;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.25);
+  background: radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.3), transparent 34%), linear-gradient(135deg, #4a4266, #222837 70%);
+}
+.playlist-card.cover-focus .playlist-art {
+  background: radial-gradient(circle at 70% 25%, rgba(205, 255, 154, 0.55), transparent 27%), linear-gradient(135deg, #334b3e, #18251f 75%);
+}
+.playlist-card.cover-ambient .playlist-art {
+  background: radial-gradient(circle at 28% 25%, rgba(192, 175, 255, 0.62), transparent 30%), linear-gradient(135deg, #51406e, #20263b 75%);
+}
+.playlist-card.cover-energy .playlist-art {
+  background: radial-gradient(circle at 75% 20%, rgba(255, 204, 139, 0.7), transparent 29%), linear-gradient(135deg, #7d4c35, #302033 75%);
+}
+.playlist-card.cover-night .playlist-art {
+  background: radial-gradient(circle at 68% 24%, rgba(147, 191, 255, 0.62), transparent 27%), linear-gradient(135deg, #283e65, #171d30 75%);
+}
+.playlist-card.cover-mix .playlist-art {
+  background: radial-gradient(circle at 28% 20%, rgba(184, 243, 107, 0.36), transparent 30%), radial-gradient(circle at 78% 72%, rgba(177, 145, 255, 0.35), transparent 35%), linear-gradient(135deg, #313849, #191d27 75%);
+}
+.playlist-card strong {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.playlist-card small {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+}
+@media (max-width: 520px) {
+  .playlist-card {
+    min-height: 138px;
+    padding: 11px;
+  }
+  .playlist-card .playlist-art {
+    min-height: 60px;
+  }
+}
