@@ -31,8 +31,9 @@ The **Connect a music source** panel supports official embedded players for:
 - **Spotify** tracks, albums, playlists, artists, shows, and episodes using Spotify Embed.
 - **YouTube / YouTube Music** videos and playlists using YouTube's privacy-enhanced embed host.
 - **SoundCloud** tracks and playlists using the SoundCloud widget.
+- **Jamendo** track search, public playlist discovery, artist information, artwork, license links when available, and playable streams. See [JAMENDO_SOURCE_SETUP.md](JAMENDO_SOURCE_SETUP.md) to configure the required public API client ID.
 
-Paste a public share URL into **Music link** and tap **Load player**. These are official web embeds, not a bypass of provider playback rules. Sign-in, availability, ads, regional restrictions, and account limits remain controlled by each provider. Some content cannot be embedded. Spotify embeds may preview rather than play full tracks depending on provider policy and account status.
+Paste a public share URL into **Music link** and tap **Load player**. Use the **Explore Jamendo** section to search its catalogue without leaving Pulse. These are official web embeds, not a bypass of provider playback rules. Sign-in, availability, ads, regional restrictions, and account limits remain controlled by each provider. Some content cannot be embedded. Spotify embeds may preview rather than play full tracks depending on provider policy and account status.
 
 ## Play your own audio
 - Tap **＋ File** beside the track count to choose an audio file stored on your phone. The file plays for the current session; reselect it after refreshing.
