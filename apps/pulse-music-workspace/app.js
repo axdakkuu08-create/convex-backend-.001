@@ -996,7 +996,96 @@ audio.oncanplay = () => {
   $("audioStatus").textContent =
     "Audio ready · press Play if it has not started.";
 };
+const SAVED_FOR_LATER_KEY = "pulse-saved-for-later-v1";
+let savedForLater = [];
+try {
+  const savedValue = JSON.parse(
+    localStorage.getItem(SAVED_FOR_LATER_KEY) || "[]",
+  );
+  savedForLater = Array.isArray(savedValue) ? savedValue : [];
+} catch (_) {
+  savedForLater = [];
+}
+const savedForLaterHost = document.createElement("section");
+savedForLaterHost.className = "saved-for-later";
+savedForLaterHost.setAttribute("aria-label", "Saved for later");
+savedForLaterHost.innerHTML =
+  '<div class="sectionhead"><div><small>PLAYBACK RECOVERY</small><h2>Saved for later</h2></div></div><p class="embed-note">Tracks that fail to load are bookmarked on this device so you can retry them.</p><div id="savedForLaterRows"></div>';
+$("audioStatus").insertAdjacentElement("afterend", savedForLaterHost);
+function persistSavedForLater() {
+  localStorage.setItem(SAVED_FOR_LATER_KEY, JSON.stringify(savedForLater));
+}
+function renderSavedForLater() {
+  const host = $("savedForLaterRows");
+  if (!host) return;
+  host.replaceChildren();
+  if (!savedForLater.length) {
+    const empty = document.createElement("p");
+    empty.className = "embed-note";
+    empty.textContent = "Nothing saved yet.";
+    host.append(empty);
+    return;
+  }
+  for (const item of savedForLater) {
+    const row = document.createElement("div");
+    row.className = "saved-track-row";
+    const info = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = item.title || "Untitled track";
+    const artist = document.createElement("small");
+    artist.textContent = item.artist || "Unknown artist";
+    info.append(title, artist);
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "secondary";
+    retry.textContent = "↻ Retry";
+    retry.addEventListener("click", () => {
+      let track = tracks.find((candidate) => candidate.src === item.src);
+      if (!track) {
+        track = { ...item, id: Date.now(), cover: item.cover || "blue", symbol: item.symbol || "♫" };
+        tracks.push(track);
+      }
+      setTrack(tracks.findIndex((candidate) => candidate.id === track.id), true);
+    });
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "textbutton";
+    remove.textContent = "Remove";
+    remove.addEventListener("click", () => {
+      savedForLater = savedForLater.filter((saved) => saved.src !== item.src);
+      persistSavedForLater();
+      renderSavedForLater();
+    });
+    row.append(info, retry, remove);
+    host.append(row);
+  }
+}
+function saveFailedTrack(track) {
+  if (!track || !/^https?:\\/\\//i.test(track.src || "")) return;
+  if (savedForLater.some((item) => item.src === track.src)) return;
+  savedForLater.unshift({
+    id: track.id,
+    title: track.title || "Untitled track",
+    artist: track.artist || "Unknown artist",
+    mood: track.mood || "Saved",
+    time: track.time || "—",
+    cover: track.cover || "blue",
+    symbol: track.symbol || "♫",
+    src: track.src,
+    sourceUrl: track.sourceUrl || track.src,
+    source: track.source || "direct",
+    archiveId: track.archiveId,
+    jamendoId: track.jamendoId,
+    licenseUrl: track.licenseUrl,
+    rights: track.rights,
+  });
+  savedForLater = savedForLater.slice(0, 50);
+  persistSavedForLater();
+  renderSavedForLater();
+}
+renderSavedForLater();
 audio.onerror = () => {
+  saveFailedTrack(tracks[index]);
   playing = false;
   $("play").textContent = "▶";
   const msg =
