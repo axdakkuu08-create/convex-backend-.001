@@ -1064,7 +1064,7 @@ function renderSavedForLater() {
   }
 }
 function saveFailedTrack(track) {
-  if (!track || !/^https?:\\/\\//i.test(track.src || "")) return;
+  if (!track || !/^https?:\/\//i.test(track.src || "")) return;
   if (savedForLater.some((item) => item.src === track.src)) return;
   savedForLater.unshift({
     id: track.id,
