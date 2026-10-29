@@ -1496,3 +1496,57 @@ body[data-view="sources"] .intro h1 { font-size: clamp(27px, 3vw, 36px); }
   .archive-discovery-card { grid-template-columns: 36px minmax(0,1fr) auto; gap: 9px; padding: 10px; }
   .archive-discovery-card .archive-glyph { width: 36px; height: 36px; }
 }
+
+
+.saved-for-later {
+  margin-top: 28px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(28, 32, 42, 0.7), rgba(17, 20, 27, 0.7));
+}
+
+.saved-track-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.saved-track-row:last-child {
+  border-bottom: 0;
+}
+
+.saved-track-row strong,
+.saved-track-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-track-row strong {
+  margin-bottom: 4px;
+}
+
+.saved-track-row small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+@media (max-width: 520px) {
+  .saved-for-later {
+    padding: 12px;
+  }
+
+  .saved-track-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .saved-track-row .textbutton {
+    grid-column: 2;
+  }
+}
