@@ -73,6 +73,7 @@ let index = 0,
   liked = new Set(JSON.parse(localStorage.getItem("pulse-liked") || "[]")),
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
+let playlistQueue = [], playlistQueueIndex = -1;
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -542,6 +543,8 @@ $("archiveForm")?.addEventListener("submit", (event) => {
 });
 
 window.addEventListener("pulse:playlist-play", (event) => {
+  playlistQueue = [];
+  playlistQueueIndex = -1;
   const item = event.detail;
   if (!item?.src || !/^https?:\/\//i.test(item.src)) return;
   let track = tracks.find((candidate) =>
@@ -558,6 +561,31 @@ window.addEventListener("pulse:playlist-play", (event) => {
     tracks.push(track);
   }
   setTrack(tracks.findIndex((candidate) => candidate.id === track.id), true);
+});
+window.addEventListener("pulse:playlist-start", (event) => {
+  const items = Array.isArray(event.detail) ? event.detail : [];
+  const ids = [];
+  for (const item of items) {
+    if (!item?.src || !/^https?:\/\//i.test(item.src)) continue;
+    let track = tracks.find((candidate) =>
+      (item.archiveId && candidate.archiveId === item.archiveId) ||
+      (item.jamendoId && candidate.jamendoId === item.jamendoId) || candidate.src === item.src
+    );
+    if (!track) {
+      track = { id: Date.now() + ids.length, title: item.title || "Untitled track",
+        artist: item.artist || "Unknown artist", mood: item.mood || "Playlist",
+        time: item.time || "—", cover: item.cover || "blue", symbol: item.symbol || "♫",
+        src: item.src, sourceUrl: item.sourceUrl || item.src, source: item.source || "Internet Archive",
+        archiveId: item.archiveId, jamendoId: item.jamendoId, artworkUrl: item.artworkUrl,
+        licenseUrl: item.licenseUrl, rights: item.rights };
+      tracks.push(track);
+    }
+    ids.push(tracks.findIndex((candidate) => candidate.id === track.id));
+  }
+  playlistQueue = ids;
+  playlistQueueIndex = 0;
+  if (playlistQueue.length) setTrack(playlistQueue[0], true);
+  else toast("This playlist has no playable web audio tracks.");
 });
 function setTrack(i, autoplay = false) {
   index = (i + tracks.length) % tracks.length;
@@ -614,6 +642,18 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
+  if (playlistQueue.length) {
+    if (playlistQueueIndex + 1 < playlistQueue.length) {
+      playlistQueueIndex += 1;
+      setTrack(playlistQueue[playlistQueueIndex], true);
+    } else {
+      pause();
+      audio.currentTime = 0;
+      playlistQueue = [];
+      playlistQueueIndex = -1;
+    }
+    return;
+  }
   let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
   if (n >= tracks.length && !repeatOn) {
     pause();
@@ -715,7 +755,12 @@ $("prev").onclick = () => {
     audio.currentTime = 0;
     return;
   }
-  setTrack(index - 1, true);
+  if (playlistQueue.length && playlistQueueIndex > 0) {
+    playlistQueueIndex -= 1;
+    setTrack(playlistQueue[playlistQueueIndex], true);
+  } else {
+    setTrack(index - 1, true);
+  }
 };
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
