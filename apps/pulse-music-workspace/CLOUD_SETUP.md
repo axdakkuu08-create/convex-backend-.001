@@ -1,9 +1,6 @@
 # Pulse cloud playlists setup (Clerk + Convex)
 
-This is the first cloud milestone for the existing static HTML/JavaScript
-player. It adds sign-in and cloud playlist create/list/delete. Playback remains
-local and the cloud client stays disabled until both public frontend settings
-are filled.
+This cloud integration supports sign-in, cloud playlist create/list/delete, and saved-track favourites through the existing Convex backend. Playback remains local/official-embed based, and the cloud client stays disabled until both public frontend settings are filled.
 
 ## 1. Create a Clerk development application
 
@@ -58,7 +55,8 @@ configured origin is allowed by Clerk.
 - With blank values in `config.js`, the player must remain in local mode.
 - With valid development settings, sign in and create a cloud playlist.
 - Refresh the page and confirm the playlist remains.
-- Sign out and confirm cloud playlists are no longer displayed.
+- Like an online direct-audio track and confirm it appears under Cloud Favourites; unlike it and confirm it is removed.
+- Sign out and confirm cloud playlists and favourites are no longer displayed.
 - Use a second test account and verify it cannot see, rename, or delete the
   first account's playlists.
 - Confirm local playback still works when cloud configuration is blank or
@@ -66,8 +64,7 @@ configured origin is allowed by Clerk.
 
 ## Current scope and limitations
 
-- This milestone syncs playlists only. Existing local favourites and recently
-  played history are not synced yet.
+- Online direct-audio favourites sync to Convex when signed in. Device-local files and blob URLs remain local-only. Recently played history is not cloud-synced.
 - Music playback still uses the current local audio player and official embeds.
   It does not upload or proxy audio files.
 - The frontend loads pinned Convex and major-version Clerk browser modules from

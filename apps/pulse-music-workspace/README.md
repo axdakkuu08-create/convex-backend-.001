@@ -24,9 +24,7 @@ are made.
 
 Follow [the cloud setup guide](CLOUD_SETUP.md) before enabling it. The guide
 covers the Clerk Convex integration, the Convex development deployment, and
-account-isolation checks. Cloud playlists are a first milestone; local
-favourites and recently played history still use `localStorage` and are not
-synced yet. A passing GitHub workflow does not prove that a real deployment or
+account-isolation checks. Cloud playlists and cloud favourites are wired to the authenticated Convex backend. The local player still keeps its own favourites and recently played history in `localStorage`; online audio favourites are additionally synced when the cloud connection is configured. Recently played history is not cloud-synced yet. A passing GitHub workflow does not prove that a real deployment or
 sign-in works.
 
 ## Run

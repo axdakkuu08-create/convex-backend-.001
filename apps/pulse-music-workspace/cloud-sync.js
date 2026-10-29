@@ -5,6 +5,7 @@ const signInButton = document.getElementById("cloudSignIn");
 const signOutButton = document.getElementById("cloudSignOut");
 const createButton = document.getElementById("cloudNewPlaylist");
 const cloudList = document.getElementById("cloudPlaylists");
+const cloudSavedList = document.getElementById("cloudSavedTracks");
 const config = window.PULSE_CONFIG || {};
 
 function status(message) {
@@ -45,6 +46,11 @@ async function startCloud() {
     const listMine = makeFunctionReference("playlists:listMine");
     const createPlaylist = makeFunctionReference("playlists:create");
     const removePlaylist = makeFunctionReference("playlists:remove");
+    const listSaved = makeFunctionReference("library:listSaved");
+    const saveTrack = makeFunctionReference("library:saveTrack");
+    const unsaveTrack = makeFunctionReference("library:unsaveTrack");
+    let savedByUrl = new Map();
+    let stopSavedUpdates = null;
     let stopPlaylistUpdates = null;
     let authenticated = false;
 
@@ -83,6 +89,42 @@ async function startCloud() {
       }
     };
 
+    const renderSavedTracks = (savedTracks) => {
+      savedByUrl = new Map(savedTracks.map((track) => [track.sourceUrl, track]));
+      window.dispatchEvent(new CustomEvent("pulse:cloud-favourites", {
+        detail: { urls: savedTracks.map((track) => track.sourceUrl) },
+      }));
+      if (!cloudSavedList) return;
+      cloudSavedList.replaceChildren();
+      for (const track of savedTracks) {
+        const row = document.createElement("div");
+        row.className = "cloud-playlist-row";
+        const name = document.createElement("span");
+        name.textContent = track.title + (track.artist ? " · " + track.artist : "");
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "cloud-delete";
+        remove.textContent = "♥";
+        remove.setAttribute("aria-label", "Remove favourite " + track.title);
+        remove.addEventListener("click", async () => {
+          try {
+            await convex.mutation(unsaveTrack, { trackId: track._id });
+            status("Favourite removed from your cloud library.");
+          } catch (error) {
+            status("Could not remove favourite: " + (error?.message || "unknown error"));
+          }
+        });
+        row.append(name, remove);
+        cloudSavedList.append(row);
+      }
+      if (!savedTracks.length) {
+        const empty = document.createElement("p");
+        empty.className = "cloud-empty";
+        empty.textContent = "No cloud favourites yet. Like an online track to save it here.";
+        cloudSavedList.append(empty);
+      }
+    };
+
     const updateAuth = async () => {
       const user = clerk.user;
       authenticated = Boolean(user && clerk.session);
@@ -91,8 +133,12 @@ async function startCloud() {
       createButton.hidden = !authenticated;
       if (!authenticated) {
         if (stopPlaylistUpdates) stopPlaylistUpdates();
+        if (stopSavedUpdates) stopSavedUpdates();
         stopPlaylistUpdates = null;
+        stopSavedUpdates = null;
+        savedByUrl.clear();
         cloudList.replaceChildren();
+        if (cloudSavedList) cloudSavedList.replaceChildren();
         status("Signed out · local mode remains available.");
         return;
       }
@@ -102,11 +148,14 @@ async function startCloud() {
         listMine,
         {},
         renderPlaylists,
-        (error) =>
-          status(
-            "Cloud playlist error: " +
-              (error?.message || "check configuration"),
-          ),
+        (error) => status("Cloud playlist error: " + (error?.message || "check configuration")),
+      );
+      if (stopSavedUpdates) stopSavedUpdates();
+      stopSavedUpdates = convex.onUpdate(
+        listSaved,
+        {},
+        renderSavedTracks,
+        (error) => status("Cloud favourites error: " + (error?.message || "check configuration")),
       );
     };
 
@@ -137,6 +186,41 @@ async function startCloud() {
       });
     });
     await updateAuth();
+
+    window.addEventListener("pulse:favourite-change", async (event) => {
+      if (!authenticated) return;
+      const detail = event.detail || {};
+      const track = detail.track || {};
+      const sourceUrl = track.src || "";
+      if (!/^https?:\/\//i.test(sourceUrl)) {
+        status("This favourite is device-only. Cloud favourites need an online audio URL.");
+        return;
+      }
+      try {
+        if (detail.saved) {
+          const trackId = await convex.mutation(saveTrack, {
+            title: String(track.title || "Untitled track").slice(0, 200),
+            artist: String(track.artist || "").slice(0, 200),
+            source: "direct",
+            sourceUrl,
+            ...(track.artwork ? { artworkUrl: track.artwork } : {}),
+          });
+          savedByUrl.set(sourceUrl, { _id: trackId, title: track.title, artist: track.artist, sourceUrl });
+          status("Favourite saved to your cloud library.");
+        } else {
+          let saved = savedByUrl.get(sourceUrl);
+          if (!saved) {
+            const current = await convex.query(listSaved, {});
+            saved = current.find((item) => item.sourceUrl === sourceUrl);
+          }
+          if (saved) await convex.mutation(unsaveTrack, { trackId: saved._id });
+          savedByUrl.delete(sourceUrl);
+          status("Favourite removed from your cloud library.");
+        }
+      } catch (error) {
+        status("Cloud favourite could not sync: " + (error?.message || "check configuration"));
+      }
+    });
 
     signInButton.addEventListener("click", () => clerk.openSignIn());
     signOutButton.addEventListener("click", async () => {

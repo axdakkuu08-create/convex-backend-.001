@@ -325,8 +325,31 @@ function next() {
   }
   setTrack(n, true);
 }
+window.addEventListener("pulse:cloud-favourites", (event) => {
+  const urls = new Set(event.detail?.urls || []);
+  for (const track of tracks) {
+    if (/^https?:\/\//i.test(track.src)) {
+      if (urls.has(track.src)) liked.add(track.id);
+      else liked.delete(track.id);
+    }
+  }
+  save();
+  if (tracks[index]) {
+    $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
+    $("like").classList.toggle("liked", liked.has(tracks[index].id));
+  }
+  render();
+});
+
 function like(id) {
-  liked.has(id) ? liked.delete(id) : liked.add(id);
+  const wasLiked = liked.has(id);
+  wasLiked ? liked.delete(id) : liked.add(id);
+  const track = tracks.find((item) => item.id === id);
+  if (track) {
+    window.dispatchEvent(new CustomEvent("pulse:favourite-change", {
+      detail: { saved: !wasLiked, track },
+    }));
+  }
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
   $("like").classList.toggle("liked", liked.has(tracks[index].id));
