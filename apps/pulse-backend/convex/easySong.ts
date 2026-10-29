@@ -18,13 +18,19 @@ export const getRequestStatus = action({
     }
 
     const requestId = args.requestId.trim();
-    if (!requestId || requestId.length > 128 || !/^[A-Za-z0-9_-]+$/.test(requestId)) {
+    if (
+      !requestId ||
+      requestId.length > 128 ||
+      !/^[A-Za-z0-9_-]+$/.test(requestId)
+    ) {
       throw new Error("A valid Easy Song request ID is required.");
     }
 
     const apiKey = process.env.EASYSONG_API_KEY;
     if (!apiKey) {
-      throw new Error("Easy Song integration is not configured on this deployment.");
+      throw new Error(
+        "Easy Song integration is not configured on this deployment.",
+      );
     }
 
     const response = await fetch(
@@ -41,12 +47,16 @@ export const getRequestStatus = action({
     if (!response.ok) {
       // Do not include provider response bodies, which may contain sensitive details.
       if (response.status === 401 || response.status === 403) {
-        throw new Error("Easy Song rejected the API credentials or permissions.");
+        throw new Error(
+          "Easy Song rejected the API credentials or permissions.",
+        );
       }
       if (response.status === 404) {
         throw new Error("The Easy Song request was not found.");
       }
-      throw new Error(`Easy Song status lookup failed (HTTP ${response.status}).`);
+      throw new Error(
+        `Easy Song status lookup failed (HTTP ${response.status}).`,
+      );
     }
 
     const payload: unknown = await response.json();
@@ -57,7 +67,8 @@ export const getRequestStatus = action({
     }
 
     const data = request as Record<string, unknown>;
-    const rawStatus = data.status ?? data.Status ?? data.requestStatus ?? data.RequestStatus;
+    const rawStatus =
+      data.status ?? data.Status ?? data.requestStatus ?? data.RequestStatus;
     const statusData =
       rawStatus && typeof rawStatus === "object" && !Array.isArray(rawStatus)
         ? (rawStatus as Record<string, unknown>)
@@ -65,12 +76,14 @@ export const getRequestStatus = action({
     const statusValue =
       typeof rawStatus === "string"
         ? rawStatus
-        : statusData?.status ?? statusData?.Status;
+        : (statusData?.status ?? statusData?.Status);
     const idValue = data.id ?? data.Id ?? data.requestId ?? data.RequestId;
     const description = statusData?.description ?? statusData?.Description;
 
     if (typeof statusValue !== "string" || !statusValue.trim()) {
-      throw new Error("Easy Song response did not contain a recognised request status.");
+      throw new Error(
+        "Easy Song response did not contain a recognised request status.",
+      );
     }
 
     return {
