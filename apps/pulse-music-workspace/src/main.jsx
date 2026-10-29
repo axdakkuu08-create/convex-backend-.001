@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ConvexAuthProvider, useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
-import { ConvexReactClient } from "convex/react";
+import { ConvexReactClient, useAction } from "convex/react";
+import { api } from "../convex/_generated/api";
 import "./auth.css";
+import "./ai.css";
 
 function PasskeyPanel() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -49,6 +51,54 @@ function PasskeyPanel() {
   );
 }
 
+function MusicAssistant() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const ask = useAction(api.ai.ask);
+  const [prompt, setPrompt] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [model, setModel] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event) {
+    event.preventDefault();
+    if (!isAuthenticated || busy || !prompt.trim()) return;
+    setBusy(true);
+    setError("");
+    setAnswer("");
+    try {
+      const result = await ask({ prompt: prompt.trim() });
+      setAnswer(result.answer);
+      setModel(result.model);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The assistant could not respond. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="pulse-ai" aria-labelledby="pulse-ai-title">
+      <div className="pulse-ai__head">
+        <div>
+          <small>DISCOVERY COMPANION</small>
+          <h2 id="pulse-ai-title">Ask Pulse AI</h2>
+          <p>Explore moods, build playlist ideas, or learn about music.</p>
+        </div>
+        <span className="pulse-ai__tag">FREE MODEL ROUTING</span>
+      </div>
+      {!isLoading && !isAuthenticated && <p className="pulse-ai__hint">Sign in above to use the assistant. Your request is sent through the secure Convex backend.</p>}
+      <form className="pulse-ai__form" onSubmit={submit}>
+        <textarea aria-label="Ask Pulse AI" maxLength={1800} value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="e.g. Build a calm 30-minute focus playlist theme…" disabled={!isAuthenticated || busy} />
+        <button type="submit" disabled={!isAuthenticated || busy || !prompt.trim()}>{busy ? "Thinking…" : "Ask AI"}</button>
+      </form>
+      {error && <p className="pulse-ai__answer pulse-ai__error" role="alert">{error}</p>}
+      {answer && <div className="pulse-ai__answer" role="status">{answer}<div className="pulse-ai__foot">Model route: {model}. Availability and free-model limits may change.</div></div>}
+      <p className="pulse-ai__foot">AI suggestions are not live catalogue results and do not control playback. Free models may be rate-limited.</p>
+    </section>
+  );
+}
+
 const rootElement = document.getElementById("pulse-auth-root");
 const convexUrl = import.meta.env.VITE_CONVEX_URL;
 
@@ -58,10 +108,20 @@ if (rootElement) {
   } else {
     const client = new ConvexReactClient(convexUrl);
     window.pulseConvexClient = client;
+    const aiRoot = document.createElement("div");
+    aiRoot.id = "pulse-ai-root";
+    rootElement.insertAdjacentElement("afterend", aiRoot);
     createRoot(rootElement).render(
       <React.StrictMode>
         <ConvexAuthProvider client={client}>
           <PasskeyPanel />
+        </ConvexAuthProvider>
+      </React.StrictMode>,
+    );
+    createRoot(aiRoot).render(
+      <React.StrictMode>
+        <ConvexAuthProvider client={client}>
+          <MusicAssistant />
         </ConvexAuthProvider>
       </React.StrictMode>,
     );
