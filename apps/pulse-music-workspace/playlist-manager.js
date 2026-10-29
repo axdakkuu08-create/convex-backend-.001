@@ -16,14 +16,14 @@
         })[ch],
     );
   let activeId = "";
+  let storageUnavailable = false;
 
   function load() {
     try {
       const value = JSON.parse(localStorage.getItem(KEY) || "[]");
       return Array.isArray(value)
         ? value.filter(
-            (p) =>
-              p && typeof p.id === "string" && Array.isArray(p.tracks),
+            (p) => p && typeof p.id === "string" && Array.isArray(p.tracks),
           )
         : [];
     } catch (_) {
@@ -34,7 +34,17 @@
   let playlists = load();
 
   function save() {
-    localStorage.setItem(KEY, JSON.stringify(playlists));
+    try {
+      localStorage.setItem(KEY, JSON.stringify(playlists));
+      storageUnavailable = false;
+      return true;
+    } catch (_) {
+      storageUnavailable = true;
+      toast(
+        "Playlist changes are only temporary because browser storage is unavailable or full.",
+      );
+      return false;
+    }
   }
 
   function active() {
@@ -249,6 +259,9 @@
       "sourceUrl",
       "source",
       "archiveId",
+      "catalogId",
+      "sourcePage",
+      "releaseDate",
       "jamendoId",
       "artworkUrl",
       "licenseUrl",
@@ -328,7 +341,9 @@
   function toast(message) {
     const node = $("toast");
     if (node) {
-      node.textContent = message;
+      node.textContent = storageUnavailable
+        ? message + " — changes may be lost when you refresh."
+        : message;
       node.classList.add("show");
     }
   }

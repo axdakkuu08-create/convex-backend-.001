@@ -41,7 +41,12 @@
     return candidates[0] || null;
   }
 
-  async function search(term, fetchImpl) {
+  async function search(term, options, fetchImpl) {
+    if (typeof options === "function") {
+      fetchImpl = options;
+      options = {};
+    }
+    options = options || {};
     const request = fetchImpl || fetch;
     const query = String(term || "").trim();
     if (query.length < 2)
@@ -50,8 +55,10 @@
     const url = new URL(SEARCH_ENDPOINT);
     url.search = new URLSearchParams({
       q: "mediatype:audio AND (" + query.replace(/[\\:*?^~]/g, " ") + ")",
-      "fl[]": "identifier,title,creator,year,licenseurl,rights",
-      rows: "12",
+      "fl[]":
+        "identifier,title,creator,year,licenseurl,rights,addeddate,publicdate,date",
+      sort: options.latest === false ? "downloads desc" : "addeddate desc",
+      rows: String(Math.min(24, Math.max(1, Number(options.rows) || 12))),
       page: "1",
       output: "json",
     }).toString();
@@ -101,6 +108,8 @@
             details.creator || doc.creator || "Internet Archive contributor",
           ),
           year: String(details.year || doc.year || ""),
+          addedDate: String(details.addeddate || doc.addeddate || ""),
+          releaseDate: String(details.date || doc.date || ""),
           src:
             "https://archive.org/download/" +
             encodeURIComponent(doc.identifier) +
