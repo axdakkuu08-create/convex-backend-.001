@@ -57,7 +57,7 @@
       card.addEventListener("click", () => open(playlist.id));
       cards.append(card);
     }
-    if (!playlists.some((p) => p.id === target.value)) target.value = activeId || playlists[0].id;
+    target.value = activeId && playlists.some((p) => p.id === activeId) ? activeId : playlists[0].id;
     if (activeId && !active()) activeId = "";
     if (active()) renderDetail();
     else detail.hidden = true;
