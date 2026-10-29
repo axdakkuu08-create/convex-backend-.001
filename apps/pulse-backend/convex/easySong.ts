@@ -50,23 +50,38 @@ export const getRequestStatus = action({
     }
 
     const payload: unknown = await response.json();
-    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    // Easy Song documents request status responses as an array of request objects.
+    const request = Array.isArray(payload) ? payload[0] : payload;
+    if (!request || typeof request !== "object" || Array.isArray(request)) {
       throw new Error("Easy Song returned an unexpected response.");
     }
 
-    const data = payload as Record<string, unknown>;
-    const statusValue = data.status ?? data.Status ?? data.requestStatus ?? data.RequestStatus;
+    const data = request as Record<string, unknown>;
+    const rawStatus = data.status ?? data.Status ?? data.requestStatus ?? data.RequestStatus;
+    const statusData =
+      rawStatus && typeof rawStatus === "object" && !Array.isArray(rawStatus)
+        ? (rawStatus as Record<string, unknown>)
+        : null;
+    const statusValue =
+      typeof rawStatus === "string"
+        ? rawStatus
+        : statusData?.status ?? statusData?.Status;
     const idValue = data.id ?? data.Id ?? data.requestId ?? data.RequestId;
+    const description = statusData?.description ?? statusData?.Description;
 
     if (typeof statusValue !== "string" || !statusValue.trim()) {
       throw new Error("Easy Song response did not contain a recognised request status.");
     }
 
     return {
-      requestId: typeof idValue === "string" || typeof idValue === "number"
-        ? String(idValue)
-        : requestId,
+      requestId:
+        typeof idValue === "string" || typeof idValue === "number"
+          ? String(idValue)
+          : requestId,
       status: statusValue.trim(),
+      ...(typeof description === "string" && description.trim()
+        ? { description: description.trim() }
+        : {}),
     };
   },
 });
