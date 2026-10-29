@@ -84,9 +84,19 @@
 
       const card = document.createElement("button");
       card.type = "button";
-      card.className = "playlist-card";
+      const playlistName = playlist.name.toLowerCase();
+      const coverTheme = playlistName.includes("focus")
+        ? "cover-focus"
+        : playlistName.includes("ambient") || playlistName.includes("drift")
+          ? "cover-ambient"
+          : playlistName.includes("energy") || playlistName.includes("upbeat")
+            ? "cover-energy"
+            : playlistName.includes("night") || playlistName.includes("after")
+              ? "cover-night"
+              : "cover-mix";
+      card.className = "playlist-card " + coverTheme;
       card.innerHTML =
-        '<span class="playlist-art">♫</span><strong>' +
+        '<span class="playlist-art" aria-hidden="true">♫</span><strong>' +
         esc(playlist.name) +
         "</strong><small>" +
         playlist.tracks.length +
