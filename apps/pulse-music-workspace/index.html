@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body data-view="discover">
     <div class="layout">
       <aside class="sidebar" id="sidebar">
         <a class="brand" href="#"
@@ -20,6 +20,7 @@
         ><button class="nav active" data-view="discover">◈　Discover</button
         ><button class="nav" data-view="library">▤　Your library</button
         ><button class="nav" data-view="recent">◷　Recently played</button>
+        <button class="nav" data-view="sources">◉　Sources</button>
         <hr />
         <small
           >YOUR COLLECTION
@@ -73,7 +74,7 @@
           </div>
           <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
         </section>
-        <section class="hero">
+        <section class="hero" data-home-panel>
           <div>
             <small>● EDITOR'S PICK / 01</small>
             <h2>Make room<br />for <em>focus.</em></h2>
@@ -86,7 +87,7 @@
           <div class="orb"><span>p.</span></div>
           <label class="heroNo">01 — 03</label>
         </section>
-        <section class="sourcehub" id="sourceHub">
+        <section class="sourcehub view-panel" id="sourceHub" aria-label="Music sources">
           <div class="sectionhead">
             <div>
               <small>LISTEN YOUR WAY</small>
@@ -232,7 +233,7 @@
             >
           </div>
         </section>
-        <section>
+        <section data-home-panel>
           <div class="sectionhead">
             <div>
               <small>CURATED FOR YOU</small>
@@ -256,7 +257,16 @@
             </button>
           </div>
         </section>
-        <section class="playlist-library" id="playlistLibrary">
+        <section class="archive-discovery" id="archiveDiscovery" data-home-panel>
+          <div class="sectionhead">
+            <div><small>FRESH FINDS · INTERNET ARCHIVE</small><h2>Discover something new</h2></div>
+            <button id="generateArchiveMix" class="primary" type="button">✦ Generate my mix</button>
+          </div>
+          <p class="source-copy">Pulse searches public Archive audio metadata and builds a playlist from items with supported audio files. Rights and playback vary by item.</p>
+          <p id="archiveDiscoveryStatus" class="audio-status" role="status" aria-live="polite">Finding fresh audio…</p>
+          <div id="archiveDiscoveryResults" class="archive-discovery-results"></div>
+        </section>
+        <section class="playlist-library" id="playlistLibrary" data-home-panel>
           <div class="sectionhead">
             <div>
               <small>YOUR COLLECTION</small>
@@ -302,7 +312,7 @@
             their source item; check each item’s rights before reuse.
           </p>
         </section>
-        <section class="tracks">
+        <section class="tracks" data-home-panel>
           <div class="sectionhead">
             <div>
               <small>YOUR ROTATION</small>
