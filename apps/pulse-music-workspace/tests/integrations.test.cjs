@@ -264,9 +264,11 @@ test("country-aware catalog returns recent song previews ordered by release date
   assert.equal(results[0].source, "itunes-preview");
 });
 
-
 test("Worldwide discovery combines regional catalogs", () => {
   assert.match(appSource, /async function searchRegionalCatalog/);
-  assert.match(appSource, /United States.*India.*United Kingdom.*Japan.*South Korea/s);
+  assert.match(
+    appSource,
+    /United States.*India.*United Kingdom.*Japan.*South Korea/s,
+  );
   assert.match(indexSource, /FRESH FINDS/);
 });

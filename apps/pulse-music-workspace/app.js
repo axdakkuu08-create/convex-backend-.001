@@ -742,12 +742,21 @@ function renderArchiveDiscovery(items) {
 }
 async function searchRegionalCatalog(prefs) {
   if (!window.PULSE_CATALOG?.search) return [];
-  const regions = prefs.country === "Worldwide"
-    ? ["United States", "India", "United Kingdom", "Japan", "South Korea"]
-    : [prefs.country];
-  const batches = await Promise.all(regions.map((country) =>
-    window.PULSE_CATALOG.search({ country, genre: prefs.genre, term: prefs.genre, latest: prefs.latest, limit: 30 }).catch(() => [])
-  ));
+  const regions =
+    prefs.country === "Worldwide"
+      ? ["United States", "India", "United Kingdom", "Japan", "South Korea"]
+      : [prefs.country];
+  const batches = await Promise.all(
+    regions.map((country) =>
+      window.PULSE_CATALOG.search({
+        country,
+        genre: prefs.genre,
+        term: prefs.genre,
+        latest: prefs.latest,
+        limit: 30,
+      }).catch(() => []),
+    ),
+  );
   const seen = new Set();
   const results = batches.flat().filter((item) => {
     const key = item.catalogId || item.id;
@@ -755,7 +764,11 @@ async function searchRegionalCatalog(prefs) {
     seen.add(key);
     return true;
   });
-  if (prefs.latest) results.sort((a, b) => Date.parse(b.releaseDate || "") - Date.parse(a.releaseDate || ""));
+  if (prefs.latest)
+    results.sort(
+      (a, b) =>
+        Date.parse(b.releaseDate || "") - Date.parse(a.releaseDate || ""),
+    );
   return results.slice(0, 50);
 }
 async function loadArchiveDiscovery() {
@@ -793,7 +806,8 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       throw new Error("Playlist storage did not load. Refresh and try again.");
     }
     let items = archiveDiscoveryItems.filter((item) => item.src);
-    if (items.length < 3 && window.PULSE_CATALOG?.search) items = await searchRegionalCatalog(prefs);
+    if (items.length < 3 && window.PULSE_CATALOG?.search)
+      items = await searchRegionalCatalog(prefs);
     if (items.length < 3 && window.PULSE_ARCHIVE?.search) {
       const terms = [
         prefs.genre,
