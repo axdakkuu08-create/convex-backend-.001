@@ -104,23 +104,14 @@ const convexUrl = import.meta.env.VITE_CONVEX_URL;
 
 if (rootElement) {
   if (!convexUrl) {
-    rootElement.innerHTML = '<div class="pulse-auth pulse-auth--notice"><strong>Cloud sync setup pending</strong><small>Pulse is still usable locally. Add VITE_CONVEX_URL after creating a Convex development deployment to enable account sign-in.</small></div>';
+    rootElement.innerHTML = '<div class="pulse-auth pulse-auth--notice"><strong>Cloud sync setup pending</strong><small>Pulse is still usable locally. Add VITE_CONVEX_URL after creating a Convex development deployment to enable account sign-in and AI.</small></div>';
   } else {
     const client = new ConvexReactClient(convexUrl);
     window.pulseConvexClient = client;
-    const aiRoot = document.createElement("div");
-    aiRoot.id = "pulse-ai-root";
-    rootElement.insertAdjacentElement("afterend", aiRoot);
     createRoot(rootElement).render(
       <React.StrictMode>
         <ConvexAuthProvider client={client}>
           <PasskeyPanel />
-        </ConvexAuthProvider>
-      </React.StrictMode>,
-    );
-    createRoot(aiRoot).render(
-      <React.StrictMode>
-        <ConvexAuthProvider client={client}>
           <MusicAssistant />
         </ConvexAuthProvider>
       </React.StrictMode>,
