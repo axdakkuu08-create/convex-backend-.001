@@ -294,6 +294,29 @@
               >SoundCloud ↗</a
             >
           </div>
+          <div id="licensingPanel" class="archive-search-panel" hidden>
+            <div class="sectionhead">
+              <div>
+                <small>RIGHTS CLEARANCE</small>
+                <h3>Easy Song Licensing</h3>
+              </div>
+              <span class="source-badge">REQUEST STATUS</span>
+            </div>
+            <p class="source-copy">
+              Check an existing Easy Song licensing request. This panel does not
+              submit a new request or grant permission to use a song.
+            </p>
+            <form id="licensingStatusForm" class="source-form">
+              <label class="source-input-label" for="licensingRequestId">Easy Song request ID</label>
+              <div class="source-input-row">
+                <input id="licensingRequestId" type="text" maxlength="128" autocomplete="off" placeholder="Enter an existing request ID" required />
+                <button id="licensingStatusButton" class="primary" type="submit">Check status</button>
+              </div>
+            </form>
+            <p id="licensingStatus" class="audio-status" role="status" aria-live="polite">
+              Sign in and configure the server integration to check a request.
+            </p>
+          </div>
         </section>
         <section>
           <div class="sectionhead">
