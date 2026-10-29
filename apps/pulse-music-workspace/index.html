@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body data-view="discover">
     <div class="layout">
       <aside class="sidebar" id="sidebar">
         <a class="brand" href="#"
@@ -20,6 +20,14 @@
         ><button class="nav active" data-view="discover">◈　Discover</button
         ><button class="nav" data-view="library">▤　Your library</button
         ><button class="nav" data-view="recent">◷　Recently played</button>
+        <button class="nav" data-view="sources">◉　Sources</button>
+        <div class="sidebar-moods" aria-label="Pick a mood">
+          <small>PICK A MOOD</small>
+          <button class="mood-link" data-mood="Focus" type="button"><span>◉</span> Deep focus</button>
+          <button class="mood-link" data-mood="Ambient" type="button"><span>✳</span> Ambient drift</button>
+          <button class="mood-link" data-mood="Energy" type="button"><span>ϟ</span> Good energy</button>
+          <button class="mood-link" data-mood="Night" type="button"><span>☾</span> After hours</button>
+        </div>
         <hr />
         <small
           >YOUR COLLECTION
@@ -68,12 +76,12 @@
         <section class="intro">
           <div>
             <small class="eyebrow">— YOUR SOUND, ORGANIZED</small>
-            <h1 id="heading">Find your <span>next favorite.</span></h1>
-            <p>A quieter space for the music you love.</p>
+            <h1 id="heading">Find your <span>next favourite.</span></h1>
+            <p>Pick a mood, discover a sound, and build your next favourite playlist.</p>
           </div>
           <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
         </section>
-        <section class="hero">
+        <section class="hero" data-home-panel>
           <div>
             <small>● EDITOR'S PICK / 01</small>
             <h2>Make room<br />for <em>focus.</em></h2>
@@ -86,7 +94,7 @@
           <div class="orb"><span>p.</span></div>
           <label class="heroNo">01 — 03</label>
         </section>
-        <section class="sourcehub" id="sourceHub">
+        <section class="sourcehub view-panel" id="sourceHub" aria-label="Music sources">
           <div class="sectionhead">
             <div>
               <small>LISTEN YOUR WAY</small>
@@ -232,11 +240,11 @@
             >
           </div>
         </section>
-        <section>
+        <section data-home-panel>
           <div class="sectionhead">
             <div>
               <small>CURATED FOR YOU</small>
-              <h2>Pick a mood</h2>
+              <h2>Find your next favourite</h2>
             </div>
             <button id="allMoods" class="textbutton">View all ↗</button>
           </div>
@@ -256,7 +264,16 @@
             </button>
           </div>
         </section>
-        <section class="playlist-library" id="playlistLibrary">
+        <section class="archive-discovery" id="archiveDiscovery" data-home-panel>
+          <div class="sectionhead">
+            <div><small>FRESH FINDS · INTERNET ARCHIVE</small><h2>Discover something new</h2></div>
+            <button id="generateArchiveMix" class="primary" type="button">✦ Generate my mix</button>
+          </div>
+          <p class="source-copy">Pulse searches public Archive audio metadata and builds a playlist from items with supported audio files. Rights and playback vary by item.</p>
+          <p id="archiveDiscoveryStatus" class="audio-status" role="status" aria-live="polite">Finding fresh audio…</p>
+          <div id="archiveDiscoveryResults" class="archive-discovery-results"></div>
+        </section>
+        <section class="playlist-library" id="playlistLibrary" data-home-panel>
           <div class="sectionhead">
             <div>
               <small>YOUR COLLECTION</small>
@@ -302,7 +319,7 @@
             their source item; check each item’s rights before reuse.
           </p>
         </section>
-        <section class="tracks">
+        <section class="tracks" data-home-panel>
           <div class="sectionhead">
             <div>
               <small>YOUR ROTATION</small>
