@@ -32,6 +32,6 @@ test("Jamendo streams connect to the existing Pulse player bridge", () => {
 
 test("Jamendo UI escapes returned metadata and links only HTTPS artwork and streams", () => {
   assert.match(source, /function escapeHTML/);
-  assert.match(source, /https:\\/\\/i\.test\(track\.audio\)/);
-  assert.match(source, /https:\\/\\/i\.test\(url\)/);
+  assert.ok(source.includes("/^https:\\\\/\\\\//i.test(track.audio)"));
+  assert.ok(source.includes("/^https:\\\\/\\\\//i.test(url)"));
 });
