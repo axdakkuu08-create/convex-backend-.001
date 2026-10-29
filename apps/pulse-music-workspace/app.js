@@ -74,7 +74,9 @@ let index = 0,
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
 let playlistQueue = [],
-  playlistQueueIndex = -1;
+  playlistQueueIndex = -1,
+  onlineSearchIds = new Set(),
+  onlineSearchBusy = false;
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -740,7 +742,7 @@ function renderArchiveDiscovery(items) {
     host.append(card);
   }
 }
-async function searchRegionalCatalog(prefs) {
+async function searchRegionalCatalog(prefs, term = prefs.genre) {
   if (!window.PULSE_CATALOG?.search) return [];
   const regions =
     prefs.country === "Worldwide"
@@ -751,7 +753,7 @@ async function searchRegionalCatalog(prefs) {
       window.PULSE_CATALOG.search({
         country,
         genre: prefs.genre,
-        term: prefs.genre,
+        term: term || prefs.genre,
         latest: prefs.latest,
         limit: 30,
       }).catch(() => []),
@@ -1110,8 +1112,83 @@ document.querySelectorAll("[data-mood]").forEach(
 );
 $("search").oninput = (e) => {
   query = e.target.value.trim();
+  onlineSearchIds.clear();
   render();
 };
+$("search").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    void searchOnlineCatalog(query);
+  }
+});
+async function searchOnlineCatalog(term) {
+  const cleanTerm = String(term || "").trim();
+  if (cleanTerm.length < 2 || onlineSearchBusy) return;
+  onlineSearchBusy = true;
+  $("audioStatus").textContent =
+    'Searching music catalogs for "' + cleanTerm + '"…';
+  try {
+    const prefs = discoveryPreferences();
+    let items = await searchRegionalCatalog(prefs, cleanTerm);
+    if (!items.length && window.PULSE_ARCHIVE?.search) {
+      items = await window.PULSE_ARCHIVE.search(cleanTerm, {
+        latest: prefs.latest,
+      });
+    }
+    if (!items.length) {
+      $("audioStatus").textContent =
+        "No online matches found. Try another title, artist, or genre.";
+      return;
+    }
+    let added = 0;
+    for (const item of items) {
+      if (!item.src) continue;
+      const existing = tracks.find(
+        (track) =>
+          (item.catalogId && track.catalogId === item.catalogId) ||
+          (item.id && item.archiveId === item.id && track.archiveId === item.id) ||
+          track.src === item.src,
+      );
+      const track =
+        existing ||
+        {
+          id: item.catalogId
+            ? "itunes:" + item.catalogId
+            : "archive:" + item.id,
+          catalogId: item.catalogId,
+          archiveId: item.catalogId ? undefined : item.id,
+          title: item.title || "Untitled track",
+          artist: item.artist || "Unknown artist",
+          mood: item.genre || "Archive",
+          time: item.time || "—",
+          cover: item.cover || "blue",
+          symbol: item.symbol || "♫",
+          src: item.src,
+          sourceUrl: item.sourceUrl || item.src,
+          sourcePage: item.sourcePage || "",
+          source: item.source || "internet-archive",
+          artworkUrl: item.artworkUrl || undefined,
+          releaseDate: item.releaseDate || "",
+          licenseUrl: item.licenseUrl || undefined,
+          rights: item.rights || undefined,
+        };
+      if (!existing) {
+        tracks.push(track);
+        added += 1;
+      }
+      onlineSearchIds.add(track.id);
+    }
+    render();
+    $("audioStatus").textContent =
+      onlineSearchIds.size +
+      " online matches added to results. Catalog entries play 30-second previews; Archive availability varies.";
+  } catch (error) {
+    $("audioStatus").textContent =
+      "Online search failed: " + (error?.message || "check your connection.");
+  } finally {
+    onlineSearchBusy = false;
+  }
+}
 $("play").onclick = toggle;
 $("heroPlay").onclick = () => setTrack(0, true);
 $("shuffleAll").onclick = () => {
