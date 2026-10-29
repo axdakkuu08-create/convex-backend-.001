@@ -740,24 +740,31 @@ function renderArchiveDiscovery(items) {
     host.append(card);
   }
 }
+async function searchRegionalCatalog(prefs) {
+  if (!window.PULSE_CATALOG?.search) return [];
+  const regions = prefs.country === "Worldwide"
+    ? ["United States", "India", "United Kingdom", "Japan", "South Korea"]
+    : [prefs.country];
+  const batches = await Promise.all(regions.map((country) =>
+    window.PULSE_CATALOG.search({ country, genre: prefs.genre, term: prefs.genre, latest: prefs.latest, limit: 30 }).catch(() => [])
+  ));
+  const seen = new Set();
+  const results = batches.flat().filter((item) => {
+    const key = item.catalogId || item.id;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  if (prefs.latest) results.sort((a, b) => Date.parse(b.releaseDate || "") - Date.parse(a.releaseDate || ""));
+  return results.slice(0, 50);
+}
 async function loadArchiveDiscovery() {
   const status = $("archiveDiscoveryStatus");
   if (!status) return;
   status.textContent = "Finding recent releases for your region and genre…";
   const prefs = discoveryPreferences();
   let items = [];
-  if (window.PULSE_CATALOG?.search) {
-    try {
-      items = await window.PULSE_CATALOG.search({
-        country: prefs.country,
-        genre: prefs.genre,
-        term: prefs.genre,
-        limit: 50,
-      });
-    } catch (_) {
-      items = [];
-    }
-  }
+  if (window.PULSE_CATALOG?.search) items = await searchRegionalCatalog(prefs);
   if (!items.length && window.PULSE_ARCHIVE?.search) {
     try {
       items = await searchArchiveForDiscovery("");
@@ -786,19 +793,7 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       throw new Error("Playlist storage did not load. Refresh and try again.");
     }
     let items = archiveDiscoveryItems.filter((item) => item.src);
-    if (items.length < 3 && window.PULSE_CATALOG?.search) {
-      try {
-        items = await window.PULSE_CATALOG.search({
-          country: prefs.country,
-          genre: prefs.genre,
-          term: prefs.genre,
-          latest: prefs.latest,
-          limit: 50,
-        });
-      } catch (_) {
-        items = [];
-      }
-    }
+    if (items.length < 3 && window.PULSE_CATALOG?.search) items = await searchRegionalCatalog(prefs);
     if (items.length < 3 && window.PULSE_ARCHIVE?.search) {
       const terms = [
         prefs.genre,
