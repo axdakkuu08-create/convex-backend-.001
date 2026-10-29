@@ -2,7 +2,12 @@ name: Pulse Internet Archive smoke test
 
 on:
   push:
-    branches: [feature/pulse-internet-archive, feature/pulse-archive-playlists, feature/pulse-convx-glass-adaptation]
+    branches:
+      [
+        feature/pulse-internet-archive,
+        feature/pulse-archive-playlists,
+        feature/pulse-convx-glass-adaptation,
+      ]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-archive-smoke.yml"
