@@ -235,7 +235,11 @@
     const playlist =
       playlists.find((p) => p.id === selected) || active() || playlists[0];
     const identity = trackIdentity(track);
-    if (playlist.tracks.some((savedTrack) => trackIdentity(savedTrack) === identity)) {
+    if (
+      playlist.tracks.some(
+        (savedTrack) => trackIdentity(savedTrack) === identity,
+      )
+    ) {
       toast("That song is already in " + playlist.name + ".");
       return;
     }
