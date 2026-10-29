@@ -9,7 +9,7 @@ const uiSource = fs.readFileSync(path.join(root, "src", "main.jsx"), "utf8");
 
 test("OpenRouter key is read only by the Convex server action", () => {
   assert.match(actionSource, /process\.env\.OPENROUTER_API_KEY/);
-  assert.match(actionSource, /Authorization:\s*\`Bearer \\$\{apiKey\}\`/);
+  assert.ok(actionSource.includes("Authorization: `Bearer ${apiKey}`"));
   assert.doesNotMatch(uiSource, /OPENROUTER_API_KEY|sk-or-v1-/);
 });
 
