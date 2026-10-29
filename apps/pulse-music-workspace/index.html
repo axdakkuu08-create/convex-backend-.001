@@ -23,10 +23,18 @@
         <button class="nav" data-view="sources">◉　Sources</button>
         <div class="sidebar-moods" aria-label="Pick a mood">
           <small>PICK A MOOD</small>
-          <button class="mood-link" data-mood="Focus" type="button"><span>◉</span> Deep focus</button>
-          <button class="mood-link" data-mood="Ambient" type="button"><span>✳</span> Ambient drift</button>
-          <button class="mood-link" data-mood="Energy" type="button"><span>ϟ</span> Good energy</button>
-          <button class="mood-link" data-mood="Night" type="button"><span>☾</span> After hours</button>
+          <button class="mood-link" data-mood="Focus" type="button">
+            <span>◉</span> Deep focus
+          </button>
+          <button class="mood-link" data-mood="Ambient" type="button">
+            <span>✳</span> Ambient drift
+          </button>
+          <button class="mood-link" data-mood="Energy" type="button">
+            <span>ϟ</span> Good energy
+          </button>
+          <button class="mood-link" data-mood="Night" type="button">
+            <span>☾</span> After hours
+          </button>
         </div>
         <hr />
         <small
@@ -77,7 +85,10 @@
           <div>
             <small class="eyebrow">— YOUR SOUND, ORGANIZED</small>
             <h1 id="heading">Find your <span>next favourite.</span></h1>
-            <p>Pick a mood, discover a sound, and build your next favourite playlist.</p>
+            <p>
+              Pick a mood, discover a sound, and build your next favourite
+              playlist.
+            </p>
           </div>
           <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
         </section>
@@ -94,7 +105,11 @@
           <div class="orb"><span>p.</span></div>
           <label class="heroNo">01 — 03</label>
         </section>
-        <section class="sourcehub view-panel" id="sourceHub" aria-label="Music sources">
+        <section
+          class="sourcehub view-panel"
+          id="sourceHub"
+          aria-label="Music sources"
+        >
           <div class="sectionhead">
             <div>
               <small>LISTEN YOUR WAY</small>
@@ -264,14 +279,88 @@
             </button>
           </div>
         </section>
-        <section class="archive-discovery" id="archiveDiscovery" data-home-panel>
+        <section
+          class="archive-discovery"
+          id="archiveDiscovery"
+          data-home-panel
+        >
           <div class="sectionhead">
-            <div><small>FRESH FINDS · INTERNET ARCHIVE</small><h2>Discover something new</h2></div>
-            <button id="generateArchiveMix" class="primary" type="button">✦ Generate my mix</button>
+            <div>
+              <small>FRESH FINDS · INTERNET ARCHIVE</small>
+              <h2>Discover something new</h2>
+            </div>
+            <button id="generateArchiveMix" class="primary" type="button">
+              ✦ Generate my mix
+            </button>
           </div>
-          <p class="source-copy">Pulse searches public Archive audio metadata and builds a playlist from items with supported audio files. Rights and playback vary by item.</p>
-          <p id="archiveDiscoveryStatus" class="audio-status" role="status" aria-live="polite">Finding fresh audio…</p>
-          <div id="archiveDiscoveryResults" class="archive-discovery-results"></div>
+          <p class="source-copy">
+            Discover recent releases by country and genre, or fall back to
+            public Archive recordings. Catalog playback uses short previews;
+            availability varies by region.
+          </p>
+          <div
+            class="discovery-preferences"
+            aria-label="Music discovery preferences"
+          >
+            <label for="discoveryCountry"
+              >Country / region
+              <select id="discoveryCountry">
+                <option value="Worldwide">Worldwide</option>
+                <option value="India">India</option>
+                <option value="United States">United States</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="South Korea">South Korea</option>
+                <option value="Japan">Japan</option>
+                <option value="France">France</option>
+                <option value="Brazil">Brazil</option>
+              </select>
+            </label>
+            <label for="discoveryGenre"
+              >Preferred genre
+              <select id="discoveryGenre">
+                <option value="ambient">Ambient</option>
+                <option value="pop">Pop</option>
+                <option value="rock">Rock</option>
+                <option value="hip hop">Hip-hop</option>
+                <option value="electronic">Electronic</option>
+                <option value="jazz">Jazz</option>
+                <option value="classical">Classical</option>
+                <option value="indie">Indie</option>
+                <option value="lofi">Lo-fi</option>
+                <option value="folk">Folk</option>
+                <option value="soundtrack">Soundtracks</option>
+                <option value="devotional">Devotional</option>
+              </select>
+            </label>
+            <label class="discovery-latest"
+              ><input id="discoveryLatest" type="checkbox" checked /> Latest
+              additions first</label
+            >
+            <button
+              id="saveDiscoveryPreferences"
+              class="secondary"
+              type="button"
+            >
+              Apply preferences
+            </button>
+          </div>
+          <p class="embed-note">
+            Latest additions means recently added to Internet Archive, not
+            necessarily the newest commercial releases. Country matching depends
+            on each item's metadata.
+          </p>
+          <p
+            id="archiveDiscoveryStatus"
+            class="audio-status"
+            role="status"
+            aria-live="polite"
+          >
+            Finding fresh audio…
+          </p>
+          <div
+            id="archiveDiscoveryResults"
+            class="archive-discovery-results"
+          ></div>
         </section>
         <section class="playlist-library" id="playlistLibrary" data-home-panel>
           <div class="sectionhead">
@@ -409,6 +498,7 @@
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
     <script src="archive-source.js"></script>
+    <script src="itunes-source.js"></script>
     <script src="app.js"></script>
     <script src="playlist-manager.js"></script>
     <script type="module" src="cloud-sync.js"></script>

@@ -12,6 +12,10 @@ const playlistSource = fs.readFileSync(
   path.join(root, "playlist-manager.js"),
   "utf8",
 );
+const catalogSource = fs.readFileSync(
+  path.join(root, "itunes-source.js"),
+  "utf8",
+);
 const archiveSource = fs.readFileSync(
   path.join(root, "archive-source.js"),
   "utf8",
@@ -166,7 +170,7 @@ test("Internet Archive adapter builds public search and resolves only supported 
 test("Internet Archive integration preserves shared queue, source attribution and cloud event payload", () => {
   assert.match(indexSource, /id="archiveForm"/);
   assert.match(indexSource, /src="archive-source\.js"/);
-  assert.match(appSource, /window\.PULSE_ARCHIVE\.search\(term\)/);
+  assert.match(appSource, /searchArchiveForDiscovery\(term\)/);
   assert.match(appSource, /source: "internet-archive"/);
   assert.match(appSource, /window\.PULSE_QUEUE\?\.add\(track\)/);
   assert.match(appSource, /track\?\.sourceUrl \|\| track\?\.src/);
@@ -190,4 +194,72 @@ test("playlist library supports local persistence, add/remove, and shared-player
   assert.match(appSource, /window\.addEventListener\("pulse:playlist-play"/);
   assert.match(appSource, /data-playlist-add/);
   assert.match(appSource, /＋ Playlist/);
+});
+
+test("discovery preferences and latest-added search are wired to the Archive adapter", () => {
+  assert.match(indexSource, /id="discoveryCountry"/);
+  assert.match(indexSource, /id="discoveryGenre"/);
+  assert.match(indexSource, /id="discoveryLatest"/);
+  assert.match(indexSource, /id="saveDiscoveryPreferences"/);
+  assert.match(appSource, /pulse-discovery-preferences-v1/);
+  assert.match(appSource, /discoverySearchTerm/);
+  assert.match(appSource, /searchArchiveForDiscovery/);
+  assert.match(archiveSource, /addeddate desc/);
+  assert.match(archiveSource, /addedDate:/);
+});
+
+test("playlist playback is sequential and advances automatically when a track ends", () => {
+  assert.match(appSource, /window\.addEventListener\("pulse:playlist-start"/);
+  assert.match(appSource, /playlistQueue = ids;/);
+  assert.match(appSource, /playlistQueueIndex = 0;/);
+  assert.match(appSource, /playlistQueueIndex \+= 1;/);
+  assert.match(appSource, /audio\.onended = .*next\(\)/);
+  assert.match(appSource, /pulse:playlist-play/);
+  assert.match(
+    playlistSource,
+    /window\.dispatchEvent\(\s*new CustomEvent\("pulse:playlist-start"/,
+  );
+});
+
+test("country-aware catalog returns recent song previews ordered by release date", async () => {
+  const sandbox = { URL, URLSearchParams, window: {} };
+  vm.runInNewContext(catalogSource, sandbox);
+  const calls = [];
+  const mockFetch = async (url) => {
+    calls.push(String(url));
+    return {
+      ok: true,
+      json: async () => ({
+        results: [
+          {
+            trackId: 1,
+            trackName: "Older",
+            artistName: "Artist",
+            previewUrl: "https://audio.example/old.mp3",
+            trackViewUrl: "https://music.example/old",
+            releaseDate: "2020-01-01T00:00:00Z",
+            primaryGenreName: "Pop",
+          },
+          {
+            trackId: 2,
+            trackName: "Newer",
+            artistName: "Artist",
+            previewUrl: "https://audio.example/new.mp3",
+            trackViewUrl: "https://music.example/new",
+            releaseDate: "2025-01-01T00:00:00Z",
+            primaryGenreName: "Pop",
+          },
+        ],
+      }),
+    };
+  };
+  const results = await sandbox.window.PULSE_CATALOG.search(
+    { country: "India", genre: "pop" },
+    mockFetch,
+  );
+  assert.equal(results[0].title, "Newer");
+  assert.equal(results[0].time, "0:30");
+  assert.match(calls[0], /country=in/);
+  assert.match(calls[0], /entity=song/);
+  assert.equal(results[0].source, "itunes-preview");
 });

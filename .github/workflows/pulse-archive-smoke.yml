@@ -2,7 +2,7 @@ name: Pulse Internet Archive smoke test
 
 on:
   push:
-    branches: [feature/pulse-internet-archive, feature/pulse-archive-playlists]
+    branches: [feature/pulse-internet-archive, feature/pulse-archive-playlists, feature/pulse-convx-glass-adaptation]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-archive-smoke.yml"
@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Check iTunes catalog syntax
+        run: node --check apps/pulse-music-workspace/itunes-source.js
       - name: Check adapter syntax
         run: node --check apps/pulse-music-workspace/archive-source.js
       - name: Check playlist module syntax
