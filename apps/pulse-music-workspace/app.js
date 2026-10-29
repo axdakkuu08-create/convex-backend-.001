@@ -147,10 +147,12 @@ function list() {
       .sort((x, y) => recent.indexOf(x.id) - recent.indexOf(y.id));
   if (mood) a = a.filter((t) => t.mood.toLowerCase() === mood.toLowerCase());
   if (query)
-    a = a.filter((t) =>
-      (t.title + " " + t.artist + " " + t.mood)
-        .toLowerCase()
-        .includes(query.toLowerCase()),
+    a = a.filter(
+      (t) =>
+        onlineSearchIds.has(t.id) ||
+        (t.title + " " + t.artist + " " + t.mood)
+          .toLowerCase()
+          .includes(query.toLowerCase()),
     );
   if (az) a.sort((x, y) => x.title.localeCompare(y.title));
   return a;
