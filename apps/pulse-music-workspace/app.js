@@ -583,26 +583,43 @@ function renderArchiveDiscovery(items) {
     const title = document.createElement("strong");
     title.textContent = item.title || "Untitled recording";
     const meta = document.createElement("small");
-    meta.textContent = (item.artist || "Unknown artist") + " · Internet Archive · " + (item.format || "audio");
+    meta.textContent =
+      (item.artist || "Unknown artist") +
+      " · Internet Archive · " +
+      (item.format || "audio");
     info.append(title, meta);
     const playButton = document.createElement("button");
     playButton.type = "button";
     playButton.className = "secondary";
     playButton.textContent = "▶";
-    playButton.setAttribute("aria-label", "Play " + (item.title || "recording"));
+    playButton.setAttribute(
+      "aria-label",
+      "Play " + (item.title || "recording"),
+    );
     playButton.addEventListener("click", () => {
       let track = tracks.find((candidate) => candidate.archiveId === item.id);
       if (!track) {
         track = {
-          id: Date.now() + archiveTrackCounter++, archiveId: item.id,
-          title: item.title || "Untitled recording", artist: item.artist || "Unknown artist",
-          mood: "Archive", time: "—", cover: "blue", symbol: "♫", src: item.src,
-          sourceUrl: item.sourceUrl, source: "internet-archive",
-          licenseUrl: item.licenseUrl || undefined, rights: item.rights || undefined,
+          id: Date.now() + archiveTrackCounter++,
+          archiveId: item.id,
+          title: item.title || "Untitled recording",
+          artist: item.artist || "Unknown artist",
+          mood: "Archive",
+          time: "—",
+          cover: "blue",
+          symbol: "♫",
+          src: item.src,
+          sourceUrl: item.sourceUrl,
+          source: "internet-archive",
+          licenseUrl: item.licenseUrl || undefined,
+          rights: item.rights || undefined,
         };
         tracks.push(track);
       }
-      setTrack(tracks.findIndex((candidate) => candidate.id === track.id), true);
+      setTrack(
+        tracks.findIndex((candidate) => candidate.id === track.id),
+        true,
+      );
       window.PULSE_QUEUE?.add(track);
     });
     card.append(glyph, info, playButton);
@@ -612,20 +629,25 @@ function renderArchiveDiscovery(items) {
 async function loadArchiveDiscovery() {
   const status = $("archiveDiscoveryStatus");
   if (!status || !window.PULSE_ARCHIVE?.search) {
-    if (status) status.textContent = "Archive discovery is unavailable right now. Open Sources to search manually.";
+    if (status)
+      status.textContent =
+        "Archive discovery is unavailable right now. Open Sources to search manually.";
     return;
   }
   status.textContent = "Finding fresh Archive audio…";
   try {
     const items = await window.PULSE_ARCHIVE.search("meditation ambient music");
     if (!items.length) {
-      status.textContent = "No playable matches came back. Try Sources for another search.";
+      status.textContent =
+        "No playable matches came back. Try Sources for another search.";
       return;
     }
     renderArchiveDiscovery(items);
-    status.textContent = "Fresh public Archive items with supported audio files. Check item rights before reuse.";
+    status.textContent =
+      "Fresh public Archive items with supported audio files. Check item rights before reuse.";
   } catch (_) {
-    status.textContent = "Could not load fresh items just now. Your library still works; retry from Sources.";
+    status.textContent =
+      "Could not load fresh items just now. Your library still works; retry from Sources.";
   }
 }
 $("generateArchiveMix")?.addEventListener("click", async () => {
@@ -634,34 +656,69 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
   button.disabled = true;
   button.textContent = "Building mix…";
   try {
-    let items = archiveDiscoveryItems;
-    if (items.length < 3 && window.PULSE_ARCHIVE?.search) {
-      const terms = ["ambient music", "field recordings", "public domain music"];
-      const batches = await Promise.all(terms.map((term) => window.PULSE_ARCHIVE.search(term).catch(() => [])));
-      const seen = new Set();
-      items = batches.flat().filter((item) => {
-        const key = item.id || item.src;
-        if (!key || seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      }).slice(0, 12);
+    if (!window.PULSE_ARCHIVE?.search) {
+      throw new Error("Internet Archive discovery is unavailable right now.");
     }
-    if (!items.length) throw new Error("No playable Archive items found. Try again later.");
+    if (!window.PULSE_PLAYLISTS?.create || !window.PULSE_PLAYLISTS?.add) {
+      throw new Error("Playlist storage did not load. Refresh and try again.");
+    }
+    let items = archiveDiscoveryItems;
+    if (items.length < 3) {
+      const terms = [
+        "ambient music",
+        "field recordings",
+        "public domain music",
+      ];
+      const batches = await Promise.all(
+        terms.map((term) =>
+          window.PULSE_ARCHIVE.search(term).catch(() => []),
+        ),
+      );
+      const seen = new Set();
+      items = batches
+        .flat()
+        .filter((item) => {
+          const key = item.id || item.src;
+          if (!key || !item.src || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .slice(0, 12);
+    } else {
+      items = items.filter((item) => item.id && item.src).slice(0, 12);
+    }
+    if (!items.length) {
+      throw new Error("No playable Archive items found. Try again later.");
+    }
     const name = "Archive Mix · " + new Date().toLocaleDateString();
-    window.PULSE_PLAYLISTS?.create(name);
+    window.PULSE_PLAYLISTS.create(name);
     for (const item of items) {
-      window.PULSE_PLAYLISTS?.add({
-        id: "archive:" + item.id, archiveId: item.id, title: item.title,
-        artist: item.artist, mood: "Archive", time: "—", cover: "blue", symbol: "♫",
-        src: item.src, sourceUrl: item.sourceUrl, source: "Internet Archive",
-        licenseUrl: item.licenseUrl || undefined, rights: item.rights || undefined,
-        year: item.year || "", format: item.format || "",
+      window.PULSE_PLAYLISTS.add({
+        id: "archive:" + item.id,
+        archiveId: item.id,
+        title: item.title || "Untitled recording",
+        artist: item.artist || "Unknown artist",
+        mood: "Archive",
+        time: "—",
+        cover: "blue",
+        symbol: "♫",
+        src: item.src,
+        sourceUrl: item.sourceUrl,
+        source: "Internet Archive",
+        licenseUrl: item.licenseUrl || undefined,
+        rights: item.rights || undefined,
+        year: item.year || "",
+        format: item.format || "",
       });
     }
-    status.textContent = "Created an Archive mix with " + items.length + " candidate tracks. Some items may not stream; rights vary by item.";
+    status.textContent =
+      "Created an Archive mix with " +
+      items.length +
+      " candidate tracks. Some items may not stream; rights vary by item.";
     toast("Your Archive mix is ready.");
   } catch (error) {
-    status.textContent = error.message || "Could not build a mix right now.";
+    status.textContent =
+      error.message || "Could not build a mix right now.";
   } finally {
     button.disabled = false;
     button.textContent = "✦ Generate my mix";
