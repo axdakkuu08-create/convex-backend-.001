@@ -156,7 +156,7 @@
   });
   $("playlistPlayAll").addEventListener("click", () => {
     const playlist = active();
-    if (playlist?.tracks.length) window.dispatchEvent(new CustomEvent("pulse:playlist-play", { detail: playlist.tracks[0] }));
+    if (playlist?.tracks.length) window.dispatchEvent(new CustomEvent("pulse:playlist-start", { detail: playlist.tracks }));
     else toast("Add songs to this playlist first.");
   });
   $("playlistDelete").addEventListener("click", () => {
