@@ -1491,6 +1491,55 @@ $("addUrlButton").onclick = () => {
   toast("Audio link added");
 };
 setTrack(0);
+function renderMobileListeningHome() {
+  const picks = $("mobileTopPicks");
+  const speed = $("mobileSpeedDial");
+  if (!picks || !speed) return;
+  const featured = tracks.slice(0, 5);
+  picks.innerHTML = featured.map((track, i) =>
+    '<article class="mobile-pick" data-mobile-track="' + escapeHTML(track.id) + '">' +
+      '<div class="mobile-pick-art">' + escapeHTML(track.symbol || "♫") + '</div>' +
+      '<div class="mobile-pick-info"><strong>' + escapeHTML(track.title) + '</strong><small>' + escapeHTML(track.artist) + '</small></div>' +
+    '</article>'
+  ).join("");
+  speed.innerHTML = tracks.slice(0, 6).map((track) =>
+    '<div class="mobile-speed-row"><div class="mobile-speed-art">' + escapeHTML(track.symbol || "♫") + '</div>' +
+    '<div><strong>' + escapeHTML(track.title) + '</strong><small>' + escapeHTML(track.artist) + '</small></div>' +
+    '<button type="button" data-mobile-play="' + escapeHTML(track.id) + '" aria-label="Play ' + escapeHTML(track.title) + '">▶</button></div>'
+  ).join("");
+}
+renderMobileListeningHome();
+$("mobileTopPicks")?.addEventListener("click", (event) => {
+  const card = event.target.closest("[data-mobile-track]");
+  if (!card) return;
+  const i = tracks.findIndex((track) => String(track.id) === card.dataset.mobileTrack);
+  if (i >= 0) setTrack(i, true);
+});
+$("mobileSpeedDial")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-mobile-play]");
+  if (!button) return;
+  const i = tracks.findIndex((track) => String(track.id) === button.dataset.mobilePlay);
+  if (i >= 0) setTrack(i, true);
+});
+$("mobileVoiceSearch")?.addEventListener("click", () => {
+  const term = prompt("Search songs, artists, or genres");
+  if (term && term.trim()) {
+    $("search").value = term.trim();
+    void searchOnlineCatalog(term.trim());
+  }
+});
+document.querySelectorAll("[data-mobile-nav]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-mobile-nav]").forEach((item) => item.classList.remove("selected"));
+    button.classList.add("selected");
+    const target = button.dataset.mobileNav;
+    if (target === "search") $("mobileVoiceSearch")?.click();
+    if (target === "library") { view = "library"; render(); toast("Library selected"); }
+    if (target === "playlists") { $("playlistLibrary").style.display = "block"; $("playlistLibrary").scrollIntoView({behavior:"smooth"}); }
+    if (target === "home") window.scrollTo({top:0,behavior:"smooth"});
+  });
+});
+
 
 // Unified queue foundation for direct audio and provider links.
 (() => {
