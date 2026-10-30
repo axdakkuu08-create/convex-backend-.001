@@ -188,7 +188,9 @@ function render() {
         escapeHTML(t.artist) +
         '</small></div></div><div class="moodcell"><span class="chip">' +
         escapeHTML(t.mood) +
-        '</span></div><div class="time">' +
+        '</span><small class="source-label">' +
+        escapeHTML(t.source === "itunes-preview" ? "30-SEC PREVIEW" : t.source === "internet-archive" ? "INTERNET ARCHIVE" : t.source || "LOCAL") +
+        '</small></div><div class="time">' +
         t.time +
         '</div><button class="rowadd" data-playlist-add="1" aria-label="Add to playlist">＋</button><button class="rowlike ' +
         (liked.has(t.id) ? "liked" : "") +
@@ -1133,11 +1135,19 @@ async function searchOnlineCatalog(term) {
     'Searching music catalogs for "' + cleanTerm + '"…';
   try {
     const prefs = discoveryPreferences();
-    let items = await searchRegionalCatalog(prefs, cleanTerm);
-    if (!items.length && window.PULSE_ARCHIVE?.search) {
-      items = await window.PULSE_ARCHIVE.search(cleanTerm, {
-        latest: prefs.latest,
-      });
+    // Prefer full-length Archive files when available; iTunes is a preview fallback.
+    let items = [];
+    if (window.PULSE_ARCHIVE?.search) {
+      try {
+        items = await window.PULSE_ARCHIVE.search(cleanTerm, {
+          latest: prefs.latest,
+        });
+      } catch (_) {
+        items = [];
+      }
+    }
+    if (!items.length) {
+      items = await searchRegionalCatalog(prefs, cleanTerm);
     }
     if (!items.length) {
       $("audioStatus").textContent =
@@ -1183,7 +1193,7 @@ async function searchOnlineCatalog(term) {
     render();
     $("audioStatus").textContent =
       onlineSearchIds.size +
-      " online matches added to results. Catalog entries play 30-second previews; Archive availability varies.";
+      " online matches added. Internet Archive full-length files are preferred when playable; iTunes results are 30-second previews. Archive rights vary by item.";
   } catch (error) {
     $("audioStatus").textContent =
       "Online search failed: " + (error?.message || "check your connection.");
