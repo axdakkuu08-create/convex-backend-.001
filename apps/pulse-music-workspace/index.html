@@ -93,6 +93,19 @@
           </div>
           <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
         </section>
+        <section class="mobile-listening-home" aria-label="Music home">
+          <div class="mobile-moods" aria-label="Music categories">
+            <button class="active" data-mobile-mood="">All</button>
+            <button data-mobile-mood="Podcasts">Podcasts</button>
+            <button data-mobile-mood="Romance">Romance</button>
+            <button data-mobile-mood="Feel good">Feel good</button>
+            <button data-mobile-mood="Focus">Focus</button>
+          </div>
+          <div class="mobile-home-heading"><h2>Top Picks for You <span>›</span></h2></div>
+          <div id="mobileTopPicks" class="mobile-top-picks"></div>
+          <div class="mobile-speed-heading"><h2>Speed dial</h2><button id="mobileVoiceSearch" aria-label="Search music">⌕</button></div>
+          <div id="mobileSpeedDial" class="mobile-speed-dial"></div>
+        </section>
         <section class="hero" data-home-panel>
           <div>
             <small>● EDITOR'S PICK / 01</small>
@@ -496,6 +509,12 @@
       </div>
       <audio id="audio" preload="metadata"></audio>
     </section>
+    <nav class="mobile-bottom-nav" aria-label="Main navigation">
+      <button class="selected" data-mobile-nav="home" aria-label="Home">⌂</button>
+      <button data-mobile-nav="library" aria-label="Library">▤</button>
+      <button data-mobile-nav="search" aria-label="Search">⌕</button>
+      <button data-mobile-nav="playlists" aria-label="Playlists">♫</button>
+    </nav>
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
     <script src="archive-source.js"></script>
