@@ -578,6 +578,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
   results.innerHTML = "";
   try {
     archiveItems = await window.PulseArchive.search(query, 24);
+    window.PulseArchiveResults = archiveItems;
     if (!archiveItems.length) {
       status.textContent =
         "No playable audio files were found for that search. Try a broader title or artist.";
@@ -601,9 +602,11 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           '</small><a href="' +
           escapeHTML(item.pageUrl) +
           '" target="_blank" rel="noopener noreferrer">View item & rights ↗</a></div>' +
-          '<button class="primary archive-play" type="button" data-archive-index="' +
+          '<div class="archive-actions"><button class="primary archive-play" type="button" data-archive-index="' +
           i +
-          '">▶ Play</button></article>',
+          '">▶ Play</button><button class="catalog-add" type="button" data-add-archive-index="' +
+          i +
+          '">＋ Playlist</button></div></article>',
       )
       .join("");
   } catch (error) {
