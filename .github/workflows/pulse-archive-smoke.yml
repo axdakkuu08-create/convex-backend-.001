@@ -2,7 +2,7 @@ name: Pulse Internet Archive smoke test
 
 on:
   push:
-    branches: [feature/pulse-internet-archive]
+    branches: [feature/pulse-internet-archive, feature/pulse-archive-playlists]
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-archive-smoke.yml"
@@ -22,6 +22,8 @@ jobs:
           node-version: 20
       - name: Check adapter syntax
         run: node --check apps/pulse-music-workspace/archive-source.js
+      - name: Check playlist module syntax
+        run: node --check apps/pulse-music-workspace/playlist-manager.js
       - name: Test provider integrations
         run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs
       - name: Smoke-test the live public Internet Archive APIs

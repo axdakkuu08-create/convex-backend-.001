@@ -73,6 +73,8 @@ let index = 0,
   liked = new Set(JSON.parse(localStorage.getItem("pulse-liked") || "[]")),
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
+let playlistQueue = [],
+  playlistQueueIndex = -1;
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -184,7 +186,7 @@ function render() {
         escapeHTML(t.mood) +
         '</span></div><div class="time">' +
         t.time +
-        '</div><button class="rowlike ' +
+        '</div><button class="rowadd" data-playlist-add="1" aria-label="Add to playlist">＋</button><button class="rowlike ' +
         (liked.has(t.id) ? "liked" : "") +
         '" data-like="1">' +
         (liked.has(t.id) ? "♥" : "♡") +
@@ -407,7 +409,28 @@ async function searchJamendo(searchText) {
         statusNode.textContent =
           "Playing " + track.title + " in Pulse's shared player.";
       });
-      row.append(artwork, details, playButton);
+      const addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.className = "secondary";
+      addButton.textContent = "＋ Playlist";
+      addButton.addEventListener("click", () =>
+        window.PULSE_PLAYLISTS?.add({
+          id: "jamendo:" + item.id,
+          jamendoId: String(item.id),
+          title: item.name,
+          artist: item.artist_name || "Unknown artist",
+          mood: "Jamendo",
+          time: fmt(Number(item.duration) || 0),
+          cover: "green",
+          symbol: "♫",
+          src: item.audio,
+          sourceUrl: item.audio,
+          source: "Jamendo",
+          artworkUrl: item.album_image || undefined,
+          licenseUrl: item.license_ccurl || undefined,
+        }),
+      );
+      row.append(artwork, details, playButton, addButton);
       resultsNode.append(row);
     }
   } catch (error) {
@@ -505,7 +528,30 @@ async function searchInternetArchive(searchText) {
           track.title +
           ". If playback fails, the item may restrict streaming or seeking.";
       });
-      row.append(details, playButton);
+      const addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.className = "secondary";
+      addButton.textContent = "＋ Playlist";
+      addButton.addEventListener("click", () =>
+        window.PULSE_PLAYLISTS?.add({
+          id: "archive:" + item.id,
+          archiveId: item.id,
+          title: item.title,
+          artist: item.artist,
+          mood: "Archive",
+          time: "—",
+          cover: "blue",
+          symbol: "♫",
+          src: item.src,
+          sourceUrl: item.sourceUrl,
+          source: "Internet Archive",
+          licenseUrl: item.licenseUrl || undefined,
+          rights: item.rights || undefined,
+          year: item.year || "",
+          format: item.format || "",
+        }),
+      );
+      row.append(details, playButton, addButton);
       resultsNode.append(row);
     }
   } catch (error) {
@@ -519,6 +565,80 @@ $("archiveForm")?.addEventListener("submit", (event) => {
   void searchInternetArchive($("archiveQuery").value);
 });
 
+window.addEventListener("pulse:playlist-play", (event) => {
+  playlistQueue = [];
+  playlistQueueIndex = -1;
+  const item = event.detail;
+  if (!item?.src || !/^https?:\/\//i.test(item.src)) return;
+  let track = tracks.find(
+    (candidate) =>
+      (item.archiveId && candidate.archiveId === item.archiveId) ||
+      (item.jamendoId && candidate.jamendoId === item.jamendoId) ||
+      candidate.src === item.src,
+  );
+  if (!track) {
+    track = {
+      id: Date.now(),
+      title: item.title || "Untitled track",
+      artist: item.artist || "Unknown artist",
+      mood: item.mood || "Playlist",
+      time: item.time || "—",
+      cover: item.cover || "blue",
+      symbol: item.symbol || "♫",
+      src: item.src,
+      sourceUrl: item.sourceUrl || item.src,
+      source: item.source || "Internet Archive",
+      archiveId: item.archiveId,
+      jamendoId: item.jamendoId,
+      artworkUrl: item.artworkUrl,
+      licenseUrl: item.licenseUrl,
+      rights: item.rights,
+    };
+    tracks.push(track);
+  }
+  setTrack(
+    tracks.findIndex((candidate) => candidate.id === track.id),
+    true,
+  );
+});
+window.addEventListener("pulse:playlist-start", (event) => {
+  const items = Array.isArray(event.detail) ? event.detail : [];
+  const ids = [];
+  for (const item of items) {
+    if (!item?.src || !/^https?:\/\//i.test(item.src)) continue;
+    let track = tracks.find(
+      (candidate) =>
+        (item.archiveId && candidate.archiveId === item.archiveId) ||
+        (item.jamendoId && candidate.jamendoId === item.jamendoId) ||
+        candidate.src === item.src,
+    );
+    if (!track) {
+      track = {
+        id: Date.now() + ids.length,
+        title: item.title || "Untitled track",
+        artist: item.artist || "Unknown artist",
+        mood: item.mood || "Playlist",
+        time: item.time || "—",
+        cover: item.cover || "blue",
+        symbol: item.symbol || "♫",
+        src: item.src,
+        sourceUrl: item.sourceUrl || item.src,
+        source: item.source || "Internet Archive",
+        archiveId: item.archiveId,
+        jamendoId: item.jamendoId,
+        artworkUrl: item.artworkUrl,
+        licenseUrl: item.licenseUrl,
+        rights: item.rights,
+      };
+      tracks.push(track);
+    }
+    ids.push(tracks.findIndex((candidate) => candidate.id === track.id));
+  }
+  playlistQueue = ids;
+  playlistQueueIndex = 0;
+  if (playlistQueue.length) setTrack(playlistQueue[0], true);
+  else toast("This playlist has no playable web audio tracks.");
+});
 function setTrack(i, autoplay = false) {
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
@@ -574,6 +694,18 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
+  if (playlistQueue.length) {
+    if (playlistQueueIndex + 1 < playlistQueue.length) {
+      playlistQueueIndex += 1;
+      setTrack(playlistQueue[playlistQueueIndex], true);
+    } else {
+      pause();
+      audio.currentTime = 0;
+      playlistQueue = [];
+      playlistQueueIndex = -1;
+    }
+    return;
+  }
   let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
   if (n >= tracks.length && !repeatOn) {
     pause();
@@ -627,6 +759,10 @@ $("rows").addEventListener("click", (e) => {
   let r = e.target.closest(".row");
   if (!r) return;
   let id = Number(r.dataset.id);
+  if (e.target.closest("[data-playlist-add]")) {
+    window.PULSE_PLAYLISTS?.add(tracks.find((t) => t.id === id));
+    return;
+  }
   if (e.target.closest("[data-like]")) {
     like(id);
     return;
@@ -671,7 +807,12 @@ $("prev").onclick = () => {
     audio.currentTime = 0;
     return;
   }
-  setTrack(index - 1, true);
+  if (playlistQueue.length && playlistQueueIndex > 0) {
+    playlistQueueIndex -= 1;
+    setTrack(playlistQueue[playlistQueueIndex], true);
+  } else {
+    setTrack(index - 1, true);
+  }
 };
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
