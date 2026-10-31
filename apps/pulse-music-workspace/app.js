@@ -205,6 +205,7 @@ function render() {
         "</button></div>",
     )
     .join("");
+  renderMobileListeningHome();
 }
 function resolveMusicEmbed(raw) {
   let u;
@@ -1133,7 +1134,7 @@ $("search").addEventListener("keydown", (event) => {
     void searchOnlineCatalog(query);
   }
 });
-async function searchOnlineCatalog(term) {
+async async function searchOnlineCatalog(term) {
   const cleanTerm = String(term || "").trim();
   if (cleanTerm.length < 2 || onlineSearchBusy) return;
   onlineSearchBusy = true;
@@ -1497,7 +1498,8 @@ function renderMobileListeningHome() {
   const picks = $("mobileTopPicks");
   const speed = $("mobileSpeedDial");
   if (!picks || !speed) return;
-  const featured = tracks.slice(0, 5);
+  const onlineTracks = tracks.filter((track) => onlineSearchIds.has(track.id));
+  const featured = [...onlineTracks, ...tracks.filter((track) => !onlineSearchIds.has(track.id))].slice(0, 12);
   picks.innerHTML = featured
     .map(
       (track) =>
@@ -1514,8 +1516,8 @@ function renderMobileListeningHome() {
         "</small></div></article>",
     )
     .join("");
-  speed.innerHTML = tracks
-    .slice(0, 6)
+  speed.innerHTML = featured
+    .slice(0, 8)
     .map(
       (track) =>
         '<div class="mobile-speed-row"><div class="mobile-speed-art">' +
