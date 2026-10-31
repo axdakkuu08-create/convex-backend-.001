@@ -1577,7 +1577,13 @@ function renderMobileListeningHome() {
         "</strong><small>" +
         escapeHTML(track.artist) +
         '</small><small class="mobile-source-label">' +
-        escapeHTML(track.source === "itunes-preview" ? "30-SEC PREVIEW" : track.source === "internet-archive" ? "INTERNET ARCHIVE · " + (track.time || "FULL TRACK") : track.source || "LOCAL") +
+        escapeHTML(
+          track.source === "itunes-preview"
+            ? "30-SEC PREVIEW"
+            : track.source === "internet-archive"
+              ? "INTERNET ARCHIVE · " + (track.time || "FULL TRACK")
+              : track.source || "LOCAL",
+        ) +
         "</small></div>" +
         '<button type="button" data-mobile-play="' +
         escapeHTML(track.id) +
