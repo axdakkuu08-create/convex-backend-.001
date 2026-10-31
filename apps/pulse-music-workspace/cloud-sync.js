@@ -45,10 +45,19 @@ async function startCloud() {
     const listMine = makeFunctionReference("playlists:listMine");
     const createPlaylist = makeFunctionReference("playlists:create");
     const removePlaylist = makeFunctionReference("playlists:remove");
+    const addToPlaylist = makeFunctionReference("library:addToPlaylist");
+    const listPlaylistTracks = makeFunctionReference(
+      "library:listPlaylistTracks",
+    );
+    const removeFromPlaylist = makeFunctionReference(
+      "library:removeFromPlaylist",
+    );
+    let currentPlaylists = [];
     let stopPlaylistUpdates = null;
     let authenticated = false;
 
     const renderPlaylists = (playlists) => {
+      currentPlaylists = Array.isArray(playlists) ? playlists : [];
       cloudList.replaceChildren();
       for (const playlist of playlists) {
         const row = document.createElement("div");
@@ -72,7 +81,51 @@ async function startCloud() {
             );
           }
         });
-        row.append(name, remove);
+        const tracksButton = document.createElement("button");
+        tracksButton.type = "button";
+        tracksButton.className = "cloud-delete";
+        tracksButton.textContent = "Tracks";
+        tracksButton.addEventListener("click", async () => {
+          try {
+            const tracks = await convex.query(listPlaylistTracks, {
+              playlistId: playlist._id,
+            });
+            if (!tracks.length) {
+              status('"' + playlist.name + '" is empty.');
+              return;
+            }
+            const listing = tracks
+              .map(
+                (track, index) =>
+                  index +
+                  1 +
+                  ". " +
+                  track.title +
+                  " — " +
+                  (track.artist || "Unknown artist"),
+              )
+              .join("\\n");
+            const choice = prompt(
+              'Tracks in "' +
+                playlist.name +
+                '". Enter a number to remove it, or Cancel to close:\\n' +
+                listing,
+            );
+            if (!choice) return;
+            const selected = tracks[Number(choice) - 1];
+            if (!selected) return;
+            await convex.mutation(removeFromPlaylist, {
+              trackId: selected._id,
+            });
+            status("Track removed from cloud playlist.");
+          } catch (error) {
+            status(
+              "Could not load cloud tracks: " +
+                (error?.message || "unknown error"),
+            );
+          }
+        });
+        row.append(name, tracksButton, remove);
         cloudList.append(row);
       }
       if (!playlists.length) {
@@ -143,6 +196,34 @@ async function startCloud() {
       await clerk.signOut();
       await updateAuth();
     });
+    document.addEventListener("pulse:add-track-to-playlist", async (event) => {
+      const track = event.detail || {};
+      if (!authenticated || !track.src || !currentPlaylists.length) return;
+      const choices = currentPlaylists
+        .map((item, index) => index + 1 + ". " + item.name)
+        .join("\\n");
+      const answer = prompt(
+        "Also save this track to a cloud playlist? Enter a number:\\n" +
+          choices,
+      );
+      if (!answer) return;
+      const playlist = currentPlaylists[Number(answer) - 1];
+      if (!playlist) return;
+      try {
+        await convex.mutation(addToPlaylist, {
+          playlistId: playlist._id,
+          title: String(track.title || "Untitled track").slice(0, 200),
+          artist: String(track.artist || "Unknown artist").slice(0, 200),
+          source: "direct",
+          sourceUrl: track.src,
+          artworkUrl: track.artwork || undefined,
+        });
+        status("Track added to cloud playlist: " + playlist.name);
+      } catch (error) {
+        status("Cloud save failed: " + (error?.message || "unknown error"));
+      }
+    });
+
     createButton.addEventListener("click", async () => {
       const name = prompt("Name your cloud playlist");
       if (!name || !name.trim()) return;
