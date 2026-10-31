@@ -54,7 +54,7 @@
   .intro h1 {
     font-size: 36px;
     line-height: 1.05;
-    letter-spacing: -.04em;
+    letter-spacing: -0.04em;
   }
   .hero {
     min-height: 230px;
@@ -80,7 +80,7 @@
   }
   .sectionhead h2 {
     font-size: 25px;
-    letter-spacing: -.03em;
+    letter-spacing: -0.03em;
   }
   .sectionhead small {
     font-size: 10px;
@@ -305,7 +305,7 @@
     font-size: 8px;
   }
 }
-@media (max-width:700px) {
+@media (max-width: 700px) {
   .mobile-listening-home {
     display: block;
     margin: 12px 0 30px;
@@ -475,7 +475,7 @@
     display: block;
     color: #a7a7b2;
     font-size: 9px !important;
-    letter-spacing: .04em;
+    letter-spacing: 0.04em;
     margin-top: 3px;
   }
   .mobile-bottom-nav {
@@ -515,7 +515,7 @@
     padding-bottom: 190px;
   }
 }
-@media (min-width:701px) {
+@media (min-width: 701px) {
   .mobile-listening-home,
   .mobile-bottom-nav {
     display: none;
