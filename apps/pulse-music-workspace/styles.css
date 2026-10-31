@@ -1356,7 +1356,10 @@ footer {
 }
 .thead,
 .row {
-  grid-template-columns: 32px minmax(120px, 1.8fr) minmax(60px, 0.8fr) 48px 24px 24px;
+  grid-template-columns: 32px minmax(120px, 1.8fr) minmax(
+    60px,
+    0.8fr
+  ) 48px 24px 24px;
 }
 @media (max-width: 760px) {
   .playlist-detail-head {
