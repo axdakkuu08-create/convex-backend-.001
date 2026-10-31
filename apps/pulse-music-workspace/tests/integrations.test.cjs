@@ -113,6 +113,20 @@ test("Internet Archive adapter builds public search and resolves only supported 
     adapter.chooseAudioFile([{ name: "scan.pdf", format: "PDF" }]),
     null,
   );
+  assert.equal(
+    adapter.chooseAudioFile([
+      { name: "preview.mp3", format: "VBR MP3", duration: "30" },
+    ]),
+    null,
+    "preview-only Archive items must not be returned as full tracks",
+  );
+  assert.equal(
+    adapter.chooseAudioFile([
+      { name: "short-sample.mp3", format: "VBR MP3", duration: "22" },
+      { name: "full-recording.mp3", format: "VBR MP3", duration: "245" },
+    ]).name,
+    "full-recording.mp3",
+  );
 
   const requests = [];
   const mockFetch = async (url) => {
@@ -289,14 +303,24 @@ test("country-aware catalog returns recent song previews ordered by release date
   assert.equal(results[0].source, "itunes-preview");
 });
 
-test("main search can query regional catalogs and add online results", () => {
+test("main search returns only full-length Archive recordings, not catalogue previews", () => {
   assert.match(appSource, /async function searchOnlineCatalog/);
-  assert.match(appSource, /searchRegionalCatalog\(prefs, cleanTerm\)/);
+  assert.match(appSource, /PULSE_ARCHIVE\?\.search/);
+  assert.match(appSource, /Short previews are hidden/);
+  assert.doesNotMatch(appSource, /searchRegionalCatalog\(prefs, cleanTerm\)/);
   assert.match(appSource, /onlineSearchIds\.add\(track\.id\)/);
   assert.match(appSource, /onlineSearchIds\.has\(t\.id\)/);
   assert.match(appSource, /String\(t\.id\) === id/);
   assert.match(appSource, /escapeHTML\(t\.id\)/);
   assert.match(indexSource, /press Enter for online results/);
+});
+
+test("home discovery and generated mixes use Archive recordings instead of 30-second previews", () => {
+  assert.match(appSource, /async function loadArchiveDiscovery/);
+  assert.match(appSource, /items = items\.filter\(\(item\) => item\?\.src && item\.source === "internet-archive"\)/);
+  assert.doesNotMatch(appSource, /if \(items\.length < 3 && window\.PULSE_CATALOG/);
+  assert.match(archiveSource, /clearlyPreview/);
+  assert.match(archiveSource, /tooShort/);
 });
 
 test("Worldwide discovery combines regional catalogs", () => {
