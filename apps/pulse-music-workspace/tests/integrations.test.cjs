@@ -162,5 +162,9 @@ test("Internet Archive UI is included without replacing existing providers or cl
   assert.match(html, /internet-archive\.js/);
   assert.match(html, /archiveSearchForm/);
   assert.match(html, /cloud-sync\.js/);
+  assert.match(html, /playlist-store\.js/);
+  assert.match(html, /musicCountry/);
+  assert.match(html, /musicGenre/);
+  assert.match(html, /savedPlaylists/);
   assert.match(html, /sourceFrame/);
 });
