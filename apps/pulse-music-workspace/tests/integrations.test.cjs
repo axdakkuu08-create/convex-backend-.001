@@ -143,7 +143,7 @@ test("Internet Archive adapter builds public search and resolves only supported 
         },
         files: [
           { name: "cover.jpg", format: "JPEG" },
-          { name: "recording.mp3", format: "VBR MP3", mimetype: "audio/mpeg" },
+          { name: "recording.mp3", format: "VBR MP3", mimetype: "audio/mpeg", duration: "245.8" },
         ],
       }),
     };
@@ -152,6 +152,8 @@ test("Internet Archive adapter builds public search and resolves only supported 
   assert.equal(results.length, 1);
   assert.equal(results[0].title, "Sample Recording");
   assert.equal(results[0].artist, "Archive Artist");
+  assert.equal(results[0].time, "4:05");
+  assert.equal(results[0].source, "internet-archive");
   assert.equal(
     results[0].src,
     "https://archive.org/download/sample-recording/recording.mp3",
@@ -204,6 +206,9 @@ test("discovery preferences and latest-added search are wired to the Archive ada
   assert.match(appSource, /pulse-discovery-preferences-v1/);
   assert.match(appSource, /discoverySearchTerm/);
   assert.match(appSource, /searchArchiveForDiscovery/);
+  assert.match(appSource, /async function searchOnlineCatalog\(term\)/);
+  assert.match(appSource, /const onlineTracks = tracks\.filter\(\(track\) => onlineSearchIds\.has\(track\.id\)\)/);
+  assert.match(appSource, /renderMobileListeningHome\(\);/);
   assert.match(archiveSource, /addeddate desc/);
   assert.match(archiveSource, /addedDate:/);
 });
