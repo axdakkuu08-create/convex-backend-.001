@@ -595,6 +595,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           "</strong><small>" +
           escapeHTML(item.artist) +
           (item.year ? " · " + escapeHTML(item.year) : "") +
+          (item.durationSeconds ? " · " + fmt(item.durationSeconds) : "") +
           '</small><small class="archive-rights">' +
           (item.license
             ? "Rights/licence: " + escapeHTML(item.license)
