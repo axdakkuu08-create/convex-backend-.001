@@ -21,6 +21,8 @@
           artwork: trackButton.dataset.homeArtwork,
           source: "Apple/iTunes Top Songs"
         }}));
+      } else if (trackButton.dataset.homeUrl) {
+        window.open(trackButton.dataset.homeUrl, "_blank", "noopener,noreferrer");
       } else {
         playTrack(trackButton.dataset.homeTrack);
       }
