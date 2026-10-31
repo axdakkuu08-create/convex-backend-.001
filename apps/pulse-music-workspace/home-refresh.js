@@ -1,7 +1,9 @@
 /* Mobile home interactions bridge into Pulse's existing player actions. */
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const $$ = (selector, root = document) => [
+    ...root.querySelectorAll(selector),
+  ];
 
   function playTrack(id) {
     const row = $('.row[data-id="' + String(id).replace(/[^0-9]/g, "") + '"]');
@@ -13,16 +15,24 @@
     const trackButton = event.target.closest("[data-home-track]");
     if (trackButton) {
       if (trackButton.dataset.homeAudio) {
-        window.dispatchEvent(new CustomEvent("pulse:play-catalog-track", { detail: {
-          title: trackButton.dataset.homeTitle,
-          artist: trackButton.dataset.homeArtist,
-          src: trackButton.dataset.homeAudio,
-          url: trackButton.dataset.homeUrl,
-          artwork: trackButton.dataset.homeArtwork,
-          source: "Apple/iTunes Top Songs"
-        }}));
+        window.dispatchEvent(
+          new CustomEvent("pulse:play-catalog-track", {
+            detail: {
+              title: trackButton.dataset.homeTitle,
+              artist: trackButton.dataset.homeArtist,
+              src: trackButton.dataset.homeAudio,
+              url: trackButton.dataset.homeUrl,
+              artwork: trackButton.dataset.homeArtwork,
+              source: "Apple/iTunes Top Songs",
+            },
+          }),
+        );
       } else if (trackButton.dataset.homeUrl) {
-        window.open(trackButton.dataset.homeUrl, "_blank", "noopener,noreferrer");
+        window.open(
+          trackButton.dataset.homeUrl,
+          "_blank",
+          "noopener,noreferrer",
+        );
       } else {
         playTrack(trackButton.dataset.homeTrack);
       }
@@ -70,9 +80,11 @@
       );
       if (view === "search") {
         const source = $("#sourceHub");
-        if (source) source.scrollIntoView({ block: "start", behavior: "smooth" });
+        if (source)
+          source.scrollIntoView({ block: "start", behavior: "smooth" });
         const search = $("#unifiedQuery") || $("#search");
-        if (search) setTimeout(() => search.focus({ preventScroll: true }), 250);
+        if (search)
+          setTimeout(() => search.focus({ preventScroll: true }), 250);
       }
       if (view === "library") {
         const library = $('.nav[data-view="library"]');
@@ -100,40 +112,65 @@
     const cards = $$(".featured-card[data-home-track]");
     const speedTracks = $$(".speed-track[data-home-track]");
     let prefs = {};
-    try { prefs = JSON.parse(localStorage.getItem("pulse.prefs") || "{}"); } catch (_) {}
+    try {
+      prefs = JSON.parse(localStorage.getItem("pulse.prefs") || "{}");
+    } catch (_) {}
     const country = String(prefs.country || "IN").toLowerCase();
     try {
-      const response = await fetch("https://itunes.apple.com/" + country + "/rss/topsongs/limit=10/json", {
-        headers: { Accept: "application/json" }
-      });
+      const response = await fetch(
+        "https://itunes.apple.com/" + country + "/rss/topsongs/limit=10/json",
+        {
+          headers: { Accept: "application/json" },
+        },
+      );
       if (!response.ok) throw new Error("Country chart unavailable");
       const payload = await response.json();
       const entries = payload.feed?.entry || [];
-      const popular = entries.slice(0, Math.max(cards.length, speedTracks.length));
-      const hydrated = await Promise.all(popular.map(async (entry) => {
-        const title = entry["im:name"]?.label || "";
-        const artist = entry["im:artist"]?.label || "Unknown artist";
-        const artwork = (entry["im:image"] || []).slice(-1)[0]?.label || "";
-        const url = entry.link?.attributes?.href || "https://music.apple.com/";
-        if (!title) return null;
-        try {
-          const lookup = await fetch("https://itunes.apple.com/search?term=" +
-            encodeURIComponent(title + " " + artist) + "&country=" + encodeURIComponent(country) +
-            "&entity=song&limit=5&media=music", { headers: { Accept: "application/json" } });
-          if (!lookup.ok) throw new Error("Track lookup unavailable");
-          const data = await lookup.json();
-          const exact = (data.results || []).find((item) =>
-            (item.trackName || "").toLowerCase() === title.toLowerCase() &&
-            (item.artistName || "").toLowerCase() === artist.toLowerCase()
-          ) || (data.results || [])[0];
-          return {
-            title, artist, artwork: exact?.artworkUrl100?.replace("100x100bb", "600x600bb") || artwork,
-            preview: exact?.previewUrl || "", url: exact?.trackViewUrl || url
-          };
-        } catch (_) {
-          return { title, artist, artwork, preview: "", url };
-        }
-      }));
+      const popular = entries.slice(
+        0,
+        Math.max(cards.length, speedTracks.length),
+      );
+      const hydrated = await Promise.all(
+        popular.map(async (entry) => {
+          const title = entry["im:name"]?.label || "";
+          const artist = entry["im:artist"]?.label || "Unknown artist";
+          const artwork = (entry["im:image"] || []).slice(-1)[0]?.label || "";
+          const url =
+            entry.link?.attributes?.href || "https://music.apple.com/";
+          if (!title) return null;
+          try {
+            const lookup = await fetch(
+              "https://itunes.apple.com/search?term=" +
+                encodeURIComponent(title + " " + artist) +
+                "&country=" +
+                encodeURIComponent(country) +
+                "&entity=song&limit=5&media=music",
+              { headers: { Accept: "application/json" } },
+            );
+            if (!lookup.ok) throw new Error("Track lookup unavailable");
+            const data = await lookup.json();
+            const exact =
+              (data.results || []).find(
+                (item) =>
+                  (item.trackName || "").toLowerCase() ===
+                    title.toLowerCase() &&
+                  (item.artistName || "").toLowerCase() ===
+                    artist.toLowerCase(),
+              ) || (data.results || [])[0];
+            return {
+              title,
+              artist,
+              artwork:
+                exact?.artworkUrl100?.replace("100x100bb", "600x600bb") ||
+                artwork,
+              preview: exact?.previewUrl || "",
+              url: exact?.trackViewUrl || url,
+            };
+          } catch (_) {
+            return { title, artist, artwork, preview: "", url };
+          }
+        }),
+      );
       const tracks = hydrated.filter(Boolean);
       function applyTrack(element, item, isFeatured) {
         if (!element || !item) return;
@@ -155,7 +192,9 @@
             image.src = item.artwork;
             image.alt = "";
             image.loading = "lazy";
-            image.addEventListener("error", () => image.remove(), { once: true });
+            image.addEventListener("error", () => image.remove(), {
+              once: true,
+            });
             $(".home-real-artwork", element)?.remove();
             element.prepend(image);
           }
@@ -167,13 +206,17 @@
         }
       }
       cards.forEach((card, index) => applyTrack(card, tracks[index], true));
-      speedTracks.forEach((row, index) => applyTrack(row, tracks[index + cards.length], false));
+      speedTracks.forEach((row, index) =>
+        applyTrack(row, tracks[index + cards.length], false),
+      );
     } catch (_) {
       // Keep the existing offline/demo home if the public chart endpoint is unavailable.
     }
   }
 
-  window.addEventListener("pulse:preferences-changed", () => { void loadHomeArtwork(); });
+  window.addEventListener("pulse:preferences-changed", () => {
+    void loadHomeArtwork();
+  });
 
   const artworkStyle = document.createElement("style");
   artworkStyle.textContent = `
@@ -199,7 +242,9 @@
   `;
   document.head.append(artworkStyle);
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadHomeArtwork, { once: true });
+    document.addEventListener("DOMContentLoaded", loadHomeArtwork, {
+      once: true,
+    });
   } else {
     void loadHomeArtwork();
   }

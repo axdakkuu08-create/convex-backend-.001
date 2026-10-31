@@ -144,7 +144,10 @@ test("Internet Archive provider sanitizes query text and selects playable audio 
   assert.equal(api.pickAudioFile([{ name: "poster.png" }]), null);
   assert.equal(api.parseDuration("3:25"), 205);
   assert.equal(api.pickAudioFile([{ name: "tiny.mp3", size: 1200 }]), null);
-  assert.equal(api.pickAudioFile([{ name: "full.mp3", size: 800000 }]).name, "full.mp3");
+  assert.equal(
+    api.pickAudioFile([{ name: "full.mp3", size: 800000 }]).name,
+    "full.mp3",
+  );
 });
 
 test("Internet Archive search rejects too-short queries without making a request", async () => {

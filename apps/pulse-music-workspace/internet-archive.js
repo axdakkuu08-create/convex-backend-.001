@@ -17,15 +17,23 @@
 
   function pickAudioFile(files) {
     if (!Array.isArray(files)) return null;
-    const candidates = files.filter((file) =>
-      file &&
-      typeof file.name === "string" &&
-      AUDIO_EXTENSIONS.test(file.name) &&
-      !/_(spectrogram|waveform|essentia)|\.(xml|json|jpg|jpeg|png|gif|txt|torrent)$/i.test(file.name) &&
-      (!Number(file.size) || Number(file.size) >= 256000)
+    const candidates = files.filter(
+      (file) =>
+        file &&
+        typeof file.name === "string" &&
+        AUDIO_EXTENSIONS.test(file.name) &&
+        !/_(spectrogram|waveform|essentia)|\.(xml|json|jpg|jpeg|png|gif|txt|torrent)$/i.test(
+          file.name,
+        ) &&
+        (!Number(file.size) || Number(file.size) >= 256000),
     );
-    return candidates.find((file) => /\.mp3$/i.test(file.name)) ||
-      candidates.find((file) => /\.(m4a|ogg|oga|opus|wav|flac)$/i.test(file.name)) || null;
+    return (
+      candidates.find((file) => /\.mp3$/i.test(file.name)) ||
+      candidates.find((file) =>
+        /\.(m4a|ogg|oga|opus|wav|flac)$/i.test(file.name),
+      ) ||
+      null
+    );
   }
 
   function parseDuration(value) {
@@ -40,52 +48,104 @@
 
   async function search(query, limit, options) {
     const term = safeQuery(query);
-    if (term.length < 2) throw new Error("Enter at least two characters to search the Internet Archive.");
+    if (term.length < 2)
+      throw new Error(
+        "Enter at least two characters to search the Internet Archive.",
+      );
     const opts = options || {};
     const requested = Math.min(Math.max(Number(limit) || 24, 1), MAX_RESULTS);
     const quoted = '"' + term.replace(/"/g, "") + '"';
-    const clauses = ["mediatype:audio", "(title:" + quoted + " OR creator:" + quoted + " OR subject:" + quoted + ")"];
+    const clauses = [
+      "mediatype:audio",
+      "(title:" +
+        quoted +
+        " OR creator:" +
+        quoted +
+        " OR subject:" +
+        quoted +
+        ")",
+    ];
     if (opts.genre) clauses.push('subject:"' + safeQuery(opts.genre) + '"');
-    if (opts.countryName) clauses.push('subject:"' + safeQuery(opts.countryName) + '"');
+    if (opts.countryName)
+      clauses.push('subject:"' + safeQuery(opts.countryName) + '"');
     const params = new URLSearchParams({
       q: clauses.join(" AND "),
       fl: "identifier,title,creator,date,year,licenseurl,rights,description",
       rows: String(requested),
       page: "1",
       output: "json",
-      sort: "downloads desc"
+      sort: "downloads desc",
     });
-    const response = await fetch(SEARCH_URL + "?" + params.toString(), { headers: { Accept: "application/json" } });
-    if (!response.ok) throw new Error("Internet Archive search is temporarily unavailable (" + response.status + ").");
+    const response = await fetch(SEARCH_URL + "?" + params.toString(), {
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok)
+      throw new Error(
+        "Internet Archive search is temporarily unavailable (" +
+          response.status +
+          ").",
+      );
     const payload = await response.json();
-    const docs = payload && payload.response && Array.isArray(payload.response.docs) ? payload.response.docs : [];
+    const docs =
+      payload && payload.response && Array.isArray(payload.response.docs)
+        ? payload.response.docs
+        : [];
     const items = new Array(docs.length);
     let cursor = 0;
     async function worker() {
       while (cursor < docs.length) {
         const position = cursor++;
         const doc = docs[position];
-        if (!doc || !/^[A-Za-z0-9_-]{1,100}$/.test(doc.identifier || "")) continue;
+        if (!doc || !/^[A-Za-z0-9_-]{1,100}$/.test(doc.identifier || ""))
+          continue;
         try {
-          const metaResponse = await fetch(META_URL + encodeURIComponent(doc.identifier), { headers: { Accept: "application/json" } });
+          const metaResponse = await fetch(
+            META_URL + encodeURIComponent(doc.identifier),
+            { headers: { Accept: "application/json" } },
+          );
           if (!metaResponse.ok) continue;
           const meta = await metaResponse.json();
           const file = pickAudioFile(meta.files);
           if (!file) continue;
           const metadata = meta.metadata || {};
-          const license = metadata.licenseurl || metadata.rights || doc.licenseurl || doc.rights || "";
-          const durationSeconds = parseDuration(metadata.runtime || metadata.length || file.length || file.duration);
-          if (opts.minDurationSeconds && durationSeconds && durationSeconds < opts.minDurationSeconds) continue;
+          const license =
+            metadata.licenseurl ||
+            metadata.rights ||
+            doc.licenseurl ||
+            doc.rights ||
+            "";
+          const durationSeconds = parseDuration(
+            metadata.runtime || metadata.length || file.length || file.duration,
+          );
+          if (
+            opts.minDurationSeconds &&
+            durationSeconds &&
+            durationSeconds < opts.minDurationSeconds
+          )
+            continue;
           items[position] = {
             id: doc.identifier,
             title: String(metadata.title || doc.title || doc.identifier),
-            artist: String(metadata.creator || metadata.artist || doc.creator || "Internet Archive contributor"),
-            year: String(metadata.year || metadata.date || doc.year || doc.date || ""),
+            artist: String(
+              metadata.creator ||
+                metadata.artist ||
+                doc.creator ||
+                "Internet Archive contributor",
+            ),
+            year: String(
+              metadata.year || metadata.date || doc.year || doc.date || "",
+            ),
             durationSeconds,
             fileSize: Number(file.size) || 0,
             license: String(license),
-            audioUrl: "https://archive.org/download/" + encodeURIComponent(doc.identifier) + "/" + encodeURIComponent(file.name),
-            pageUrl: "https://archive.org/details/" + encodeURIComponent(doc.identifier)
+            audioUrl:
+              "https://archive.org/download/" +
+              encodeURIComponent(doc.identifier) +
+              "/" +
+              encodeURIComponent(file.name),
+            pageUrl:
+              "https://archive.org/details/" +
+              encodeURIComponent(doc.identifier),
           };
         } catch (_) {
           // An unavailable item must not fail the rest of the catalogue search.

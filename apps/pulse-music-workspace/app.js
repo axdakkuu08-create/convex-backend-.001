@@ -291,7 +291,10 @@ async function play() {
     await audio.play();
     playing = true;
     $("audioStatus").textContent = tracks[index].archivePage
-      ? "Playing · " + tracks[index].title + " · Rights: " + (tracks[index].archiveLicense || "check the Archive item page")
+      ? "Playing · " +
+        tracks[index].title +
+        " · Rights: " +
+        (tracks[index].archiveLicense || "check the Archive item page")
       : "Playing · " + tracks[index].title;
     $("play").textContent = "Ⅱ";
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
@@ -650,26 +653,32 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
     title: String(item.title || "Catalogue track"),
     artist: String(item.artist || "Unknown artist"),
     mood: item.source || "Catalogue",
-    time: item.duration || (item.source === "Apple/iTunes catalogue" ? "Preview" : "—"),
+    time:
+      item.duration ||
+      (item.source === "Apple/iTunes catalogue" ? "Preview" : "—"),
     cover: "violet",
     symbol: "♫",
     src: item.src,
     customUrl: true,
     artwork: item.artwork || "",
     sourcePage: item.url || "",
-    archivePage: String(item.source || "").includes("Internet Archive") ? (item.url || "") : "",
+    archivePage: String(item.source || "").includes("Internet Archive")
+      ? item.url || ""
+      : "",
     archiveLicense: item.license || "",
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
   if (item.artwork) {
-    $("cover").style.backgroundImage = 'url("' + item.artwork.replace(/["\\]/g, "") + '")';
+    $("cover").style.backgroundImage =
+      'url("' + item.artwork.replace(/["\\]/g, "") + '")';
     $("cover").style.backgroundSize = "cover";
     $("cover").textContent = "";
   }
-  $("audioStatus").textContent = item.source === "Apple/iTunes catalogue"
-    ? "Playing the available catalogue preview. Open the provider page for full-track options."
-    : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
+  $("audioStatus").textContent =
+    item.source === "Apple/iTunes catalogue"
+      ? "Playing the available catalogue preview. Open the provider page for full-track options."
+      : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
   toast("Loading " + track.title);
 });
 
