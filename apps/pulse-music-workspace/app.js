@@ -1134,7 +1134,7 @@ $("search").addEventListener("keydown", (event) => {
     void searchOnlineCatalog(query);
   }
 });
-async async function searchOnlineCatalog(term) {
+async function searchOnlineCatalog(term) {
   const cleanTerm = String(term || "").trim();
   if (cleanTerm.length < 2 || onlineSearchBusy) return;
   onlineSearchBusy = true;
