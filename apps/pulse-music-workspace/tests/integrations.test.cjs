@@ -209,6 +209,7 @@ test("discovery preferences and latest-added search are wired to the Archive ada
   assert.match(appSource, /async function searchOnlineCatalog\(term\)/);
   assert.match(appSource, /const onlineTracks = tracks\.filter\(\(track\) => onlineSearchIds\.has\(track\.id\)\)/);
   assert.match(appSource, /renderMobileListeningHome\(\);/);
+  assert.match(archiveSource, /previewPenalty/);
   assert.match(archiveSource, /addeddate desc/);
   assert.match(archiveSource, /addedDate:/);
 });
