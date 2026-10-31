@@ -797,7 +797,9 @@ async function loadArchiveDiscovery() {
       items = [];
     }
   }
-  items = items.filter((item) => item?.src && item.source === "internet-archive");
+  items = items.filter(
+    (item) => item?.src && item.source === "internet-archive",
+  );
   if (!items.length) {
     status.textContent =
       "No full-length Archive recordings matched these preferences. Try another genre or use Sources → Internet Archive. Short previews are not shown.";
@@ -1162,7 +1164,9 @@ async function searchOnlineCatalog(term) {
   onlineSearchBusy = true;
   onlineSearchIds.clear();
   $("audioStatus").textContent =
-    'Searching full-length Internet Archive recordings for "' + cleanTerm + '"…';
+    'Searching full-length Internet Archive recordings for "' +
+    cleanTerm +
+    '"…';
   try {
     const prefs = discoveryPreferences();
     if (!window.PULSE_ARCHIVE?.search)
@@ -1181,7 +1185,11 @@ async function searchOnlineCatalog(term) {
         " " +
         String(item.artist || "")
       ).toLowerCase();
-      return item.src && terms.length > 0 && terms.every((word) => haystack.includes(word));
+      return (
+        item.src &&
+        terms.length > 0 &&
+        terms.every((word) => haystack.includes(word))
+      );
     });
     if (!unique.length) {
       $("audioStatus").textContent =
@@ -1222,7 +1230,8 @@ async function searchOnlineCatalog(term) {
       " matching full-length Archive recordings found. Check each item's rights and streaming availability; short previews are excluded.";
   } catch (error) {
     $("audioStatus").textContent =
-      "Full-track search failed: " + (error?.message || "check your connection.");
+      "Full-track search failed: " +
+      (error?.message || "check your connection.");
   } finally {
     onlineSearchBusy = false;
   }
