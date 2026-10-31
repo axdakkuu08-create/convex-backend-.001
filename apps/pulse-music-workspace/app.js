@@ -189,7 +189,13 @@ function render() {
         '</small></div></div><div class="moodcell"><span class="chip">' +
         escapeHTML(t.mood) +
         '</span><small class="source-label">' +
-        escapeHTML(t.source === "itunes-preview" ? "30-SEC PREVIEW" : t.source === "internet-archive" ? "INTERNET ARCHIVE" : t.source || "LOCAL") +
+        escapeHTML(
+        t.source === "itunes-preview"
+          ? "30-SEC PREVIEW"
+          : t.source === "internet-archive"
+            ? "INTERNET ARCHIVE"
+            : t.source || "LOCAL",
+      ) +
         '</small></div><div class="time">' +
         t.time +
         '</div><button class="rowadd" data-playlist-add="1" aria-label="Add to playlist">＋</button><button class="rowlike ' +
@@ -1162,29 +1168,25 @@ async function searchOnlineCatalog(term) {
           (item.id && !item.catalogId && track.archiveId === item.id) ||
           track.src === item.src,
       );
-      const track =
-        existing ||
-        {
-          id: item.catalogId
-            ? "itunes:" + item.catalogId
-            : "archive:" + item.id,
-          catalogId: item.catalogId,
-          archiveId: item.catalogId ? undefined : item.id,
-          title: item.title || "Untitled track",
-          artist: item.artist || "Unknown artist",
-          mood: item.genre || "Archive",
-          time: item.time || "—",
-          cover: item.cover || "blue",
-          symbol: item.symbol || "♫",
-          src: item.src,
-          sourceUrl: item.sourceUrl || item.src,
-          sourcePage: item.sourcePage || "",
-          source: item.source || "internet-archive",
-          artworkUrl: item.artworkUrl || undefined,
-          releaseDate: item.releaseDate || "",
-          licenseUrl: item.licenseUrl || undefined,
-          rights: item.rights || undefined,
-        };
+      const track = existing || {
+        id: item.catalogId ? "itunes:" + item.catalogId : "archive:" + item.id,
+        catalogId: item.catalogId,
+        archiveId: item.catalogId ? undefined : item.id,
+        title: item.title || "Untitled track",
+        artist: item.artist || "Unknown artist",
+        mood: item.genre || "Archive",
+        time: item.time || "—",
+        cover: item.cover || "blue",
+        symbol: item.symbol || "♫",
+        src: item.src,
+        sourceUrl: item.sourceUrl || item.src,
+        sourcePage: item.sourcePage || "",
+        source: item.source || "internet-archive",
+        artworkUrl: item.artworkUrl || undefined,
+        releaseDate: item.releaseDate || "",
+        licenseUrl: item.licenseUrl || undefined,
+        rights: item.rights || undefined,
+      };
       if (!existing) {
         tracks.push(track);
       }
@@ -1496,29 +1498,57 @@ function renderMobileListeningHome() {
   const speed = $("mobileSpeedDial");
   if (!picks || !speed) return;
   const featured = tracks.slice(0, 5);
-  picks.innerHTML = featured.map((track, i) =>
-    '<article class="mobile-pick" data-mobile-track="' + escapeHTML(track.id) + '">' +
-      '<div class="mobile-pick-art">' + escapeHTML(track.symbol || "♫") + '</div>' +
-      '<div class="mobile-pick-info"><strong>' + escapeHTML(track.title) + '</strong><small>' + escapeHTML(track.artist) + '</small></div>' +
-    '</article>'
-  ).join("");
-  speed.innerHTML = tracks.slice(0, 6).map((track) =>
-    '<div class="mobile-speed-row"><div class="mobile-speed-art">' + escapeHTML(track.symbol || "♫") + '</div>' +
-    '<div><strong>' + escapeHTML(track.title) + '</strong><small>' + escapeHTML(track.artist) + '</small></div>' +
-    '<button type="button" data-mobile-play="' + escapeHTML(track.id) + '" aria-label="Play ' + escapeHTML(track.title) + '">▶</button></div>'
-  ).join("");
+  picks.innerHTML = featured
+    .map(
+      (track) =>
+        '<article class="mobile-pick" data-mobile-track="' +
+        escapeHTML(track.id) +
+        '">' +
+        '<div class="mobile-pick-art">' +
+        escapeHTML(track.symbol || "♫") +
+        "</div>" +
+        '<div class="mobile-pick-info"><strong>' +
+        escapeHTML(track.title) +
+        "</strong><small>" +
+        escapeHTML(track.artist) +
+        "</small></div></article>",
+    )
+    .join("");
+  speed.innerHTML = tracks
+    .slice(0, 6)
+    .map(
+      (track) =>
+        '<div class="mobile-speed-row"><div class="mobile-speed-art">' +
+        escapeHTML(track.symbol || "♫") +
+        "</div>" +
+        "<div><strong>" +
+        escapeHTML(track.title) +
+        "</strong><small>" +
+        escapeHTML(track.artist) +
+        "</small></div>" +
+        '<button type="button" data-mobile-play="' +
+        escapeHTML(track.id) +
+        '" aria-label="Play ' +
+        escapeHTML(track.title) +
+        '">▶</button></div>',
+    )
+    .join("");
 }
 renderMobileListeningHome();
 $("mobileTopPicks")?.addEventListener("click", (event) => {
   const card = event.target.closest("[data-mobile-track]");
   if (!card) return;
-  const i = tracks.findIndex((track) => String(track.id) === card.dataset.mobileTrack);
+  const i = tracks.findIndex(
+    (track) => String(track.id) === card.dataset.mobileTrack,
+  );
   if (i >= 0) setTrack(i, true);
 });
 $("mobileSpeedDial")?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-mobile-play]");
   if (!button) return;
-  const i = tracks.findIndex((track) => String(track.id) === button.dataset.mobilePlay);
+  const i = tracks.findIndex(
+    (track) => String(track.id) === button.dataset.mobilePlay,
+  );
   if (i >= 0) setTrack(i, true);
 });
 $("mobileVoiceSearch")?.addEventListener("click", () => {
@@ -1530,13 +1560,22 @@ $("mobileVoiceSearch")?.addEventListener("click", () => {
 });
 document.querySelectorAll("[data-mobile-nav]").forEach((button) => {
   button.addEventListener("click", () => {
-    document.querySelectorAll("[data-mobile-nav]").forEach((item) => item.classList.remove("selected"));
+    document
+      .querySelectorAll("[data-mobile-nav]")
+      .forEach((item) => item.classList.remove("selected"));
     button.classList.add("selected");
     const target = button.dataset.mobileNav;
     if (target === "search") $("mobileVoiceSearch")?.click();
-    if (target === "library") { view = "library"; render(); toast("Library selected"); }
-    if (target === "playlists") { $("playlistLibrary").style.display = "block"; $("playlistLibrary").scrollIntoView({behavior:"smooth"}); }
-    if (target === "home") window.scrollTo({top:0,behavior:"smooth"});
+    if (target === "library") {
+      view = "library";
+      render();
+      toast("Library selected");
+    }
+    if (target === "playlists") {
+      $("playlistLibrary").style.display = "block";
+      $("playlistLibrary").scrollIntoView({ behavior: "smooth" });
+    }
+    if (target === "home") window.scrollTo({ top: 0, behavior: "smooth" });
   });
 });
 
