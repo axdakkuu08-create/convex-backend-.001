@@ -118,6 +118,9 @@
           sourceUrl: itemUrl,
           licenseUrl: String(details.licenseurl || doc.licenseurl || ""),
           rights: String(details.rights || doc.rights || ""),
+          time: formatDuration(file.duration || details.runtime || doc.runtime),
+          durationSeconds: Number.parseFloat(String(file.duration || details.runtime || doc.runtime || "")) || null,
+          source: "internet-archive",
           format: String(file.format || file.mimetype || "Audio"),
         };
       }),
