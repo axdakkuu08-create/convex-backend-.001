@@ -173,6 +173,8 @@
     }
   }
 
+  window.addEventListener("pulse:preferences-changed", () => { void loadHomeArtwork(); });
+
   const artworkStyle = document.createElement("style");
   artworkStyle.textContent = `
     .featured-card { position: relative; overflow: hidden; isolation: isolate; }
