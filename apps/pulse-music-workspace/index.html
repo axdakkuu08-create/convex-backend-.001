@@ -92,12 +92,13 @@
               <small>LISTEN YOUR WAY</small>
               <h2>Connect a music source</h2>
             </div>
-            <span class="source-badge">3 WEB PLAYERS</span>
+            <span class="source-badge">4 MUSIC SOURCES</span>
           </div>
           <p class="source-copy">
-            Search Jamendo's licensed independent-music catalogue, or load a
-            YouTube or SoundCloud link. Jamendo audio plays in Pulse's shared
-            player; embedded providers keep their own controls.
+            Search Jamendo or Internet Archive audio, or load a YouTube or
+            SoundCloud link. Direct audio sources use Pulse's shared player;
+            embedded providers keep their own controls. Internet Archive item
+            rights and streaming availability vary.
           </p>
           <div class="jamendo-search">
             <form id="jamendoForm" class="source-form">
@@ -128,6 +129,39 @@
               class="jamendo-results"
               aria-live="polite"
             ></div>
+          </div>
+          <div class="jamendo-search archive-search">
+            <form id="archiveForm" class="source-form">
+              <label class="source-input-label" for="archiveQuery"
+                >Search Internet Archive audio</label
+              >
+              <div class="source-input-row">
+                <input
+                  id="archiveQuery"
+                  type="search"
+                  placeholder="Search recordings, artists, or titles…"
+                  autocomplete="off"
+                />
+                <button class="primary" type="submit">Search Archive</button>
+              </div>
+            </form>
+            <p
+              id="archiveStatus"
+              class="source-error"
+              role="status"
+              aria-live="polite"
+            >
+              Search public Internet Archive metadata without an API key.
+            </p>
+            <div
+              id="archiveResults"
+              class="jamendo-results"
+              aria-live="polite"
+            ></div>
+            <p class="embed-note">
+              Playback depends on the item's files and access settings. Check
+              each item's rights and licence before reuse.
+            </p>
           </div>
           <form id="sourceForm" class="source-form">
             <label class="source-input-label" for="sourceUrl">Music link</label>
@@ -311,6 +345,7 @@
     </section>
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
+    <script src="archive-source.js"></script>
     <script src="app.js"></script>
     <script type="module" src="cloud-sync.js"></script>
   </body>
