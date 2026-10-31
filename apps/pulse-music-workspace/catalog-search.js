@@ -41,12 +41,13 @@
       ? '<small class="catalog-rights">' + esc(item.license || "No licence statement found; check the item page") +
         ' · <a href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">Item & rights ↗</a></small>'
       : "";
+    const add = '<button class="catalog-add" type="button" data-add-catalog-index="' + index + '">＋ Playlist</button>';
     return '<article class="catalog-result">' + art +
       '<div class="catalog-copy"><strong>' + esc(item.title) + "</strong><small>" +
       esc(item.artist) + (item.album ? " · " + esc(item.album) : "") +
       (item.duration ? " · " + esc(item.duration) : "") +
       '</small><small class="catalog-source">' + esc(item.source) + "</small>" + rights +
-      "</div>" + action + "</article>";
+      "</div>" + action + add + "</article>";
   };
 
   function savePreferences() {
@@ -151,5 +152,14 @@
         source: item.source, artwork: item.artwork || "", license: item.license || "", duration: item.duration || ""
       }
     }));
+  });
+  results.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-add-catalog-index]");
+    if (!button) return;
+    const item = window.PulseCatalogResults?.[Number(button.dataset.addCatalogIndex)];
+    if (item) window.dispatchEvent(new CustomEvent("pulse:add-track-to-playlist", { detail: {
+      title: item.title, artist: item.artist, src: item.audioUrl || item.preview,
+      url: item.url, artwork: item.artwork || "", license: item.license || "", source: item.source
+    }}));
   });
 })();
