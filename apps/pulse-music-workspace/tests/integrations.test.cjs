@@ -317,8 +317,14 @@ test("main search returns only full-length Archive recordings, not catalogue pre
 
 test("home discovery and generated mixes use Archive recordings instead of 30-second previews", () => {
   assert.match(appSource, /async function loadArchiveDiscovery/);
-  assert.match(appSource, /items = items\.filter\(\(item\) => item\?\.src && item\.source === "internet-archive"\)/);
-  assert.doesNotMatch(appSource, /if \(items\.length < 3 && window\.PULSE_CATALOG/);
+  assert.match(
+    appSource,
+    /items = items\.filter\(\(item\) => item\?\.src && item\.source === "internet-archive"/,
+  );
+  assert.doesNotMatch(
+    appSource,
+    /if \(items\.length < 3 && window\.PULSE_CATALOG/,
+  );
   assert.match(archiveSource, /clearlyPreview/);
   assert.match(archiveSource, /tooShort/);
 });
