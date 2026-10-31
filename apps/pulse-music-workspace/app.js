@@ -290,7 +290,9 @@ async function play() {
   try {
     await audio.play();
     playing = true;
-    $("audioStatus").textContent = "Playing · " + tracks[index].title;
+    $("audioStatus").textContent = tracks[index].archivePage
+      ? "Playing · " + tracks[index].title + " · Rights: " + (tracks[index].archiveLicense || "check the Archive item page")
+      : "Playing · " + tracks[index].title;
     $("play").textContent = "Ⅱ";
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
     recent = recent.slice(0, 6);
@@ -655,6 +657,7 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
     customUrl: true,
     artwork: item.artwork || "",
     sourcePage: item.url || "",
+    archivePage: String(item.source || "").includes("Internet Archive") ? (item.url || "") : "",
     archiveLicense: item.license || "",
   };
   tracks.splice(index + 1, 0, track);
