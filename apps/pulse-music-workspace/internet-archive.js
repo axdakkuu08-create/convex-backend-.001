@@ -3,14 +3,14 @@
 
   const SEARCH_URL = "https://archive.org/advancedsearch.php";
   const META_URL = "https://archive.org/metadata/";
-  const AUDIO_EXTENSIONS = /\\.(mp3|m4a|ogg|oga|opus|wav|flac)$/i;
+  const AUDIO_EXTENSIONS = /\.(mp3|m4a|ogg|oga|opus|wav|flac)$/i;
   const MAX_RESULTS = 24;
 
   function safeQuery(value) {
     return String(value || "")
       .trim()
-      .replace(/[\\\\+\\-!(){}\\[\\]^"~*?:\\/]/g, " ")
-      .replace(/\\s+/g, " ")
+      .replace(/[\\+\-!(){}\[\]^"~*?:\/]/g, " ")
+      .replace(/\s+/g, " ")
       .trim()
       .slice(0, 100);
   }
@@ -21,18 +21,18 @@
       file &&
       typeof file.name === "string" &&
       AUDIO_EXTENSIONS.test(file.name) &&
-      !/_(spectrogram|waveform|essentia)|\\.(xml|json|jpg|jpeg|png|gif|txt|torrent)$/i.test(file.name) &&
+      !/_(spectrogram|waveform|essentia)|\.(xml|json|jpg|jpeg|png|gif|txt|torrent)$/i.test(file.name) &&
       (!Number(file.size) || Number(file.size) >= 256000)
     );
-    return candidates.find((file) => /\\.mp3$/i.test(file.name)) ||
-      candidates.find((file) => /\\.(m4a|ogg|oga|opus|wav|flac)$/i.test(file.name)) || null;
+    return candidates.find((file) => /\.mp3$/i.test(file.name)) ||
+      candidates.find((file) => /\.(m4a|ogg|oga|opus|wav|flac)$/i.test(file.name)) || null;
   }
 
   function parseDuration(value) {
     if (typeof value === "number" && Number.isFinite(value)) return value;
     const text = String(value || "").trim();
     if (!text) return 0;
-    if (/^\\d+(?:\\.\\d+)?$/.test(text)) return Number(text);
+    if (/^\d+(?:\.\d+)?$/.test(text)) return Number(text);
     const parts = text.split(":").map(Number);
     if (parts.some((part) => !Number.isFinite(part))) return 0;
     return parts.reduce((total, part) => total * 60 + part, 0);
