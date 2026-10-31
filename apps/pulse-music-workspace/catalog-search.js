@@ -137,6 +137,7 @@
   [countrySelect, genreSelect].filter(Boolean).forEach((control) => {
     control.addEventListener("change", () => {
       savePreferences();
+      window.dispatchEvent(new CustomEvent("pulse:preferences-changed", { detail: { ...preferences } }));
       if (lastQuery) void search(lastQuery);
     });
   });
