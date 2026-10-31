@@ -56,30 +56,30 @@
       return;
     }
     let playlists = read();
+    let selectedIndex = -1;
     if (!playlists.length) {
       const name = prompt("Create your first playlist");
       if (!name) return;
       const created = create(name);
       if (!created) return;
       playlists = read();
+      selectedIndex = playlists.length - 1;
     } else {
       const choices = playlists.map((item, index) => (index + 1) + ". " + item.name).join("\n");
       const answer = prompt("Add to which playlist? Enter a number, or type a new playlist name:\n" + choices);
       if (!answer) return;
       const number = Number(answer);
       if (Number.isInteger(number) && number >= 1 && number <= playlists.length) {
-        // Use the selected existing playlist.
+        selectedIndex = number - 1;
       } else {
         const created = create(answer);
         if (!created) return;
         playlists = read();
+        selectedIndex = playlists.length - 1;
       }
     }
     playlists = read();
-    const selectedNumber = Number(window.__pulsePlaylistChoice);
-    const target = selectedNumber >= 1 && selectedNumber <= playlists.length
-      ? playlists[selectedNumber - 1]
-      : playlists[playlists.length - 1];
+    const target = playlists[selectedIndex >= 0 ? selectedIndex : playlists.length - 1];
     const duplicate = target.tracks.some((item) => item.src === track.src);
     if (!duplicate) target.tracks.push({
       title: String(track.title || "Untitled track"),
