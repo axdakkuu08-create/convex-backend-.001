@@ -37,7 +37,17 @@
       if (/\.wav$/.test(name) || format.includes("wav")) return 4;
       return 5;
     };
-    candidates.sort((a, b) => rank(a) - rank(b));
+    const previewPenalty = (file) => {
+      const name = String(file.name || "").toLowerCase();
+      const duration = Number.parseFloat(String(file.duration || ""));
+      return /preview|sample|30.?sec|snippet/.test(name) ||
+        (Number.isFinite(duration) && duration > 0 && duration <= 35)
+        ? 1
+        : 0;
+    };
+    candidates.sort(
+      (a, b) => previewPenalty(a) - previewPenalty(b) || rank(a) - rank(b),
+    );
     return candidates[0] || null;
   }
 
