@@ -108,6 +108,9 @@ test("cloud playlists are opt-in and use owner-scoped backend functions", () => 
   assert.match(cloudSource, /playlists:listMine/);
   assert.match(cloudSource, /playlists:create/);
   assert.match(cloudSource, /playlists:remove/);
+  assert.match(cloudSource, /library:addToPlaylist/);
+  assert.match(cloudSource, /library:listPlaylistTracks/);
+  assert.match(cloudSource, /library:removeFromPlaylist/);
   assert.match(cloudSource, /template: "convex"/);
   assert.match(configSource, /convexUrl: ""/);
   assert.match(configSource, /clerkPublishableKey: ""/);
@@ -139,6 +142,9 @@ test("Internet Archive provider sanitizes query text and selects playable audio 
     "recording.mp3",
   );
   assert.equal(api.pickAudioFile([{ name: "poster.png" }]), null);
+  assert.equal(api.parseDuration("3:25"), 205);
+  assert.equal(api.pickAudioFile([{ name: "tiny.mp3", size: 1200 }]), null);
+  assert.equal(api.pickAudioFile([{ name: "full.mp3", size: 800000 }]).name, "full.mp3");
 });
 
 test("Internet Archive search rejects too-short queries without making a request", async () => {
