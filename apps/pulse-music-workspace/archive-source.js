@@ -24,9 +24,15 @@
 
   function chooseAudioFile(files) {
     if (!Array.isArray(files)) return null;
-    const candidates = files.filter(
-      (file) => file && file.name && supportedAudio(file),
-    );
+    const candidates = files.filter((file) => {
+      if (!file || !file.name || !supportedAudio(file)) return false;
+      const name = String(file.name || "").toLowerCase();
+      const duration = Number.parseFloat(String(file.duration || ""));
+      const clearlyPreview = /preview|sample|30.?sec|snippet|clip/.test(name);
+      const tooShort =
+        Number.isFinite(duration) && duration > 0 && duration <= 35;
+      return !clearlyPreview && !tooShort;
+    });
     const rank = (file) => {
       const name = String(file.name).toLowerCase();
       const format = String(file.format || "").toLowerCase();
