@@ -12,7 +12,18 @@
   document.addEventListener("click", (event) => {
     const trackButton = event.target.closest("[data-home-track]");
     if (trackButton) {
-      playTrack(trackButton.dataset.homeTrack);
+      if (trackButton.dataset.homeAudio) {
+        window.dispatchEvent(new CustomEvent("pulse:play-catalog-track", { detail: {
+          title: trackButton.dataset.homeTitle,
+          artist: trackButton.dataset.homeArtist,
+          src: trackButton.dataset.homeAudio,
+          url: trackButton.dataset.homeUrl,
+          artwork: trackButton.dataset.homeArtwork,
+          source: "Apple/iTunes Top Songs"
+        }}));
+      } else {
+        playTrack(trackButton.dataset.homeTrack);
+      }
       return;
     }
 
@@ -82,40 +93,82 @@
     document.body.appendChild(nav);
   }
 
-  // Replace the decorative mobile-home gradients with real catalogue artwork
-  // when the public iTunes metadata endpoint returns a matching result.
+  // Load genuine country-chart songs into the mobile home instead of demo-only cards.
   async function loadHomeArtwork() {
     const cards = $$(".featured-card[data-home-track]");
-    const terms = cards.map((card) => {
-      const title = $(".featured-caption b", card);
-      const artist = $(".featured-caption small", card);
-      return { card, query: [title?.textContent, artist?.textContent].filter(Boolean).join(" ") };
-    });
-    await Promise.allSettled(terms.map(async ({ card, query }) => {
-      const response = await fetch(
-        "https://itunes.apple.com/search?term=" + encodeURIComponent(query) + "&entity=song&limit=5&media=music",
-        { headers: { Accept: "application/json" } },
-      );
-      if (!response.ok) throw new Error("Artwork lookup unavailable");
-      const data = await response.json();
-      const expectedTitle = ($(".featured-caption b", card)?.textContent || "").toLowerCase();
-      const match = (data.results || []).find((item) =>
-        (item.trackName || "").toLowerCase() === expectedTitle && item.artworkUrl100,
-      ) || (data.results || []).find((item) => item.artworkUrl100);
-      if (!match) return;
-      const artwork = match.artworkUrl100.replace("100x100bb", "600x600bb");
-      const image = document.createElement("img");
-      image.className = "home-real-artwork";
-      image.src = artwork;
-      image.alt = "";
-      image.loading = "lazy";
-      image.decoding = "async";
-      image.addEventListener("error", () => image.remove(), { once: true });
-      const existing = $(".home-real-artwork", card);
-      if (existing) existing.remove();
-      card.prepend(image);
-      card.dataset.artworkSource = "itunes";
-    }));
+    const speedTracks = $$(".speed-track[data-home-track]");
+    let prefs = {};
+    try { prefs = JSON.parse(localStorage.getItem("pulse.prefs") || "{}"); } catch (_) {}
+    const country = String(prefs.country || "IN").toLowerCase();
+    try {
+      const response = await fetch("https://itunes.apple.com/" + country + "/rss/topsongs/limit=10/json", {
+        headers: { Accept: "application/json" }
+      });
+      if (!response.ok) throw new Error("Country chart unavailable");
+      const payload = await response.json();
+      const entries = payload.feed?.entry || [];
+      const popular = entries.slice(0, Math.max(cards.length, speedTracks.length));
+      const hydrated = await Promise.all(popular.map(async (entry) => {
+        const title = entry["im:name"]?.label || "";
+        const artist = entry["im:artist"]?.label || "Unknown artist";
+        const artwork = (entry["im:image"] || []).slice(-1)[0]?.label || "";
+        const url = entry.link?.attributes?.href || "https://music.apple.com/";
+        if (!title) return null;
+        try {
+          const lookup = await fetch("https://itunes.apple.com/search?term=" +
+            encodeURIComponent(title + " " + artist) + "&country=" + encodeURIComponent(country) +
+            "&entity=song&limit=5&media=music", { headers: { Accept: "application/json" } });
+          if (!lookup.ok) throw new Error("Track lookup unavailable");
+          const data = await lookup.json();
+          const exact = (data.results || []).find((item) =>
+            (item.trackName || "").toLowerCase() === title.toLowerCase() &&
+            (item.artistName || "").toLowerCase() === artist.toLowerCase()
+          ) || (data.results || [])[0];
+          return {
+            title, artist, artwork: exact?.artworkUrl100?.replace("100x100bb", "600x600bb") || artwork,
+            preview: exact?.previewUrl || "", url: exact?.trackViewUrl || url
+          };
+        } catch (_) {
+          return { title, artist, artwork, preview: "", url };
+        }
+      }));
+      const tracks = hydrated.filter(Boolean);
+      function applyTrack(element, item, isFeatured) {
+        if (!element || !item) return;
+        element.dataset.homeTitle = item.title;
+        element.dataset.homeArtist = item.artist;
+        element.dataset.homeAudio = item.preview;
+        element.dataset.homeUrl = item.url;
+        element.dataset.homeArtwork = item.artwork;
+        if (isFeatured) {
+          const title = $(".featured-caption b", element);
+          const artist = $(".featured-caption small", element);
+          const artTitle = $(".art-title", element);
+          if (title) title.textContent = item.title;
+          if (artist) artist.textContent = item.artist;
+          if (artTitle) artTitle.textContent = item.title.toUpperCase();
+          if (item.artwork) {
+            const image = document.createElement("img");
+            image.className = "home-real-artwork";
+            image.src = item.artwork;
+            image.alt = "";
+            image.loading = "lazy";
+            image.addEventListener("error", () => image.remove(), { once: true });
+            $(".home-real-artwork", element)?.remove();
+            element.prepend(image);
+          }
+        } else {
+          const title = $(".speed-copy b", element);
+          const artist = $(".speed-copy small", element);
+          if (title) title.textContent = item.title;
+          if (artist) artist.textContent = item.artist;
+        }
+      }
+      cards.forEach((card, index) => applyTrack(card, tracks[index], true));
+      speedTracks.forEach((row, index) => applyTrack(row, tracks[index + cards.length], false));
+    } catch (_) {
+      // Keep the existing offline/demo home if the public chart endpoint is unavailable.
+    }
   }
 
   const artworkStyle = document.createElement("style");
