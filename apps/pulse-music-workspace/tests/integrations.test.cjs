@@ -143,7 +143,12 @@ test("Internet Archive adapter builds public search and resolves only supported 
         },
         files: [
           { name: "cover.jpg", format: "JPEG" },
-          { name: "recording.mp3", format: "VBR MP3", mimetype: "audio/mpeg", duration: "245.8" },
+          {
+            name: "recording.mp3",
+            format: "VBR MP3",
+            mimetype: "audio/mpeg",
+            duration: "245.8",
+          },
         ],
       }),
     };
@@ -207,7 +212,10 @@ test("discovery preferences and latest-added search are wired to the Archive ada
   assert.match(appSource, /discoverySearchTerm/);
   assert.match(appSource, /searchArchiveForDiscovery/);
   assert.match(appSource, /async function searchOnlineCatalog\(term\)/);
-  assert.match(appSource, /const onlineTracks = tracks\.filter\(\(track\) => onlineSearchIds\.has\(track\.id\)\)/);
+  assert.match(
+    appSource,
+    /const onlineTracks = tracks\.filter\(\(track\) => onlineSearchIds\.has\(track\.id\)\)/,
+  );
   assert.match(appSource, /renderMobileListeningHome\(\);/);
   assert.match(archiveSource, /previewPenalty/);
   assert.match(archiveSource, /addeddate desc/);
