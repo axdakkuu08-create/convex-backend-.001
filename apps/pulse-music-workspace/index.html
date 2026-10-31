@@ -10,6 +10,7 @@
     <title>Pulse — Music Workspace</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="mobile-home.css" />
   </head>
   <body data-view="discover">
     <div class="layout">
@@ -75,22 +76,42 @@
           <button id="menu" class="mobile">☰</button>
           <div>Workspace <i>/</i> <b id="crumb">Discover</b></div>
           <label class="search"
-            >⌕ <input id="search" placeholder="Search tracks, artists, or press Enter for online results…" /><kbd
-              >/</kbd
-            ></label
+            >⌕
+            <input
+              id="search"
+              placeholder="Search tracks, artists, or press Enter for online results…"
+            /><kbd>/</kbd></label
           >
           <div class="avatar">P</div>
         </header>
         <section class="intro">
           <div>
             <small class="eyebrow">— YOUR SOUND, ORGANIZED</small>
-            <h1 id="heading">Find your <span>next favourite.</span></h1>
+            <h1 id="heading">Home</h1>
             <p>
               Pick a mood, discover a sound, and build your next favourite
               playlist.
             </p>
           </div>
           <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
+        </section>
+        <section class="mobile-listening-home" aria-label="Music home">
+          <div class="mobile-moods" aria-label="Music categories">
+            <button class="active" data-mobile-mood="">All</button>
+            <button data-mobile-mood="Podcasts">Podcasts</button>
+            <button data-mobile-mood="Romance">Romance</button>
+            <button data-mobile-mood="Feel good">Feel good</button>
+            <button data-mobile-mood="Focus">Focus</button>
+          </div>
+          <div class="mobile-home-heading">
+            <h2>Top Picks for You <span>›</span></h2>
+          </div>
+          <div id="mobileTopPicks" class="mobile-top-picks"></div>
+          <div class="mobile-speed-heading">
+            <h2>Speed dial</h2>
+            <button id="mobileVoiceSearch" aria-label="Search music">⌕</button>
+          </div>
+          <div id="mobileSpeedDial" class="mobile-speed-dial"></div>
         </section>
         <section class="hero" data-home-panel>
           <div>
@@ -319,7 +340,7 @@
               >Preferred genre
               <select id="discoveryGenre">
                 <option value="ambient">Ambient</option>
-                <option value="pop">Pop</option>
+                <option value="pop" selected>Pop</option>
                 <option value="rock">Rock</option>
                 <option value="hip hop">Hip-hop</option>
                 <option value="electronic">Electronic</option>
@@ -495,6 +516,14 @@
       </div>
       <audio id="audio" preload="metadata"></audio>
     </section>
+    <nav class="mobile-bottom-nav" aria-label="Main navigation">
+      <button class="selected" data-mobile-nav="home" aria-label="Home">
+        ⌂
+      </button>
+      <button data-mobile-nav="library" aria-label="Library">▤</button>
+      <button data-mobile-nav="search" aria-label="Search">⌕</button>
+      <button data-mobile-nav="playlists" aria-label="Playlists">♫</button>
+    </nav>
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
     <script src="archive-source.js"></script>

@@ -188,7 +188,15 @@ function render() {
         escapeHTML(t.artist) +
         '</small></div></div><div class="moodcell"><span class="chip">' +
         escapeHTML(t.mood) +
-        '</span></div><div class="time">' +
+        '</span><small class="source-label">' +
+        escapeHTML(
+          t.source === "itunes-preview"
+            ? "30-SEC PREVIEW"
+            : t.source === "internet-archive"
+              ? "INTERNET ARCHIVE"
+              : t.source || "LOCAL",
+        ) +
+        '</small></div><div class="time">' +
         t.time +
         '</div><button class="rowadd" data-playlist-add="1" aria-label="Add to playlist">＋</button><button class="rowlike ' +
         (liked.has(t.id) ? "liked" : "") +
@@ -197,6 +205,7 @@ function render() {
         "</button></div>",
     )
     .join("");
+  renderMobileListeningHome();
 }
 function resolveMusicEmbed(raw) {
   let u;
@@ -598,7 +607,7 @@ function discoveryPreferences() {
     latestNode.checked = saved.latest;
   return {
     country: countryNode?.value || saved.country || "Worldwide",
-    genre: genreNode?.value || saved.genre || "ambient",
+    genre: genreNode?.value || saved.genre || "pop",
     latest: latestNode ? latestNode.checked : saved.latest !== false,
   };
 }
@@ -637,7 +646,7 @@ function renderArchiveDiscovery(items) {
   const host = $("archiveDiscoveryResults");
   if (!host) return;
   host.replaceChildren();
-  archiveDiscoveryItems = items.slice(0, 8);
+  archiveDiscoveryItems = items.slice(0, 16);
   for (const item of archiveDiscoveryItems) {
     const isCatalog = Boolean(item.catalogId);
     const card = document.createElement("article");
@@ -778,26 +787,53 @@ async function searchRegionalCatalog(prefs, term = prefs.genre) {
 async function loadArchiveDiscovery() {
   const status = $("archiveDiscoveryStatus");
   if (!status) return;
-  status.textContent = "Finding recent releases for your region and genre…";
+  status.textContent = "Finding full-length recordings in Internet Archive…";
   const prefs = discoveryPreferences();
   let items = [];
-  if (window.PULSE_CATALOG?.search) items = await searchRegionalCatalog(prefs);
-  if (!items.length && window.PULSE_ARCHIVE?.search) {
+  if (window.PULSE_ARCHIVE?.search) {
     try {
       items = await searchArchiveForDiscovery("");
     } catch (_) {
       items = [];
     }
   }
+  items = items.filter(
+    (item) => item?.src && item.source === "internet-archive",
+  );
   if (!items.length) {
     status.textContent =
-      "No catalog matches right now. Try another genre or search Archive from Sources.";
+      "No full-length Archive recordings matched these preferences. Try another genre or use Sources → Internet Archive. Short previews are not shown.";
     return;
   }
+  for (const item of items) {
+    const existing = tracks.find(
+      (track) => track.archiveId === item.id || track.src === item.src,
+    );
+    const track = existing || {
+      id: "archive:" + item.id,
+      archiveId: item.id,
+      title: item.title || "Untitled recording",
+      artist: item.artist || "Unknown artist",
+      mood: prefs.genre || "Archive",
+      time: item.time || "—",
+      cover: "blue",
+      symbol: "♫",
+      src: item.src,
+      sourceUrl: item.sourceUrl || item.src,
+      sourcePage: item.sourceUrl || "",
+      source: "internet-archive",
+      licenseUrl: item.licenseUrl || undefined,
+      rights: item.rights || undefined,
+      format: item.format || "",
+    };
+    if (!existing) tracks.push(track);
+    onlineSearchIds.add(track.id);
+  }
   renderArchiveDiscovery(items);
-  status.textContent = items.some((item) => item.catalogId)
-    ? "Latest matching catalog releases, sorted by release date. Play uses short previews; full-track availability depends on the provider."
-    : "Archive fallback: recently added recordings matched to your preferences. Check item rights and streaming availability.";
+  render();
+  status.textContent =
+    items.length +
+    " full-length Archive recordings loaded. Duration and streaming vary by item; check rights before reuse.";
 }
 $("generateArchiveMix")?.addEventListener("click", async () => {
   const button = $("generateArchiveMix");
@@ -810,8 +846,6 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       throw new Error("Playlist storage did not load. Refresh and try again.");
     }
     let items = archiveDiscoveryItems.filter((item) => item.src);
-    if (items.length < 3 && window.PULSE_CATALOG?.search)
-      items = await searchRegionalCatalog(prefs);
     if (items.length < 3 && window.PULSE_ARCHIVE?.search) {
       const terms = [
         prefs.genre,
@@ -831,16 +865,15 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
         }),
       );
     }
-    items = items.filter((item) => item.src).slice(0, 12);
+    items = items.filter((item) => item.src).slice(0, 30);
     if (!items.length)
       throw new Error(
         "No playable previews or Archive audio were found. Try again later.",
       );
-    const hasCatalog = items.some((item) => item.catalogId);
     const name =
       (prefs.genre || "Discovery") +
       " Mix · " +
-      (hasCatalog ? "Latest releases" : "Archive") +
+      "Archive" +
       " · " +
       new Date().toLocaleDateString();
     window.PULSE_PLAYLISTS.create(name);
@@ -872,7 +905,7 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       name +
       " with " +
       items.length +
-      " tracks. Catalog entries use short previews; Archive rights and streaming vary by item.";
+      " Archive recordings. Rights and streaming availability vary by item.";
     toast("Your mix is ready.");
   } catch (error) {
     status.textContent = error.message || "Could not build a mix right now.";
@@ -1129,64 +1162,76 @@ async function searchOnlineCatalog(term) {
   const cleanTerm = String(term || "").trim();
   if (cleanTerm.length < 2 || onlineSearchBusy) return;
   onlineSearchBusy = true;
+  onlineSearchIds.clear();
   $("audioStatus").textContent =
-    'Searching music catalogs for "' + cleanTerm + '"…';
+    'Searching full-length Internet Archive recordings for "' +
+    cleanTerm +
+    '"…';
   try {
     const prefs = discoveryPreferences();
-    let items = await searchRegionalCatalog(prefs, cleanTerm);
-    if (!items.length && window.PULSE_ARCHIVE?.search) {
-      items = await window.PULSE_ARCHIVE.search(cleanTerm, {
-        latest: prefs.latest,
-      });
-    }
-    if (!items.length) {
+    if (!window.PULSE_ARCHIVE?.search)
+      throw new Error("Internet Archive search module did not load.");
+    const archiveItems = await window.PULSE_ARCHIVE.search(cleanTerm, {
+      latest: prefs.latest,
+      rows: 24,
+    });
+    const terms = cleanTerm
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 2);
+    const unique = archiveItems.filter((item) => {
+      const haystack = (
+        String(item.title || "") +
+        " " +
+        String(item.artist || "")
+      ).toLowerCase();
+      return (
+        item.src &&
+        terms.length > 0 &&
+        terms.every((word) => haystack.includes(word))
+      );
+    });
+    if (!unique.length) {
       $("audioStatus").textContent =
-        "No online matches found. Try another title, artist, or genre.";
+        "No matching full-length Archive recording found. Try the artist, a shorter title, or browse Sources → Internet Archive. Short previews are hidden.";
+      render();
       return;
     }
-    for (const item of items) {
-      if (!item.src) continue;
+    for (const item of unique) {
       const existing = tracks.find(
-        (track) =>
-          (item.catalogId && track.catalogId === item.catalogId) ||
-          (item.id && !item.catalogId && track.archiveId === item.id) ||
-          track.src === item.src,
+        (track) => track.archiveId === item.id || track.src === item.src,
       );
-      const track =
-        existing ||
-        {
-          id: item.catalogId
-            ? "itunes:" + item.catalogId
-            : "archive:" + item.id,
-          catalogId: item.catalogId,
-          archiveId: item.catalogId ? undefined : item.id,
-          title: item.title || "Untitled track",
-          artist: item.artist || "Unknown artist",
-          mood: item.genre || "Archive",
-          time: item.time || "—",
-          cover: item.cover || "blue",
-          symbol: item.symbol || "♫",
-          src: item.src,
-          sourceUrl: item.sourceUrl || item.src,
-          sourcePage: item.sourcePage || "",
-          source: item.source || "internet-archive",
-          artworkUrl: item.artworkUrl || undefined,
-          releaseDate: item.releaseDate || "",
-          licenseUrl: item.licenseUrl || undefined,
-          rights: item.rights || undefined,
-        };
-      if (!existing) {
-        tracks.push(track);
-      }
+      const track = existing || {
+        id: "archive:" + item.id,
+        archiveId: item.id,
+        title: item.title || "Untitled recording",
+        artist: item.artist || "Unknown artist",
+        mood: "Archive",
+        time: item.time || "—",
+        cover: "blue",
+        symbol: "♫",
+        src: item.src,
+        sourceUrl: item.sourceUrl || item.src,
+        sourcePage: item.sourceUrl || "",
+        source: "internet-archive",
+        artworkUrl: undefined,
+        licenseUrl: item.licenseUrl || undefined,
+        rights: item.rights || undefined,
+        format: item.format || "",
+      };
+      if (!existing) tracks.push(track);
       onlineSearchIds.add(track.id);
     }
+    query = cleanTerm;
+    $("search").value = cleanTerm;
     render();
     $("audioStatus").textContent =
-      onlineSearchIds.size +
-      " online matches added to results. Catalog entries play 30-second previews; Archive availability varies.";
+      unique.length +
+      " matching full-length Archive recordings found. Check each item's rights and streaming availability; short previews are excluded.";
   } catch (error) {
     $("audioStatus").textContent =
-      "Online search failed: " + (error?.message || "check your connection.");
+      "Full-track search failed: " +
+      (error?.message || "check your connection.");
   } finally {
     onlineSearchBusy = false;
   }
@@ -1481,6 +1526,111 @@ $("addUrlButton").onclick = () => {
   toast("Audio link added");
 };
 setTrack(0);
+function renderMobileListeningHome() {
+  const picks = $("mobileTopPicks");
+  const speed = $("mobileSpeedDial");
+  if (!picks || !speed) return;
+  const onlineTracks = tracks.filter((track) => onlineSearchIds.has(track.id));
+  const featured = [
+    ...onlineTracks,
+    ...tracks.filter((track) => !onlineSearchIds.has(track.id)),
+  ].slice(0, 12);
+  picks.innerHTML = featured
+    .map(
+      (track) =>
+        '<article class="mobile-pick" data-mobile-track="' +
+        escapeHTML(track.id) +
+        '">' +
+        '<div class="mobile-pick-art">' +
+        escapeHTML(track.symbol || "♫") +
+        "</div>" +
+        '<div class="mobile-pick-info"><strong>' +
+        escapeHTML(track.title) +
+        "</strong><small>" +
+        escapeHTML(track.artist) +
+        '</small><small class="mobile-source-label">' +
+        escapeHTML(
+          track.source === "itunes-preview"
+            ? "30-SEC PREVIEW"
+            : track.source === "internet-archive"
+              ? "INTERNET ARCHIVE · " + (track.time || "FULL TRACK")
+              : track.source || "LOCAL",
+        ) +
+        "</small></div></article>",
+    )
+    .join("");
+  speed.innerHTML = featured
+    .slice(0, 8)
+    .map(
+      (track) =>
+        '<div class="mobile-speed-row"><div class="mobile-speed-art">' +
+        escapeHTML(track.symbol || "♫") +
+        "</div>" +
+        "<div><strong>" +
+        escapeHTML(track.title) +
+        "</strong><small>" +
+        escapeHTML(track.artist) +
+        '</small><small class="mobile-source-label">' +
+        escapeHTML(
+          track.source === "itunes-preview"
+            ? "30-SEC PREVIEW"
+            : track.source === "internet-archive"
+              ? "INTERNET ARCHIVE · " + (track.time || "FULL TRACK")
+              : track.source || "LOCAL",
+        ) +
+        "</small></div>" +
+        '<button type="button" data-mobile-play="' +
+        escapeHTML(track.id) +
+        '" aria-label="Play ' +
+        escapeHTML(track.title) +
+        '">▶</button></div>',
+    )
+    .join("");
+}
+renderMobileListeningHome();
+$("mobileTopPicks")?.addEventListener("click", (event) => {
+  const card = event.target.closest("[data-mobile-track]");
+  if (!card) return;
+  const i = tracks.findIndex(
+    (track) => String(track.id) === card.dataset.mobileTrack,
+  );
+  if (i >= 0) setTrack(i, true);
+});
+$("mobileSpeedDial")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-mobile-play]");
+  if (!button) return;
+  const i = tracks.findIndex(
+    (track) => String(track.id) === button.dataset.mobilePlay,
+  );
+  if (i >= 0) setTrack(i, true);
+});
+$("mobileVoiceSearch")?.addEventListener("click", () => {
+  const term = prompt("Search songs, artists, or genres");
+  if (term && term.trim()) {
+    $("search").value = term.trim();
+    void searchOnlineCatalog(term.trim());
+  }
+});
+document.querySelectorAll("[data-mobile-nav]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document
+      .querySelectorAll("[data-mobile-nav]")
+      .forEach((item) => item.classList.remove("selected"));
+    button.classList.add("selected");
+    const target = button.dataset.mobileNav;
+    if (target === "search") $("mobileVoiceSearch")?.click();
+    if (target === "library") {
+      view = "library";
+      render();
+      toast("Library selected");
+    }
+    if (target === "playlists") {
+      $("playlistLibrary").style.display = "block";
+      $("playlistLibrary").scrollIntoView({ behavior: "smooth" });
+    }
+    if (target === "home") window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
 
 // Unified queue foundation for direct audio and provider links.
 (() => {

@@ -99,16 +99,17 @@ the live Internet Archive API or every item's playback will work.
 From the repository root, run `node --check apps/pulse-music-workspace/app.js`
 and `node --test apps/pulse-music-workspace/tests/integrations.test.cjs`.
 
-
 ## Regional discovery and latest-release mixes
 
 - Choose a country/region and a preferred genre in **Discover something new**.
-- Worldwide discovery combines catalog results from the US, India, UK, Japan, and
-  South Korea, then deduplicates tracks.
+- Worldwide discovery combines catalog results from the US, India, UK, Japan,
+  and South Korea, then deduplicates tracks.
 - Catalog results are ordered by release date when **Latest additions first** is
-  enabled. The public iTunes Search API supplies short previews, not full tracks.
+  enabled. The public iTunes Search API supplies short previews, not full
+  tracks.
 - If the catalog is unavailable or returns no matches, Pulse falls back to
   Internet Archive audio. Archive items are sorted by their added date; this is
   not a commercial new-release chart, and rights/streaming availability vary.
-- Use **＋ Playlist** on a result or **Generate my mix** to save a discovery mix.
-  Playlist persistence remains browser-local unless cloud library sync is set up.
+- Use **＋ Playlist** on a result or **Generate my mix** to save a discovery
+  mix. Playlist persistence remains browser-local unless cloud library sync is
+  set up.

@@ -113,6 +113,20 @@ test("Internet Archive adapter builds public search and resolves only supported 
     adapter.chooseAudioFile([{ name: "scan.pdf", format: "PDF" }]),
     null,
   );
+  assert.equal(
+    adapter.chooseAudioFile([
+      { name: "preview.mp3", format: "VBR MP3", duration: "30" },
+    ]),
+    null,
+    "preview-only Archive items must not be returned as full tracks",
+  );
+  assert.equal(
+    adapter.chooseAudioFile([
+      { name: "short-sample.mp3", format: "VBR MP3", duration: "22" },
+      { name: "full-recording.mp3", format: "VBR MP3", duration: "245" },
+    ]).name,
+    "full-recording.mp3",
+  );
 
   const requests = [];
   const mockFetch = async (url) => {
@@ -143,7 +157,12 @@ test("Internet Archive adapter builds public search and resolves only supported 
         },
         files: [
           { name: "cover.jpg", format: "JPEG" },
-          { name: "recording.mp3", format: "VBR MP3", mimetype: "audio/mpeg" },
+          {
+            name: "recording.mp3",
+            format: "VBR MP3",
+            mimetype: "audio/mpeg",
+            duration: "245.8",
+          },
         ],
       }),
     };
@@ -152,6 +171,8 @@ test("Internet Archive adapter builds public search and resolves only supported 
   assert.equal(results.length, 1);
   assert.equal(results[0].title, "Sample Recording");
   assert.equal(results[0].artist, "Archive Artist");
+  assert.equal(results[0].time, "4:05");
+  assert.equal(results[0].source, "internet-archive");
   assert.equal(
     results[0].src,
     "https://archive.org/download/sample-recording/recording.mp3",
@@ -204,6 +225,13 @@ test("discovery preferences and latest-added search are wired to the Archive ada
   assert.match(appSource, /pulse-discovery-preferences-v1/);
   assert.match(appSource, /discoverySearchTerm/);
   assert.match(appSource, /searchArchiveForDiscovery/);
+  assert.match(appSource, /async function searchOnlineCatalog\(term\)/);
+  assert.match(
+    appSource,
+    /const onlineTracks = tracks\.filter\(\(track\) => onlineSearchIds\.has\(track\.id\)\)/,
+  );
+  assert.match(appSource, /renderMobileListeningHome\(\);/);
+  assert.match(archiveSource, /previewPenalty/);
   assert.match(archiveSource, /addeddate desc/);
   assert.match(archiveSource, /addedDate:/);
 });
@@ -275,14 +303,30 @@ test("country-aware catalog returns recent song previews ordered by release date
   assert.equal(results[0].source, "itunes-preview");
 });
 
-test("main search can query regional catalogs and add online results", () => {
+test("main search returns only full-length Archive recordings, not catalogue previews", () => {
   assert.match(appSource, /async function searchOnlineCatalog/);
-  assert.match(appSource, /searchRegionalCatalog\(prefs, cleanTerm\)/);
+  assert.match(appSource, /PULSE_ARCHIVE\?\.search/);
+  assert.match(appSource, /Short previews are hidden/);
+  assert.doesNotMatch(appSource, /searchRegionalCatalog\(prefs, cleanTerm\)/);
   assert.match(appSource, /onlineSearchIds\.add\(track\.id\)/);
   assert.match(appSource, /onlineSearchIds\.has\(t\.id\)/);
   assert.match(appSource, /String\(t\.id\) === id/);
   assert.match(appSource, /escapeHTML\(t\.id\)/);
   assert.match(indexSource, /press Enter for online results/);
+});
+
+test("home discovery and generated mixes use Archive recordings instead of 30-second previews", () => {
+  assert.match(appSource, /async function loadArchiveDiscovery/);
+  assert.match(
+    appSource,
+    /items = items\.filter\(\(item\) => item\?\.src && item\.source === "internet-archive"/,
+  );
+  assert.doesNotMatch(
+    appSource,
+    /if \(items\.length < 3 && window\.PULSE_CATALOG/,
+  );
+  assert.match(archiveSource, /clearlyPreview/);
+  assert.match(archiveSource, /tooShort/);
 });
 
 test("Worldwide discovery combines regional catalogs", () => {
@@ -393,7 +437,10 @@ test("playlist manager creates, persists, and emits songs in order", () => {
     Array.from(playlist.tracks, (track) => track.title),
     ["First", "Second", "Catalog song"],
   );
-  assert.equal(JSON.parse(storage.get("pulse-playlists-v1"))[0].tracks.length, 3);
+  assert.equal(
+    JSON.parse(storage.get("pulse-playlists-v1"))[0].tracks.length,
+    3,
+  );
   document.getElementById("playlistPlayAll").click();
   assert.equal(events.at(-1).type, "pulse:playlist-start");
   assert.deepEqual(

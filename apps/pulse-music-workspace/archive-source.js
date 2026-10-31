@@ -24,9 +24,15 @@
 
   function chooseAudioFile(files) {
     if (!Array.isArray(files)) return null;
-    const candidates = files.filter(
-      (file) => file && file.name && supportedAudio(file),
-    );
+    const candidates = files.filter((file) => {
+      if (!file || !file.name || !supportedAudio(file)) return false;
+      const name = String(file.name || "").toLowerCase();
+      const duration = Number.parseFloat(String(file.duration || ""));
+      const clearlyPreview = /preview|sample|30.?sec|snippet|clip/.test(name);
+      const tooShort =
+        Number.isFinite(duration) && duration > 0 && duration <= 35;
+      return !clearlyPreview && !tooShort;
+    });
     const rank = (file) => {
       const name = String(file.name).toLowerCase();
       const format = String(file.format || "").toLowerCase();
@@ -37,7 +43,17 @@
       if (/\.wav$/.test(name) || format.includes("wav")) return 4;
       return 5;
     };
-    candidates.sort((a, b) => rank(a) - rank(b));
+    const previewPenalty = (file) => {
+      const name = String(file.name || "").toLowerCase();
+      const duration = Number.parseFloat(String(file.duration || ""));
+      return /preview|sample|30.?sec|snippet/.test(name) ||
+        (Number.isFinite(duration) && duration > 0 && duration <= 35)
+        ? 1
+        : 0;
+    };
+    candidates.sort(
+      (a, b) => previewPenalty(a) - previewPenalty(b) || rank(a) - rank(b),
+    );
     return candidates[0] || null;
   }
 
@@ -118,6 +134,12 @@
           sourceUrl: itemUrl,
           licenseUrl: String(details.licenseurl || doc.licenseurl || ""),
           rights: String(details.rights || doc.rights || ""),
+          time: formatDuration(file.duration || details.runtime || doc.runtime),
+          durationSeconds:
+            Number.parseFloat(
+              String(file.duration || details.runtime || doc.runtime || ""),
+            ) || null,
+          source: "internet-archive",
           format: String(file.format || file.mimetype || "Audio"),
         };
       }),
