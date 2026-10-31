@@ -21,10 +21,7 @@
     try {
       const value = JSON.parse(localStorage.getItem(KEY) || "[]");
       return Array.isArray(value)
-        ? value.filter(
-            (p) =>
-              p && typeof p.id === "string" && Array.isArray(p.tracks),
-          )
+        ? value.filter((p) => p && typeof p.id === "string" && Array.isArray(p.tracks))
         : [];
     } catch (_) {
       return [];
