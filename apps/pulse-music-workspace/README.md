@@ -8,6 +8,8 @@ and is not affiliated with Convex.
 
 - Responsive desktop sidebar and mobile drawer
 - Search tracks by title, artist, or mood
+- Search Internet Archive audio metadata without a client ID and play supported
+  direct audio files
 - Mood cards, curated track list, and saved library
 - Play/pause, previous/next, shuffle, repeat, volume, and seeking
 - Like/save tracks and recently played history via localStorage
@@ -36,19 +38,21 @@ build step or package installation is required.
 
 ## Music integrations
 
-The **Connect a music source** panel supports official embedded players for:
+The **Connect a music source** panel supports these sources:
 
-- **Spotify** tracks, albums, playlists, artists, shows, and episodes using
-  Spotify Embed.
+- **Internet Archive** public audio search and direct audio files discovered
+  from each item's metadata. Search results link back to the original item; file
+  formats and streaming/seek behavior vary.
 - **YouTube / YouTube Music** videos and playlists using YouTube's
   privacy-enhanced embed host.
 - **SoundCloud** tracks and playlists using the SoundCloud widget.
 
-Paste a public share URL into **Music link** and tap **Load player**. These are
-official web embeds, not a bypass of provider playback rules. Sign-in,
-availability, ads, regional restrictions, and account limits remain controlled
-by each provider. Some content cannot be embedded. Spotify embeds may preview
-rather than play full tracks depending on provider policy and account status.
+Search for audio in the Internet Archive panel, or paste a public share URL into
+**Music link** and tap **Load player**. These are official web embeds, not a
+bypass of provider playback rules. Sign-in, availability, ads, regional
+restrictions, and account limits remain controlled by each provider. Some
+content cannot be embedded. Spotify embeds may preview rather than play full
+tracks depending on provider policy and account status.
 
 ## Play your own audio
 
@@ -66,14 +70,18 @@ uses official embeds instead.
 
 ## Checks
 
-GitHub Actions runs a JavaScript syntax check, URL resolver tests for the three
-music providers, and an HTML interface smoke test.
+GitHub Actions runs a JavaScript syntax check, URL resolver tests, Internet
+Archive adapter tests using mocked API responses, and an HTML interface smoke
+test. Mocked tests validate parsing and integration contracts but do not prove
+the live Internet Archive API or every item's playback will work.
 
 ## Files
 
 - index.html — layout and controls
 - styles.css — theme and responsive styling
 - app.js — playback, search, local library state, and interactions
+- archive-source.js — Internet Archive search, metadata lookup, and supported
+  audio-file selection
 - config.js — public Convex URL and Clerk publishable-key placeholders
 - cloud-sync.js — optional cloud playlist sign-in and CRUD
 - manifest.webmanifest — install metadata
