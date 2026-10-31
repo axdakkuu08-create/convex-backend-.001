@@ -148,7 +148,7 @@
     if (src) window.dispatchEvent(new CustomEvent("pulse:play-catalog-track", {
       detail: {
         title: item.title, artist: item.artist, src, url: item.url,
-        source: item.source, artwork: item.artwork || "", license: item.license || ""
+        source: item.source, artwork: item.artwork || "", license: item.license || "", duration: item.duration || ""
       }
     }));
   });
