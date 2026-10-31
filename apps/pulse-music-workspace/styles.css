@@ -1128,3 +1128,13 @@ footer {
     flex-direction: column;
   }
 }
+
+
+/* Country and genre preferences for local-first discovery. */
+.music-preferences{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.music-preferences label{display:grid;gap:6px;color:#a5a6b0;font-size:11px}
+.music-preferences select{width:100%;min-width:0;border:1px solid #34353d;border-radius:9px;background:#101115;color:#f6f6f8;padding:11px;font:inherit}
+.catalog-result{align-items:center}
+.catalog-rights{display:block!important;white-space:normal!important;overflow-wrap:anywhere;color:#b5b6c0!important;line-height:1.45}
+.catalog-rights a{color:#ff9bb0;text-decoration:underline}
+@media(max-width:700px){.music-preferences{grid-template-columns:1fr 1fr}.music-preferences select{min-height:44px}.catalog-result{align-items:flex-start;flex-wrap:wrap}.catalog-copy{min-width:calc(100% - 70px)}.catalog-result .catalog-preview,.catalog-result .catalog-open{margin-left:62px}}
