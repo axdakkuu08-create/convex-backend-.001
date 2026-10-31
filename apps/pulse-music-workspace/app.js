@@ -190,12 +190,12 @@ function render() {
         escapeHTML(t.mood) +
         '</span><small class="source-label">' +
         escapeHTML(
-        t.source === "itunes-preview"
-          ? "30-SEC PREVIEW"
-          : t.source === "internet-archive"
-            ? "INTERNET ARCHIVE"
-            : t.source || "LOCAL",
-      ) +
+          t.source === "itunes-preview"
+            ? "30-SEC PREVIEW"
+            : t.source === "internet-archive"
+              ? "INTERNET ARCHIVE"
+              : t.source || "LOCAL",
+        ) +
         '</small></div><div class="time">' +
         t.time +
         '</div><button class="rowadd" data-playlist-add="1" aria-label="Add to playlist">＋</button><button class="rowlike ' +
@@ -1139,7 +1139,8 @@ async function searchOnlineCatalog(term) {
   if (cleanTerm.length < 2 || onlineSearchBusy) return;
   onlineSearchBusy = true;
   onlineSearchIds.clear();
-  $("audioStatus").textContent = 'Searching official music catalog for "' + cleanTerm + '"…';
+  $("audioStatus").textContent =
+    'Searching official music catalog for "' + cleanTerm + '"…';
   try {
     const prefs = discoveryPreferences();
     // Start with a real music catalog so titles/artists are grounded in releases.
@@ -1155,17 +1156,28 @@ async function searchOnlineCatalog(term) {
         archiveItems = [];
       }
     }
-    const terms = cleanTerm.toLowerCase().split(/\\s+/).filter((word) => word.length > 2);
+    const terms = cleanTerm
+      .toLowerCase()
+      .split(/\\s+/)
+      .filter((word) => word.length > 2);
     const relevantArchive = archiveItems.filter((item) => {
-      const haystack = (String(item.title || "") + " " + String(item.artist || "")).toLowerCase();
+      const haystack = (
+        String(item.title || "") +
+        " " +
+        String(item.artist || "")
+      ).toLowerCase();
       return terms.length > 0 && terms.every((word) => haystack.includes(word));
     });
     // Catalog metadata identifies genuine releases; Archive contributes full recordings
     // only when its title/creator clearly match the requested search.
-    const items = [...catalogItems, ...relevantArchive].filter((item) => item.src);
+    const items = [...catalogItems, ...relevantArchive].filter(
+      (item) => item.src,
+    );
     const seen = new Set();
     const unique = items.filter((item) => {
-      const key = item.catalogId ? "itunes:" + item.catalogId : "archive:" + item.id;
+      const key = item.catalogId
+        ? "itunes:" + item.catalogId
+        : "archive:" + item.id;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -1196,7 +1208,9 @@ async function searchOnlineCatalog(term) {
         src: item.src,
         sourceUrl: item.sourceUrl || item.src,
         sourcePage: item.sourcePage || "",
-        source: item.source || (item.catalogId ? "itunes-preview" : "internet-archive"),
+        source:
+          item.source ||
+          (item.catalogId ? "itunes-preview" : "internet-archive"),
         artworkUrl: item.artworkUrl || undefined,
         releaseDate: item.releaseDate || "",
         licenseUrl: item.licenseUrl || undefined,
@@ -1208,11 +1222,18 @@ async function searchOnlineCatalog(term) {
     query = cleanTerm;
     $("search").value = cleanTerm;
     render();
-    const archiveCount = unique.filter((item) => item.source === "internet-archive").length;
-    const previewCount = unique.filter((item) => item.source === "itunes-preview").length;
+    const archiveCount = unique.filter(
+      (item) => item.source === "internet-archive",
+    ).length;
+    const previewCount = unique.filter(
+      (item) => item.source === "itunes-preview",
+    ).length;
     $("audioStatus").textContent =
-      unique.length + " matching songs shown · " + archiveCount +
-      " matching Archive recordings · " + previewCount +
+      unique.length +
+      " matching songs shown · " +
+      archiveCount +
+      " matching Archive recordings · " +
+      previewCount +
       " iTunes 30-second previews. Archive playback and rights vary by item.";
   } catch (error) {
     $("audioStatus").textContent =
@@ -1516,7 +1537,10 @@ function renderMobileListeningHome() {
   const speed = $("mobileSpeedDial");
   if (!picks || !speed) return;
   const onlineTracks = tracks.filter((track) => onlineSearchIds.has(track.id));
-  const featured = [...onlineTracks, ...tracks.filter((track) => !onlineSearchIds.has(track.id))].slice(0, 12);
+  const featured = [
+    ...onlineTracks,
+    ...tracks.filter((track) => !onlineSearchIds.has(track.id)),
+  ].slice(0, 12);
   picks.innerHTML = featured
     .map(
       (track) =>
@@ -1531,7 +1555,13 @@ function renderMobileListeningHome() {
         "</strong><small>" +
         escapeHTML(track.artist) +
         '</small><small class="mobile-source-label">' +
-        escapeHTML(track.source === "itunes-preview" ? "30-SEC PREVIEW" : track.source === "internet-archive" ? "INTERNET ARCHIVE · " + (track.time || "FULL TRACK") : track.source || "LOCAL") +
+        escapeHTML(
+          track.source === "itunes-preview"
+            ? "30-SEC PREVIEW"
+            : track.source === "internet-archive"
+              ? "INTERNET ARCHIVE · " + (track.time || "FULL TRACK")
+              : track.source || "LOCAL",
+        ) +
         "</small></div></article>",
     )
     .join("");
@@ -1601,7 +1631,6 @@ document.querySelectorAll("[data-mobile-nav]").forEach((button) => {
     if (target === "home") window.scrollTo({ top: 0, behavior: "smooth" });
   });
 });
-
 
 // Unified queue foundation for direct audio and provider links.
 (() => {
