@@ -646,7 +646,7 @@ function renderArchiveDiscovery(items) {
   const host = $("archiveDiscoveryResults");
   if (!host) return;
   host.replaceChildren();
-  archiveDiscoveryItems = items.slice(0, 8);
+  archiveDiscoveryItems = items.slice(0, 16);
   for (const item of archiveDiscoveryItems) {
     const isCatalog = Boolean(item.catalogId);
     const card = document.createElement("article");
@@ -840,7 +840,7 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
         }),
       );
     }
-    items = items.filter((item) => item.src).slice(0, 12);
+    items = items.filter((item) => item.src).slice(0, 30);
     if (!items.length)
       throw new Error(
         "No playable previews or Archive audio were found. Try again later.",
@@ -1138,31 +1138,45 @@ async async function searchOnlineCatalog(term) {
   const cleanTerm = String(term || "").trim();
   if (cleanTerm.length < 2 || onlineSearchBusy) return;
   onlineSearchBusy = true;
-  $("audioStatus").textContent =
-    'Searching music catalogs for "' + cleanTerm + '"…';
+  onlineSearchIds.clear();
+  $("audioStatus").textContent = 'Searching official music catalog for "' + cleanTerm + '"…';
   try {
     const prefs = discoveryPreferences();
-    // Prefer full-length Archive files when available; iTunes is a preview fallback.
-    let items = [];
+    // Start with a real music catalog so titles/artists are grounded in releases.
+    let catalogItems = await searchRegionalCatalog(prefs, cleanTerm);
+    let archiveItems = [];
     if (window.PULSE_ARCHIVE?.search) {
       try {
-        items = await window.PULSE_ARCHIVE.search(cleanTerm, {
+        archiveItems = await window.PULSE_ARCHIVE.search(cleanTerm, {
           latest: prefs.latest,
+          rows: 24,
         });
       } catch (_) {
-        items = [];
+        archiveItems = [];
       }
     }
-    if (!items.length) {
-      items = await searchRegionalCatalog(prefs, cleanTerm);
-    }
-    if (!items.length) {
+    const terms = cleanTerm.toLowerCase().split(/\\s+/).filter((word) => word.length > 2);
+    const relevantArchive = archiveItems.filter((item) => {
+      const haystack = (String(item.title || "") + " " + String(item.artist || "")).toLowerCase();
+      return terms.length > 0 && terms.every((word) => haystack.includes(word));
+    });
+    // Catalog metadata identifies genuine releases; Archive contributes full recordings
+    // only when its title/creator clearly match the requested search.
+    const items = [...catalogItems, ...relevantArchive].filter((item) => item.src);
+    const seen = new Set();
+    const unique = items.filter((item) => {
+      const key = item.catalogId ? "itunes:" + item.catalogId : "archive:" + item.id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    if (!unique.length) {
       $("audioStatus").textContent =
-        "No online matches found. Try another title, artist, or genre.";
+        "No verified catalog or clearly matching Archive tracks found. Try the exact song title or artist.";
+      render();
       return;
     }
-    for (const item of items) {
-      if (!item.src) continue;
+    for (const item of unique) {
       const existing = tracks.find(
         (track) =>
           (item.catalogId && track.catalogId === item.catalogId) ||
@@ -1175,28 +1189,31 @@ async async function searchOnlineCatalog(term) {
         archiveId: item.catalogId ? undefined : item.id,
         title: item.title || "Untitled track",
         artist: item.artist || "Unknown artist",
-        mood: item.genre || "Archive",
+        mood: item.genre || "Music",
         time: item.time || "—",
         cover: item.cover || "blue",
         symbol: item.symbol || "♫",
         src: item.src,
         sourceUrl: item.sourceUrl || item.src,
         sourcePage: item.sourcePage || "",
-        source: item.source || "internet-archive",
+        source: item.source || (item.catalogId ? "itunes-preview" : "internet-archive"),
         artworkUrl: item.artworkUrl || undefined,
         releaseDate: item.releaseDate || "",
         licenseUrl: item.licenseUrl || undefined,
         rights: item.rights || undefined,
       };
-      if (!existing) {
-        tracks.push(track);
-      }
+      if (!existing) tracks.push(track);
       onlineSearchIds.add(track.id);
     }
+    query = cleanTerm;
+    $("search").value = cleanTerm;
     render();
+    const archiveCount = unique.filter((item) => item.source === "internet-archive").length;
+    const previewCount = unique.filter((item) => item.source === "itunes-preview").length;
     $("audioStatus").textContent =
-      onlineSearchIds.size +
-      " online matches added. Internet Archive full-length files are preferred when playable; iTunes results are 30-second previews. Archive rights vary by item.";
+      unique.length + " matching songs shown · " + archiveCount +
+      " matching Archive recordings · " + previewCount +
+      " iTunes 30-second previews. Archive playback and rights vary by item.";
   } catch (error) {
     $("audioStatus").textContent =
       "Online search failed: " + (error?.message || "check your connection.");
@@ -1532,7 +1549,7 @@ function renderMobileListeningHome() {
         '</small><small class="mobile-source-label">' +
         escapeHTML(track.source === "itunes-preview" ? "30-SEC PREVIEW" : track.source === "internet-archive" ? "INTERNET ARCHIVE · " + (track.time || "FULL TRACK") : track.source || "LOCAL") +
         "</small></div>" +
-        '<button type="button" data-mobile-play="'
+        '<button type="button" data-mobile-play="' +
         escapeHTML(track.id) +
         '" aria-label="Play ' +
         escapeHTML(track.title) +
