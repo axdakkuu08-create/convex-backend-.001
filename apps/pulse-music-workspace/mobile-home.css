@@ -459,9 +459,24 @@
   .tracks .sectionhead {
     display: none;
   }
-  .tracks .table,
-  .tracks #audioStatus {
+  .tracks .table {
+    display: block;
+  }
+  .tracks .thead {
     display: none;
+  }
+  .tracks #audioStatus {
+    display: block;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #aaa;
+  }
+  .mobile-source-label {
+    display: block;
+    color: #a7a7b2;
+    font-size: 9px !important;
+    letter-spacing: .04em;
+    margin-top: 3px;
   }
   .mobile-bottom-nav {
     position: fixed;
