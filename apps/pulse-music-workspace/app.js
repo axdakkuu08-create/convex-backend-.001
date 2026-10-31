@@ -787,72 +787,51 @@ async function searchRegionalCatalog(prefs, term = prefs.genre) {
 async function loadArchiveDiscovery() {
   const status = $("archiveDiscoveryStatus");
   if (!status) return;
-  status.textContent = "Finding popular music and full-length Archive recordings…";
+  status.textContent = "Finding full-length recordings in Internet Archive…";
   const prefs = discoveryPreferences();
-  let catalogItems = [];
-  let archiveItems = [];
-  if (window.PULSE_CATALOG?.search) {
-    catalogItems = await searchRegionalCatalog(prefs).catch(() => []);
-  }
+  let items = [];
   if (window.PULSE_ARCHIVE?.search) {
     try {
-      archiveItems = await searchArchiveForDiscovery("");
+      items = await searchArchiveForDiscovery("");
     } catch (_) {
-      archiveItems = [];
+      items = [];
     }
   }
-  const seen = new Set();
-  const items = [...catalogItems, ...archiveItems].filter((item) => {
-    if (!item?.src) return false;
-    const key = item.catalogId
-      ? "itunes:" + item.catalogId
-      : "archive:" + item.id;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  items = items.filter((item) => item?.src && item.source === "internet-archive");
   if (!items.length) {
     status.textContent =
-      "Online music could not be loaded. Check your connection, then try Search or Sources → Internet Archive.";
+      "No full-length Archive recordings matched these preferences. Try another genre or use Sources → Internet Archive. Short previews are not shown.";
     return;
   }
   for (const item of items) {
     const existing = tracks.find(
-      (track) =>
-        (item.catalogId && track.catalogId === item.catalogId) ||
-        (item.id && !item.catalogId && track.archiveId === item.id) ||
-        track.src === item.src,
+      (track) => track.archiveId === item.id || track.src === item.src,
     );
     const track = existing || {
-      id: item.catalogId ? "itunes:" + item.catalogId : "archive:" + item.id,
-      catalogId: item.catalogId,
-      archiveId: item.catalogId ? undefined : item.id,
-      title: item.title || "Untitled track",
+      id: "archive:" + item.id,
+      archiveId: item.id,
+      title: item.title || "Untitled recording",
       artist: item.artist || "Unknown artist",
-      mood: item.genre || prefs.genre || "Music",
+      mood: prefs.genre || "Archive",
       time: item.time || "—",
-      cover: item.cover || "blue",
-      symbol: item.symbol || "♫",
+      cover: "blue",
+      symbol: "♫",
       src: item.src,
       sourceUrl: item.sourceUrl || item.src,
-      sourcePage: item.sourcePage || item.sourceUrl || "",
-      source: item.source || (item.catalogId ? "itunes-preview" : "internet-archive"),
-      artworkUrl: item.artworkUrl || undefined,
-      releaseDate: item.releaseDate || "",
+      sourcePage: item.sourceUrl || "",
+      source: "internet-archive",
       licenseUrl: item.licenseUrl || undefined,
       rights: item.rights || undefined,
+      format: item.format || "",
     };
     if (!existing) tracks.push(track);
     onlineSearchIds.add(track.id);
   }
   renderArchiveDiscovery(items);
   render();
-  const archiveCount = items.filter((item) => item.source === "internet-archive").length;
-  const previewCount = items.filter((item) => item.source === "itunes-preview").length;
   status.textContent =
-    items.length + " online tracks loaded · " +
-    archiveCount + " Archive recordings · " +
-    previewCount + " short catalog previews. Full-track availability and rights vary by Archive item.";
+    items.length +
+    " full-length Archive recordings loaded. Duration and streaming vary by item; check rights before reuse.";
 }
 $("generateArchiveMix")?.addEventListener("click", async () => {
   const button = $("generateArchiveMix");
@@ -865,8 +844,6 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       throw new Error("Playlist storage did not load. Refresh and try again.");
     }
     let items = archiveDiscoveryItems.filter((item) => item.src);
-    if (items.length < 3 && window.PULSE_CATALOG?.search)
-      items = await searchRegionalCatalog(prefs);
     if (items.length < 3 && window.PULSE_ARCHIVE?.search) {
       const terms = [
         prefs.genre,
@@ -891,11 +868,10 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       throw new Error(
         "No playable previews or Archive audio were found. Try again later.",
       );
-    const hasCatalog = items.some((item) => item.catalogId);
     const name =
       (prefs.genre || "Discovery") +
       " Mix · " +
-      (hasCatalog ? "Latest releases" : "Archive") +
+      "Archive" +
       " · " +
       new Date().toLocaleDateString();
     window.PULSE_PLAYLISTS.create(name);
@@ -927,7 +903,7 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       name +
       " with " +
       items.length +
-      " tracks. Catalog entries use short previews; Archive rights and streaming vary by item.";
+      " Archive recordings. Rights and streaming availability vary by item.";
     toast("Your mix is ready.");
   } catch (error) {
     status.textContent = error.message || "Could not build a mix right now.";
@@ -1186,81 +1162,54 @@ async function searchOnlineCatalog(term) {
   onlineSearchBusy = true;
   onlineSearchIds.clear();
   $("audioStatus").textContent =
-    'Searching official music catalog for "' + cleanTerm + '"…';
+    'Searching full-length Internet Archive recordings for "' + cleanTerm + '"…';
   try {
     const prefs = discoveryPreferences();
-    // Start with a real music catalog so titles/artists are grounded in releases.
-    let catalogItems = await searchRegionalCatalog(prefs, cleanTerm);
-    let archiveItems = [];
-    if (window.PULSE_ARCHIVE?.search) {
-      try {
-        archiveItems = await window.PULSE_ARCHIVE.search(cleanTerm, {
-          latest: prefs.latest,
-          rows: 24,
-        });
-      } catch (_) {
-        archiveItems = [];
-      }
-    }
+    if (!window.PULSE_ARCHIVE?.search)
+      throw new Error("Internet Archive search module did not load.");
+    const archiveItems = await window.PULSE_ARCHIVE.search(cleanTerm, {
+      latest: prefs.latest,
+      rows: 24,
+    });
     const terms = cleanTerm
       .toLowerCase()
       .split(/\s+/)
       .filter((word) => word.length > 2);
-    const relevantArchive = archiveItems.filter((item) => {
+    const unique = archiveItems.filter((item) => {
       const haystack = (
         String(item.title || "") +
         " " +
         String(item.artist || "")
       ).toLowerCase();
-      return terms.length > 0 && terms.every((word) => haystack.includes(word));
-    });
-    // Catalog metadata identifies genuine releases; Archive contributes full recordings
-    // only when its title/creator clearly match the requested search.
-    const items = [...catalogItems, ...relevantArchive].filter(
-      (item) => item.src,
-    );
-    const seen = new Set();
-    const unique = items.filter((item) => {
-      const key = item.catalogId
-        ? "itunes:" + item.catalogId
-        : "archive:" + item.id;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
+      return item.src && terms.length > 0 && terms.every((word) => haystack.includes(word));
     });
     if (!unique.length) {
       $("audioStatus").textContent =
-        "No verified catalog or clearly matching Archive tracks found. Try the exact song title or artist.";
+        "No matching full-length Archive recording found. Try the artist, a shorter title, or browse Sources → Internet Archive. Short previews are hidden.";
       render();
       return;
     }
     for (const item of unique) {
       const existing = tracks.find(
-        (track) =>
-          (item.catalogId && track.catalogId === item.catalogId) ||
-          (item.id && !item.catalogId && track.archiveId === item.id) ||
-          track.src === item.src,
+        (track) => track.archiveId === item.id || track.src === item.src,
       );
       const track = existing || {
-        id: item.catalogId ? "itunes:" + item.catalogId : "archive:" + item.id,
-        catalogId: item.catalogId,
-        archiveId: item.catalogId ? undefined : item.id,
-        title: item.title || "Untitled track",
+        id: "archive:" + item.id,
+        archiveId: item.id,
+        title: item.title || "Untitled recording",
         artist: item.artist || "Unknown artist",
-        mood: item.genre || "Music",
+        mood: "Archive",
         time: item.time || "—",
-        cover: item.cover || "blue",
-        symbol: item.symbol || "♫",
+        cover: "blue",
+        symbol: "♫",
         src: item.src,
         sourceUrl: item.sourceUrl || item.src,
-        sourcePage: item.sourcePage || "",
-        source:
-          item.source ||
-          (item.catalogId ? "itunes-preview" : "internet-archive"),
-        artworkUrl: item.artworkUrl || undefined,
-        releaseDate: item.releaseDate || "",
+        sourcePage: item.sourceUrl || "",
+        source: "internet-archive",
+        artworkUrl: undefined,
         licenseUrl: item.licenseUrl || undefined,
         rights: item.rights || undefined,
+        format: item.format || "",
       };
       if (!existing) tracks.push(track);
       onlineSearchIds.add(track.id);
@@ -1268,22 +1217,12 @@ async function searchOnlineCatalog(term) {
     query = cleanTerm;
     $("search").value = cleanTerm;
     render();
-    const archiveCount = unique.filter(
-      (item) => item.source === "internet-archive",
-    ).length;
-    const previewCount = unique.filter(
-      (item) => item.source === "itunes-preview",
-    ).length;
     $("audioStatus").textContent =
       unique.length +
-      " matching songs shown · " +
-      archiveCount +
-      " matching Archive recordings · " +
-      previewCount +
-      " iTunes 30-second previews. Archive playback and rights vary by item.";
+      " matching full-length Archive recordings found. Check each item's rights and streaming availability; short previews are excluded.";
   } catch (error) {
     $("audioStatus").textContent =
-      "Online search failed: " + (error?.message || "check your connection.");
+      "Full-track search failed: " + (error?.message || "check your connection.");
   } finally {
     onlineSearchBusy = false;
   }
