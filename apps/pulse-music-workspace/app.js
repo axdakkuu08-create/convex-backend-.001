@@ -607,7 +607,7 @@ function discoveryPreferences() {
     latestNode.checked = saved.latest;
   return {
     country: countryNode?.value || saved.country || "Worldwide",
-    genre: genreNode?.value || saved.genre || "ambient",
+    genre: genreNode?.value || saved.genre || "pop",
     latest: latestNode ? latestNode.checked : saved.latest !== false,
   };
 }
@@ -787,26 +787,72 @@ async function searchRegionalCatalog(prefs, term = prefs.genre) {
 async function loadArchiveDiscovery() {
   const status = $("archiveDiscoveryStatus");
   if (!status) return;
-  status.textContent = "Finding recent releases for your region and genre…";
+  status.textContent = "Finding popular music and full-length Archive recordings…";
   const prefs = discoveryPreferences();
-  let items = [];
-  if (window.PULSE_CATALOG?.search) items = await searchRegionalCatalog(prefs);
-  if (!items.length && window.PULSE_ARCHIVE?.search) {
+  let catalogItems = [];
+  let archiveItems = [];
+  if (window.PULSE_CATALOG?.search) {
+    catalogItems = await searchRegionalCatalog(prefs).catch(() => []);
+  }
+  if (window.PULSE_ARCHIVE?.search) {
     try {
-      items = await searchArchiveForDiscovery("");
+      archiveItems = await searchArchiveForDiscovery("");
     } catch (_) {
-      items = [];
+      archiveItems = [];
     }
   }
+  const seen = new Set();
+  const items = [...catalogItems, ...archiveItems].filter((item) => {
+    if (!item?.src) return false;
+    const key = item.catalogId
+      ? "itunes:" + item.catalogId
+      : "archive:" + item.id;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   if (!items.length) {
     status.textContent =
-      "No catalog matches right now. Try another genre or search Archive from Sources.";
+      "Online music could not be loaded. Check your connection, then try Search or Sources → Internet Archive.";
     return;
   }
+  for (const item of items) {
+    const existing = tracks.find(
+      (track) =>
+        (item.catalogId && track.catalogId === item.catalogId) ||
+        (item.id && !item.catalogId && track.archiveId === item.id) ||
+        track.src === item.src,
+    );
+    const track = existing || {
+      id: item.catalogId ? "itunes:" + item.catalogId : "archive:" + item.id,
+      catalogId: item.catalogId,
+      archiveId: item.catalogId ? undefined : item.id,
+      title: item.title || "Untitled track",
+      artist: item.artist || "Unknown artist",
+      mood: item.genre || prefs.genre || "Music",
+      time: item.time || "—",
+      cover: item.cover || "blue",
+      symbol: item.symbol || "♫",
+      src: item.src,
+      sourceUrl: item.sourceUrl || item.src,
+      sourcePage: item.sourcePage || item.sourceUrl || "",
+      source: item.source || (item.catalogId ? "itunes-preview" : "internet-archive"),
+      artworkUrl: item.artworkUrl || undefined,
+      releaseDate: item.releaseDate || "",
+      licenseUrl: item.licenseUrl || undefined,
+      rights: item.rights || undefined,
+    };
+    if (!existing) tracks.push(track);
+    onlineSearchIds.add(track.id);
+  }
   renderArchiveDiscovery(items);
-  status.textContent = items.some((item) => item.catalogId)
-    ? "Latest matching catalog releases, sorted by release date. Play uses short previews; full-track availability depends on the provider."
-    : "Archive fallback: recently added recordings matched to your preferences. Check item rights and streaming availability.";
+  render();
+  const archiveCount = items.filter((item) => item.source === "internet-archive").length;
+  const previewCount = items.filter((item) => item.source === "itunes-preview").length;
+  status.textContent =
+    items.length + " online tracks loaded · " +
+    archiveCount + " Archive recordings · " +
+    previewCount + " short catalog previews. Full-track availability and rights vary by Archive item.";
 }
 $("generateArchiveMix")?.addEventListener("click", async () => {
   const button = $("generateArchiveMix");
@@ -1158,7 +1204,7 @@ async function searchOnlineCatalog(term) {
     }
     const terms = cleanTerm
       .toLowerCase()
-      .split(/\\s+/)
+      .split(/\s+/)
       .filter((word) => word.length > 2);
     const relevantArchive = archiveItems.filter((item) => {
       const haystack = (
