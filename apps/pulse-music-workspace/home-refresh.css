@@ -637,3 +637,24 @@
     padding: 8px;
   }
 }
+
+
+/* Responsive square-artwork grids for playlists, albums and individual songs. */
+.home-library-section{margin:0 0 24px}
+.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:0 22px}
+.home-grid-card{position:relative;min-width:0;overflow:hidden;border:1px solid #29292f;border-radius:15px;background:#151518;padding:8px 8px 42px}
+.home-art-open{display:flex;width:100%;min-width:0;flex-direction:column;gap:7px;border:0;padding:0;background:transparent;color:#f7f7f9;text-align:left;cursor:pointer}
+.home-grid-artwork{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:linear-gradient(135deg,#343047,#15565d)}
+.home-grid-artwork.artwork-missing{background:linear-gradient(135deg,#343047,#15565d)}
+.home-art-open strong,.home-art-open small{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-art-open strong{font-size:13px;line-height:1.25}.home-art-open small{color:#a5a5ae;font-size:11px}
+.home-grid-play{position:absolute;right:10px;bottom:9px;width:32px;height:32px;border:0;border-radius:50%;background:#ff2452;color:#fff;font-size:12px;cursor:pointer}
+.home-grid-empty{grid-column:1/-1;margin:0;padding:14px;color:#a5a5ae;border:1px dashed #35353c;border-radius:12px;font-size:12px;line-height:1.5}
+.home-detail-dialog{width:min(88vw,380px);max-width:380px;border:1px solid #393941;border-radius:20px;padding:18px;background:#17171c;color:#fff}
+.home-detail-dialog::backdrop{background:#000b}.home-detail-dialog #homeDetailContent{display:grid;gap:10px}
+.home-detail-artwork{width:min(100%,220px);aspect-ratio:1;object-fit:cover;border-radius:14px;margin:0 auto}
+.home-detail-dialog h2{margin:0;font-size:20px}.home-detail-dialog p{margin:0;color:#aaaab4}
+.home-detail-dialog button,.home-detail-dialog a{display:inline-flex;justify-content:center;align-items:center;min-height:40px;border:1px solid #41414a;border-radius:10px;padding:8px 12px;background:#25252c;color:#fff;text-decoration:none}
+.home-detail-close{width:100%;margin-top:12px}
+@media(min-width:701px){.home-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1100px){.home-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
