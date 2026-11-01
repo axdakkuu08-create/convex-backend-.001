@@ -137,7 +137,19 @@ function render() {
         escapeHTML(t.artist) +
         '</small></div></div><div class="moodcell"><span class="chip">' +
         escapeHTML(t.mood) +
-        '</span></div><div class="time">' +
+        '</span>' +
+        (t.source
+          ? '<small class="source-label">' +
+            escapeHTML(
+              t.source === "Apple/iTunes catalogue"
+                ? "30-SEC PREVIEW"
+                : String(t.source).includes("Internet Archive")
+                  ? "INTERNET ARCHIVE · AUDIO"
+                  : t.source,
+            ) +
+            "</small>"
+          : "") +
+        '</div><div class="time">' +
         t.time +
         '</div><button class="rowlike ' +
         (liked.has(t.id) ? "liked" : "") +
