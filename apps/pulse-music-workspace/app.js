@@ -73,7 +73,7 @@ let index = 0,
   liked = new Set(JSON.parse(localStorage.getItem("pulse-liked") || "[]")),
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
-let archiveItems = [];\nlet nativeLoadPromise = Promise.resolve();\nlet nativeDurationSeconds = 0;\nlet nativePositionSeconds = 0;\nlet nativeTrackActive = false;\nlet nativeEndedHandled = false;
+let archiveItems = [];
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -277,8 +277,29 @@ function loadMusicEmbed(raw) {
 function setTrack(i, autoplay = false) {
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
-  audio.src = t.src;
-  audio.load();
+  nativeTrackActive = !!(
+    window.PulseMedia3 &&
+    window.PulseMedia3.isNative &&
+    /^https?:\/\//i.test(t.src)
+  );
+  if (nativeTrackActive) {
+    nativeEndedHandled = false;
+    nativeLoadPromise = window.PulseMedia3.loadTrack({
+      url: t.src,
+      title: t.title,
+      artist: t.artist,
+    });
+    nativeLoadPromise.catch((error) => {
+      $("audioStatus").textContent =
+        error && error.message
+          ? error.message
+          : "Android audio service could not load this track.";
+      toast("Native playback could not load this track.");
+    });
+  } else {
+    audio.src = t.src;
+    audio.load();
+  }
   $("audioStatus").textContent = t.archivePage
     ? "Internet Archive audio · verify item rights before reuse. Open the item page for details."
     : t.localFile
@@ -300,7 +321,12 @@ function setTrack(i, autoplay = false) {
 }
 async function play() {
   try {
-    await audio.play();
+    if (nativeTrackActive) {
+      await nativeLoadPromise;
+      await window.PulseMedia3.play();
+    } else {
+      await audio.play();
+    }
     playing = true;
     $("audioStatus").textContent = tracks[index].archivePage
       ? "Playing · " +
@@ -325,7 +351,11 @@ async function play() {
   }
 }
 function pause() {
-  audio.pause();
+  if (nativeTrackActive) {
+    window.PulseMedia3.pause().catch(() => toast("Could not pause native playback."));
+  } else {
+    audio.pause();
+  }
   playing = false;
   $("play").textContent = "▶";
   render();
@@ -337,7 +367,11 @@ function next() {
   let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
   if (n >= tracks.length && !repeatOn) {
     pause();
-    audio.currentTime = 0;
+    if (nativeTrackActive) {
+      window.PulseMedia3.seekTo(0).catch(() => {});
+    } else {
+      audio.currentTime = 0;
+    }
     return;
   }
   setTrack(n, true);
@@ -420,8 +454,12 @@ $("shuffle").onclick = () => {
 };
 $("next").onclick = next;
 $("prev").onclick = () => {
-  if (audio.currentTime > 3) {
-    audio.currentTime = 0;
+  const currentPosition = nativeTrackActive
+    ? nativePositionSeconds
+    : audio.currentTime;
+  if (currentPosition > 3) {
+    if (nativeTrackActive) window.PulseMedia3.seekTo(0).catch(() => {});
+    else audio.currentTime = 0;
     return;
   }
   setTrack(index - 1, true);
@@ -442,10 +480,53 @@ audio.ontimeupdate = () => {
   }
 };
 $("progress").oninput = (e) => {
-  if (Number.isFinite(audio.duration))
+  if (nativeTrackActive) {
+    window.PulseMedia3.seekTo(
+      (Number(e.target.value) / 100) * nativeDurationSeconds,
+    ).catch(() => {});
+  } else if (Number.isFinite(audio.duration)) {
     audio.currentTime = (Number(e.target.value) / 100) * audio.duration;
+  }
 };
-audio.onended = () => (repeatOn ? ((audio.currentTime = 0), play()) : next());\n\nif (window.PulseMedia3 && window.PulseMedia3.isNative) {\n  window.PulseMedia3.setVolume(0.75).catch(() => {});\n  window.PulseMedia3.addStateListener((state) => {\n    if (!state) return;\n    const position = Number(state.positionSeconds) || 0;\n    const duration = Number(state.durationSeconds) || 0;\n    nativePositionSeconds = position;\n    nativeDurationSeconds = duration;\n    if (duration > 0) {\n      $("progress").value = (position / duration) * 100;\n      $("time").textContent = fmt(position);\n      $("duration").textContent = fmt(duration);\n    }\n    const isNowPlaying = !!state.isPlaying;\n    if (playing !== isNowPlaying) {\n      playing = isNowPlaying;\n      $("play").textContent = playing ? "Ⅱ" : "▶";\n      render();\n    }\n    if (state.playbackState === 4 && !nativeEndedHandled) {\n      nativeEndedHandled = true;\n      if (repeatOn) window.PulseMedia3.seekTo(0).then(() => play()).catch(() => {});\n      else next();\n    } else if (state.playbackState !== 4) {\n      nativeEndedHandled = false;\n    }\n  });\n}
+audio.onended = () => (repeatOn ? ((audio.currentTime = 0), play()) : next());
+
+let nativeLoadPromise = Promise.resolve();
+let nativeDurationSeconds = 0;
+let nativePositionSeconds = 0;
+let nativeTrackActive = false;
+let nativeEndedHandled = false;
+
+if (window.PulseMedia3 && window.PulseMedia3.isNative) {
+  window.PulseMedia3.setVolume(0.75).catch(() => {});
+  window.PulseMedia3.addStateListener((state) => {
+    if (!state) return;
+    const position = Number(state.positionSeconds) || 0;
+    const duration = Number(state.durationSeconds) || 0;
+    nativePositionSeconds = position;
+    nativeDurationSeconds = duration;
+    if (duration > 0) {
+      $("progress").value = (position / duration) * 100;
+      $("time").textContent = fmt(position);
+      $("duration").textContent = fmt(duration);
+    }
+    const isNowPlaying = !!state.isPlaying;
+    if (playing !== isNowPlaying) {
+      playing = isNowPlaying;
+      $("play").textContent = playing ? "Ⅱ" : "▶";
+      render();
+    }
+    if (state.playbackState === 4 && !nativeEndedHandled) {
+      nativeEndedHandled = true;
+      if (repeatOn) {
+        window.PulseMedia3.seekTo(0).then(() => play()).catch(() => {});
+      } else {
+        next();
+      }
+    } else if (state.playbackState !== 4) {
+      nativeEndedHandled = false;
+    }
+  });
+};\n\nif (window.PulseMedia3 && window.PulseMedia3.isNative) {\n  window.PulseMedia3.setVolume(0.75).catch(() => {});\n  window.PulseMedia3.addStateListener((state) => {\n    if (!state) return;\n    const position = Number(state.positionSeconds) || 0;\n    const duration = Number(state.durationSeconds) || 0;\n    nativePositionSeconds = position;\n    nativeDurationSeconds = duration;\n    if (duration > 0) {\n      $("progress").value = (position / duration) * 100;\n      $("time").textContent = fmt(position);\n      $("duration").textContent = fmt(duration);\n    }\n    const isNowPlaying = !!state.isPlaying;\n    if (playing !== isNowPlaying) {\n      playing = isNowPlaying;\n      $("play").textContent = playing ? "Ⅱ" : "▶";\n      render();\n    }\n    if (state.playbackState === 4 && !nativeEndedHandled) {\n      nativeEndedHandled = true;\n      if (repeatOn) window.PulseMedia3.seekTo(0).then(() => play()).catch(() => {});\n      else next();\n    } else if (state.playbackState !== 4) {\n      nativeEndedHandled = false;\n    }\n  });\n}
 audio.onwaiting = () => {
   $("audioStatus").textContent =
     "Loading audio… If it stays here, the link may not be a direct audio file.";
