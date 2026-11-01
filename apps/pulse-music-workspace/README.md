@@ -105,7 +105,7 @@ Android wrapper is maintained separately and does not replace the web app or
 change the backend. See [ANDROID_RELEASE.md](ANDROID_RELEASE.md) for the native
 build, debug APK workflow, signing requirements, and Play Store release plan.
 
-The first Android CI milestone produces a debug APK for device testing. A
-signed release APK and Play Store AAB require a securely managed release
-keystore. Background playback, native media controls, and offline downloads
-are not claimed as supported until implemented and tested on a physical device.
+The first Android CI milestone produces a debug APK for device testing. A signed
+release APK and Play Store AAB require a securely managed release keystore.
+Background playback, native media controls, and offline downloads are not
+claimed as supported until implemented and tested on a physical device.
