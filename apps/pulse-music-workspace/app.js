@@ -357,7 +357,9 @@ async function play() {
 }
 function pause() {
   if (nativeTrackActive) {
-    window.PulseMedia3.pause().catch(() => toast("Could not pause native playback."));
+    window.PulseMedia3.pause().catch(() =>
+      toast("Could not pause native playback."),
+    );
   } else {
     audio.pause();
   }
@@ -530,7 +532,9 @@ if (window.PulseMedia3 && window.PulseMedia3.isNative) {
     if (state.playbackState === 4 && !nativeEndedHandled) {
       nativeEndedHandled = true;
       if (repeatOn) {
-        window.PulseMedia3.seekTo(0).then(() => play()).catch(() => {});
+        window.PulseMedia3.seekTo(0)
+          .then(() => play())
+          .catch(() => {});
       } else {
         next();
       }
