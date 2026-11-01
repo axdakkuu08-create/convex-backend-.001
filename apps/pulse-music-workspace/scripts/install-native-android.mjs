@@ -21,8 +21,13 @@ const mediaDependencies = [
   '    implementation "androidx.media3:media3-ui:1.8.0"',
 ].join("\n");
 if (!gradle.includes("androidx.media3:media3-exoplayer")) {
-  if (!/dependencies\s*\{/.test(gradle)) throw new Error("Could not locate app Gradle dependencies block");
-  gradle = gradle.replace(/dependencies\s*\{/, (match) => match + "\n" + mediaDependencies);
+  if (!/dependencies\s*\{/.test(gradle)) {
+    throw new Error("Could not locate app Gradle dependencies block");
+  }
+  gradle = gradle.replace(
+    /dependencies\s*\{/,
+    (match) => match + "\n" + mediaDependencies,
+  );
   await writeFile(gradlePath, gradle);
 }
 
@@ -32,7 +37,10 @@ const permissions = [
   '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />',
 ].join("\n");
 if (!manifest.includes("FOREGROUND_SERVICE_MEDIA_PLAYBACK")) {
-  manifest = manifest.replace("<application", permissions + "\n    <application");
+  manifest = manifest.replace(
+    "<application",
+    permissions + "\n    <application",
+  );
 }
 const service = `
         <service
@@ -44,7 +52,10 @@ const service = `
             </intent-filter>
         </service>`;
 if (!manifest.includes("com.pulse.music.PulseAudioService")) {
-  manifest = manifest.replace("</application>", service + "\n    </application>");
+  manifest = manifest.replace(
+    "</application>",
+    service + "\n    </application>",
+  );
 }
 await writeFile(manifestPath, manifest);
 
@@ -60,4 +71,6 @@ if (!activity.includes("PulseMedia3Plugin")) {
   );
   await writeFile(activityPath, activity);
 }
-console.log("Installed Pulse Media3 service, Capacitor plugin, manifest, and dependencies.");
+console.log(
+  "Installed Pulse Media3 service, Capacitor plugin, manifest, and dependencies.",
+);
