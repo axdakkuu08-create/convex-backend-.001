@@ -23,6 +23,7 @@
       );
     }
     render();
+    window.dispatchEvent(new Event("pulse:playlists-updated"));
   }
   function create(name) {
     const clean = String(name || "")
@@ -178,5 +179,5 @@
       });
   });
   render();
-  window.PulsePlaylistStore = { read, create, render };
+  window.PulsePlaylistStore = { read, create, render, play: playFromPlaylist };
 })();
