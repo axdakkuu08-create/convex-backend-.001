@@ -375,7 +375,8 @@
           const cover = document.createElement("span");
           cover.className = "speed-cover";
           if (item.artwork) {
-            cover.style.backgroundImage = 'url("' + item.artwork.replace(/["\\]/g, "") + '")';
+            cover.style.backgroundImage =
+              'url("' + item.artwork.replace(/["\\]/g, "") + '")';
             cover.style.backgroundSize = "cover";
           } else {
             cover.textContent = "♫";

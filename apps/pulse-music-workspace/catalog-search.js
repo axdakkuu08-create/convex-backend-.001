@@ -160,7 +160,9 @@
             )
             .filter((track, index, all) =>
               track.catalogId
-                ? all.findIndex((item) => item.catalogId === track.catalogId) === index
+                ? all.findIndex(
+                    (item) => item.catalogId === track.catalogId,
+                  ) === index
                 : true,
             )
             .sort((a, b) => {

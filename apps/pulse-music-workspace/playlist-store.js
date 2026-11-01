@@ -131,7 +131,9 @@
         (duplicate ? "Already saved in " : "Added to ") + target.name + ".";
   }
   function createFromTracks(name, tracks) {
-    const clean = String(name || "Archive Mix").trim().slice(0, 60);
+    const clean = String(name || "Archive Mix")
+      .trim()
+      .slice(0, 60);
     const items = (Array.isArray(tracks) ? tracks : [])
       .filter((track) => track && track.src)
       .slice(0, 24)

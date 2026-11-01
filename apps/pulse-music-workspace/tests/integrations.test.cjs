@@ -172,7 +172,6 @@ test("Internet Archive UI is included without replacing existing providers or cl
   assert.match(html, /sourceFrame/);
 });
 
-
 test("regional catalogue search excludes explicit content and sorts invalid dates safely", () => {
   const catalog = fs.readFileSync(
     path.join(__dirname, "..", "catalog-search.js"),
@@ -181,7 +180,10 @@ test("regional catalogue search excludes explicit content and sorts invalid date
   assert.match(catalog, /explicit=No/);
   assert.match(catalog, /catalogId: track\.trackId/);
   assert.match(catalog, /Number\.isFinite\(dateA\)/);
-  assert.match(catalog, /findIndex\(\(item\) => item\.catalogId === track\.catalogId\)/);
+  assert.match(
+    catalog,
+    /findIndex\(\(item\) => item\.catalogId === track\.catalogId\)/,
+  );
 });
 
 test("local playlists deduplicate catalogue IDs and can save generated mixes", () => {
@@ -199,7 +201,10 @@ test("home Archive discovery creates a multi-search local mix with rights links"
     path.join(__dirname, "..", "home-archive-discovery.js"),
     "utf8",
   );
-  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
   assert.match(discovery, /Promise\.allSettled/);
   assert.match(discovery, /createFromTracks/);
   assert.match(discovery, /check each item's rights/i);
@@ -214,7 +219,10 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
     "utf8",
   );
   const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
   assert.match(home, /speedList\.replaceChildren/);
   assert.match(home, /catalogId: exact\?\.trackId/);
   assert.match(app, /function renderQueuePanel/);
