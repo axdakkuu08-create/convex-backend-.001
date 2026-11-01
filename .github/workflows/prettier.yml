@@ -12,9 +12,6 @@ on:
   pull_request:
     branches: ["**", "!release"]
 
-permissions:
-  contents: write
-
 jobs:
   check:
     name: Prettier
@@ -23,9 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          persist-credentials: true
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
@@ -36,43 +31,6 @@ jobs:
       - name: Get dprint version
         run: |
           echo DPRINT_VERSION=$(node -p "require('./scripts/package.json').devDependencies['dprint']") >> $GITHUB_ENV
-
-      - name: Reconcile latest PR26 branch into PR27
-        id: reconcile
-        if: github.event_name == 'pull_request'
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          git fetch origin "$GITHUB_BASE_REF:refs/remotes/origin/$GITHUB_BASE_REF"
-          git merge --no-commit --no-ff "origin/$GITHUB_BASE_REF" || true
-          conflicts="$(git diff --name-only --diff-filter=U)"
-          if [ -n "$conflicts" ]; then
-            mkdir -p /tmp/pulse-pr27-conflicts
-            printf '%s\n' "$conflicts" > /tmp/pulse-pr27-conflicts/conflicts.txt
-            while IFS= read -r file; do
-              mkdir -p "/tmp/pulse-pr27-conflicts/$(dirname "$file")"
-              cp "$file" "/tmp/pulse-pr27-conflicts/$file"
-            done <<< "$conflicts"
-            echo "Merge conflicts need manual reconciliation:"
-            cat /tmp/pulse-pr27-conflicts/conflicts.txt
-            exit 1
-          fi
-          curl -fsSL https://dprint.dev/install.sh | sh -s 0.57.0
-          ~/.dprint/bin/dprint fmt apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/itunes-source.js apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/tests/integrations.test.cjs apps/pulse-music-workspace/README.md
-          git add -A
-          git commit -m "merge: reconcile updated PR26 into PR27"
-          git push origin "HEAD:$GITHUB_HEAD_REF"
-
-      - name: Upload PR27 conflict files for review
-        if: steps.reconcile.outcome == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr27-merge-conflicts
-          path: /tmp/pulse-pr27-conflicts/
-
-      - name: Stop until PR27 conflicts are resolved
-        if: steps.reconcile.outcome == 'failure'
-        run: exit 1
 
       - uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
         with:

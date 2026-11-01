@@ -768,11 +768,17 @@ async function searchRegionalCatalog(prefs, term = prefs.genre) {
     seen.add(key);
     return true;
   });
-  if (prefs.latest)
+  if (prefs.latest) {
+    const timestamp = (value) => {
+      const parsed = Date.parse(value || "");
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
     results.sort(
       (a, b) =>
-        Date.parse(b.releaseDate || "") - Date.parse(a.releaseDate || ""),
+        timestamp(b.releaseDate) - timestamp(a.releaseDate) ||
+        a.title.localeCompare(b.title),
     );
+  }
   return results.slice(0, 50);
 }
 async function loadArchiveDiscovery() {
