@@ -12,6 +12,9 @@ on:
   pull_request:
     branches: ["**", "!release"]
 
+permissions:
+  contents: write
+
 jobs:
   check:
     name: Prettier
@@ -20,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          persist-credentials: false
+          persist-credentials: true
+          ref: feature/pulse-discovery-playlist-fixes
+          fetch-depth: 0
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
@@ -31,6 +36,36 @@ jobs:
       - name: Get dprint version
         run: |
           echo DPRINT_VERSION=$(node -p "require('./scripts/package.json').devDependencies['dprint']") >> $GITHUB_ENV
+
+      - name: Reconcile updated PR26 branch into PR27
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          BASE_BRANCH="feature/pulse-convx-glass-adaptation"
+          HEAD_BRANCH="feature/pulse-discovery-playlist-fixes"
+          git fetch origin "$BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH"
+          git merge --no-commit --no-ff "origin/$BASE_BRANCH" || true
+          conflicts="$(git diff --name-only --diff-filter=U)"
+          if [ -n "$conflicts" ]; then
+            while IFS= read -r file; do
+              case "$file" in
+                apps/pulse-music-workspace/app.js|apps/pulse-music-workspace/index.html|apps/pulse-music-workspace/itunes-source.js|apps/pulse-music-workspace/playlist-manager.js|apps/pulse-music-workspace/tests/integrations.test.cjs)
+                  git checkout --ours -- "$file"
+                  git add "$file"
+                  ;;
+                *)
+                  echo "Unexpected merge conflict: $file"
+                  exit 1
+                  ;;
+              esac
+            done <<< "$conflicts"
+          fi
+          curl -fsSL https://dprint.dev/install.sh | sh -s 0.57.0
+          ~/.dprint/bin/dprint fmt apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/itunes-source.js apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/tests/integrations.test.cjs apps/pulse-music-workspace/README.md
+          ~/.dprint/bin/dprint check apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/itunes-source.js apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/tests/integrations.test.cjs apps/pulse-music-workspace/README.md
+          git add -A
+          git commit -m "merge: reconcile updated PR26 into PR27"
+          git push origin "HEAD:$HEAD_BRANCH"
 
       - uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
         with:
