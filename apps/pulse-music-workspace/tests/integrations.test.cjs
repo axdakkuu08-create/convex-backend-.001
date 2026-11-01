@@ -170,7 +170,7 @@ test("Internet Archive adapter builds public search and resolves only supported 
 test("Internet Archive integration preserves shared queue, source attribution and cloud event payload", () => {
   assert.match(indexSource, /id="archiveForm"/);
   assert.match(indexSource, /src="archive-source\.js"/);
-  assert.match(appSource, /searchArchiveForDiscovery\(term\)/);
+  assert.match(appSource, /(?:window\.PULSE_ARCHIVE\.search\(term\)|searchArchiveForDiscovery\(term\))/);
   assert.match(appSource, /source: "internet-archive"/);
   assert.match(appSource, /window\.PULSE_QUEUE\?\.add\(track\)/);
   assert.match(appSource, /track\?\.sourceUrl \|\| track\?\.src/);
