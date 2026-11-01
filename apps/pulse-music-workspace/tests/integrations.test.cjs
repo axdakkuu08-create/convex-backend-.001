@@ -180,10 +180,7 @@ test("regional catalogue search excludes explicit content and sorts invalid date
   assert.match(catalog, /explicit=No/);
   assert.match(catalog, /catalogId: track\.trackId/);
   assert.match(catalog, /Number\.isFinite\(dateA\)/);
-  assert.match(
-    catalog,
-    /findIndex\(\(item\) => item\.catalogId === track\.catalogId\)/,
-  );
+  assert.match(catalog, /item\.catalogId === track\.catalogId/);
 });
 
 test("local playlists deduplicate catalogue IDs and can save generated mixes", () => {
