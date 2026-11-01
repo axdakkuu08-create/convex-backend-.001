@@ -447,7 +447,6 @@
   );
   window.addEventListener("pulse:playlists-updated", renderHomePlaylists);
   renderHomePlaylists();
-  void loadHomeArtwork();
 
   window.addEventListener("pulse:preferences-changed", () => {
     void loadHomeArtwork();
