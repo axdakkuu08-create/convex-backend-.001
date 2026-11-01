@@ -11,8 +11,8 @@ does not replace the website or change the Convex deployment.
 - Capacitor copies the static frontend into the generated `www/` directory.
 - The Android application loads that bundled frontend and uses the same public
   service endpoints as the website.
-- `config.js` remains public client configuration. Never put Clerk secret
-  keys, Convex deploy keys, signing passwords, or private credentials in it.
+- `config.js` remains public client configuration. Never put Clerk secret keys,
+  Convex deploy keys, signing passwords, or private credentials in it.
 - Playlist and catalogue content can update online. Native application code
   changes still require a new Android release through the chosen distribution
   channel.
@@ -32,11 +32,10 @@ cd android
 ./gradlew assembleDebug
 ```
 
-The debug APK is created at
-`android/app/build/outputs/apk/debug/app-debug.apk`.
+The debug APK is created at `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-The Android project is generated during CI so the repository does not acquire
-an unreviewed generated Gradle project. Native playback sources are stored in
+The Android project is generated during CI so the repository does not acquire an
+unreviewed generated Gradle project. Native playback sources are stored in
 `android-native/` and installed into the generated project by
 `scripts/install-native-android.mjs`. The integration uses Media3 ExoPlayer and
 MediaSessionService, registered through a Capacitor plugin. Direct HTTP(S) audio
@@ -46,8 +45,8 @@ audio element.
 ## GitHub Actions
 
 The `Pulse Android build` workflow runs on pull requests that change the Pulse
-workspace and can also be started manually. It builds a debug APK and uploads
-it as a workflow artifact for device testing.
+workspace and can also be started manually. It builds a debug APK and uploads it
+as a workflow artifact for device testing.
 
 A signed release APK and Play Store AAB are a separate release step. They must
 use an authorized release keystore stored in GitHub Actions secrets; do not
@@ -62,8 +61,8 @@ for future updates to the same Play app.
   store listing, privacy disclosures, content declarations, testing track, and
   applicable review requirements. An eligible adult account holder must manage
   Play Console registration and publishing.
-- Keep the website available at its existing URL throughout Android testing
-  and release.
+- Keep the website available at its existing URL throughout Android testing and
+  release.
 
 ## Current limitations to verify before release
 
