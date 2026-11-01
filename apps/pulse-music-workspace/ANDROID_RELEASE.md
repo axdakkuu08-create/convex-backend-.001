@@ -57,25 +57,26 @@ for future updates to the same Play app.
 
 ## Distribution
 
-- Direct installation: use a signed release APK. The CI debug APK is for
-  testing only and is not the public release build.
-- Google Play: upload a signed AAB through the Play Console after completing
-  the store listing, privacy disclosures, content declarations, testing track,
-  and applicable review requirements. An eligible adult account holder must
-  manage Play Console registration and publishing.
-- Keep the website available at its existing URL throughout Android testing
-  and release.
+- Direct installation: use a signed release APK. The CI debug APK is for testing
+  only and is not the public release build.
+- Google Play: upload a signed AAB through the Play Console after completing the
+  store listing, privacy disclosures, content declarations, testing track, and
+  applicable review requirements. An eligible adult account holder must manage
+  Play Console registration and publishing.
+- Keep the website available at its existing URL throughout Android testing and
+  release.
 
 ## Current limitations to verify before release
 
-The native Media3 service and Capacitor control bridge are now present in source.
-The bridge configures Android media audio focus and noisy-audio handling and
-exposes play, pause, seek, volume, and playback-state updates. This source-level
-integration is not yet verified by a successful Android build or physical-device
-test. Queue-aware notification next/previous actions, offline downloads, and
-end-to-end lifecycle testing remain outstanding. Official Spotify, YouTube, and
-SoundCloud embeds continue to follow provider restrictions inside Android WebView.
+The native Media3 service and Capacitor control bridge are now present in
+source. The bridge configures Android media audio focus and noisy-audio handling
+and exposes play, pause, seek, volume, and playback-state updates. This
+source-level integration is not yet verified by a successful Android build or
+physical-device test. Queue-aware notification next/previous actions, offline
+downloads, and end-to-end lifecycle testing remain outstanding. Official
+Spotify, YouTube, and SoundCloud embeds continue to follow provider restrictions
+inside Android WebView.
 
-A successful CI build proves packaging only. It does not prove playback,
-Clerk sign-in, Convex cloud sync, queue controls, or background playback on a
-physical Android phone. Test those on the target device before a public release.
+A successful CI build proves packaging only. It does not prove playback, Clerk
+sign-in, Convex cloud sync, queue controls, or background playback on a physical
+Android phone. Test those on the target device before a public release.
