@@ -5,8 +5,8 @@
   "description": "Pulse music workspace web and Android application",
   "scripts": {
     "build:web": "node scripts/prepare-web.mjs",
-    "android:sync": "npm run build:web && cap sync android",
-    "android:add": "npm run build:web && cap add android",
+    "android:sync": "npm run build:web && node scripts/install-native-android.mjs && cap sync android",
+    "android:add": "npm run build:web && cap add android && node scripts/install-native-android.mjs",
     "android:debug": "npm run android:add && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
@@ -16,4 +16,4 @@
   "devDependencies": {
     "@capacitor/cli": "8.5.0"
   }
-}
+}\n
