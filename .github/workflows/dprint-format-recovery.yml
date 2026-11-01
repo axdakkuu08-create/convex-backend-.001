@@ -1,0 +1,28 @@
+name: Temporary PR25 dprint formatting recovery
+on:
+  push:
+    branches:
+      - feature/pulse-discovery-polish
+    paths:
+      - ".github/workflows/dprint-format-recovery.yml"
+permissions:
+  contents: read
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install repository-pinned dprint
+        run: curl -fsSL https://dprint.dev/install.sh | sh -s 0.57.0
+      - name: Format PR25 files
+        run: |
+          ~/.dprint/bin/dprint fmt apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/styles.css
+          ~/.dprint/bin/dprint check apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/styles.css
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pr25-dprint-formatted
+          path: |
+            apps/pulse-music-workspace/app.js
+            apps/pulse-music-workspace/index.html
+            apps/pulse-music-workspace/playlist-manager.js
+            apps/pulse-music-workspace/styles.css
