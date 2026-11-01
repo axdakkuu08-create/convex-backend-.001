@@ -190,7 +190,7 @@ test("playlist library supports local persistence, add/remove, and shared-player
   assert.match(playlistSource, /window\.PULSE_PLAYLISTS/);
   assert.match(playlistSource, /pulse:playlist-play/);
   assert.match(playlistSource, /playlist\.tracks\.splice\(index, 1\)/);
-  assert.match(appSource, /window\.PULSE_PLAYLISTS\?\.add\(tracks\.find/);
+  assert.match(appSource, /window\.PULSE_PLAYLISTS\?\.add\(track\)/);
   assert.match(appSource, /window\.addEventListener\("pulse:playlist-play"/);
   assert.match(appSource, /data-playlist-add/);
   assert.match(appSource, /＋ Playlist/);
