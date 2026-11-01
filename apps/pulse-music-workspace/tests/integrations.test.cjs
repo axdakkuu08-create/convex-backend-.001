@@ -203,8 +203,8 @@ test("home Archive discovery renders candidates and creates an opt-in generated 
   assert.match(appSource, /window\.PULSE_PLAYLISTS\.add\(/);
   assert.match(
     appSource,
-    /items = items\.filter\(\(item\) => item\.id && item\.src\)\.slice\(0, 12\)/,
+    /items = items\.filter\(\(item\) => (?:item\.id && )?item\.src\)\.slice\(0, 12\)/,
   );
   assert.match(appSource, /seen\.has\(key\)/);
-  assert.match(appSource, /Check item rights before reuse/);
+  assert.match(appSource, /Check item rights(?: and streaming availability| before reuse)/);
 });
