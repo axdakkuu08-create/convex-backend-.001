@@ -5,3 +5,7 @@ convex_local_storage/
 .DS_Store
 .turbo/
 # testing 123
+
+# Generated Capacitor Android/web build output
+/apps/pulse-music-workspace/android/
+/apps/pulse-music-workspace/www/
