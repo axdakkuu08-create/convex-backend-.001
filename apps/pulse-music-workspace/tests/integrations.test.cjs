@@ -170,7 +170,10 @@ test("Internet Archive adapter builds public search and resolves only supported 
 test("Internet Archive integration preserves shared queue, source attribution and cloud event payload", () => {
   assert.match(indexSource, /id="archiveForm"/);
   assert.match(indexSource, /src="archive-source\.js"/);
-  assert.match(appSource, /searchArchiveForDiscovery\(term\)/);
+  assert.match(
+    appSource,
+    /(?:window\.PULSE_ARCHIVE\.search\(term\)|searchArchiveForDiscovery\(term\))/,
+  );
   assert.match(appSource, /source: "internet-archive"/);
   assert.match(appSource, /window\.PULSE_QUEUE\?\.add\(track\)/);
   assert.match(appSource, /track\?\.sourceUrl \|\| track\?\.src/);
@@ -419,4 +422,24 @@ test("online catalog search is explicitly triggered by Enter and renders selecta
     /const id = r\.dataset\.id;\s*const track = tracks\.find\(\(t\) => String\(t\.id\) === id\)/,
   );
   assert.match(appSource, /escapeHTML\(t\.id\)/);
+});
+
+test("home Archive discovery renders candidates and creates an opt-in generated playlist", () => {
+  assert.match(indexSource, /id="archiveDiscovery"/);
+  assert.match(indexSource, /id="archiveDiscoveryStatus"/);
+  assert.match(indexSource, /id="archiveDiscoveryResults"/);
+  assert.match(indexSource, /id="generateArchiveMix"/);
+  assert.match(appSource, /async function loadArchiveDiscovery/);
+  assert.match(appSource, /renderArchiveDiscovery\(items\)/);
+  assert.match(appSource, /window\.PULSE_PLAYLISTS\.create\(name\)/);
+  assert.match(appSource, /window\.PULSE_PLAYLISTS\.add\(/);
+  assert.match(
+    appSource,
+    /items = items\.filter\(\(item\) => (?:item\.id && )?item\.src\)\.slice\(0, 12\)/,
+  );
+  assert.match(appSource, /seen\.has\(key\)/);
+  assert.match(
+    appSource,
+    /Check item rights(?: and streaming availability| before reuse)/,
+  );
 });
