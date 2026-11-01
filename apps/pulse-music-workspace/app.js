@@ -533,7 +533,7 @@ if (window.PulseMedia3 && window.PulseMedia3.isNative) {
       nativeEndedHandled = false;
     }
   });
-};}
+}
 audio.onwaiting = () => {
   $("audioStatus").textContent =
     "Loading audio… If it stays here, the link may not be a direct audio file.";
