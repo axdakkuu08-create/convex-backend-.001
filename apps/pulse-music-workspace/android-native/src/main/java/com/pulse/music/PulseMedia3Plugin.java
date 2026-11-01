@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 public final class PulseMedia3Plugin extends Plugin {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private ListenableFuture<MediaController> controllerFuture;
-    private MediaController controller;
+    private MediaController controller;\n    private final Runnable positionTicker = new Runnable() {\n        @Override\n        public void run() {\n            if (controller != null) {\n                emitState(controller);\n                if (controller.isPlaying()) mainHandler.postDelayed(this, 500);\n            }\n        }\n    };
 
     private interface ControllerAction {
         void run(MediaController mediaController);
@@ -47,7 +47,7 @@ public final class PulseMedia3Plugin extends Plugin {
                     @Override
                     public void onEvents(androidx.media3.common.Player player,
                                          androidx.media3.common.Player.Events events) {
-                        emitState(player);
+                        emitState(player);\n                        mainHandler.removeCallbacks(positionTicker);\n                        if (player.isPlaying()) mainHandler.post(positionTicker);
                     }
                 });
                 action.run(controller);
