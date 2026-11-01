@@ -32,6 +32,22 @@ jobs:
         run: |
           echo DPRINT_VERSION=$(node -p "require('./scripts/package.json').devDependencies['dprint']") >> $GITHUB_ENV
 
+      - name: Format PR25 recovery targets with pinned dprint
+        run: |
+          curl -fsSL https://dprint.dev/install.sh | sh -s "$DPRINT_VERSION"
+          ~/.dprint/bin/dprint fmt apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/styles.css
+          ~/.dprint/bin/dprint check apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/styles.css
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pr25-dprint-formatted
+          path: |
+            apps/pulse-music-workspace/app.js
+            apps/pulse-music-workspace/index.html
+            apps/pulse-music-workspace/playlist-manager.js
+            apps/pulse-music-workspace/styles.css
+
       - uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
         with:
           dprint-version: ${{ env.DPRINT_VERSION }}
