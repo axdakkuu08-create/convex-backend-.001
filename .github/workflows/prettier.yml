@@ -64,6 +64,8 @@ jobs:
           ~/.dprint/bin/dprint fmt apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/itunes-source.js apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/tests/integrations.test.cjs apps/pulse-music-workspace/README.md
           ~/.dprint/bin/dprint check apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/itunes-source.js apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/tests/integrations.test.cjs apps/pulse-music-workspace/README.md
           git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "merge: reconcile updated PR26 into PR27"
           git push origin "HEAD:$HEAD_BRANCH"
 
