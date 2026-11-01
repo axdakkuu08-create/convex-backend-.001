@@ -8,6 +8,10 @@ const root = path.join(__dirname, "..");
 const appSource = fs.readFileSync(path.join(root, "app.js"), "utf8");
 const configSource = fs.readFileSync(path.join(root, "config.js"), "utf8");
 const cloudSource = fs.readFileSync(path.join(root, "cloud-sync.js"), "utf8");
+const playlistSource = fs.readFileSync(
+  path.join(root, "playlist-manager.js"),
+  "utf8",
+);
 const archiveSource = fs.readFileSync(
   path.join(root, "archive-source.js"),
   "utf8",
@@ -170,4 +174,20 @@ test("Internet Archive integration preserves shared queue, source attribution an
     appSource,
     /emitPulseLibraryEvent\("pulse:track-played", tracks\[index\]\)/,
   );
+});
+
+test("playlist library supports local persistence, add/remove, and shared-player playback", () => {
+  assert.match(indexSource, /id="playlistNameInput"/);
+  assert.match(indexSource, /id="playlistCreateButton"/);
+  assert.match(indexSource, /id="playlistTarget"/);
+  assert.match(indexSource, /id="playlistCards"/);
+  assert.match(indexSource, /src="playlist-manager\.js"/);
+  assert.match(playlistSource, /pulse-playlists-v1/);
+  assert.match(playlistSource, /window\.PULSE_PLAYLISTS/);
+  assert.match(playlistSource, /pulse:playlist-play/);
+  assert.match(playlistSource, /playlist\.tracks\.splice\(index, 1\)/);
+  assert.match(appSource, /window\.PULSE_PLAYLISTS\?\.add\(tracks\.find/);
+  assert.match(appSource, /window\.addEventListener\("pulse:playlist-play"/);
+  assert.match(appSource, /data-playlist-add/);
+  assert.match(appSource, /＋ Playlist/);
 });

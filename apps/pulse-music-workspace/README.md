@@ -13,7 +13,9 @@ and is not affiliated with Convex.
 - Mood cards, curated track list, and saved library
 - Play/pause, previous/next, shuffle, repeat, volume, and seeking
 - Like/save tracks and recently played history via localStorage
-- Create a simple local playlist label
+- Create, open, and delete device-local playlists with saved track lists
+- Add demo, Jamendo, and Internet Archive tracks to playlists; play playlist
+  tracks through the shared audio player
 - Keyboard shortcut / to focus search; Space toggles playback
 - PWA install metadata
 
@@ -47,6 +49,10 @@ The **Connect a music source** panel supports these sources:
   privacy-enhanced embed host.
 - **SoundCloud** tracks and playlists using the SoundCloud widget.
 
+Create a playlist in the **Playlists** section, choose it in **Add songs to**,
+then use **＋ Playlist** beside an Internet Archive result or the **＋** action
+beside a track. Playlist records persist in this browser on this device; they
+are not cloud-synced unless a separate cloud-playlist feature is configured.
 Search for audio in the Internet Archive panel, or paste a public share URL into
 **Music link** and tap **Load player**. These are official web embeds, not a
 bypass of provider playback rules. Sign-in, availability, ads, regional
@@ -82,6 +88,8 @@ the live Internet Archive API or every item's playback will work.
 - app.js — playback, search, local library state, and interactions
 - archive-source.js — Internet Archive search, metadata lookup, and supported
   audio-file selection
+- playlist-manager.js — device-local playlist creation, saved track lists, and
+  playback integration
 - config.js — public Convex URL and Clerk publishable-key placeholders
 - cloud-sync.js — optional cloud playlist sign-in and CRUD
 - manifest.webmanifest — install metadata

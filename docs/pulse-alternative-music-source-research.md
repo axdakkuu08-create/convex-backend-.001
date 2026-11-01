@@ -66,8 +66,8 @@ No private API keys have been obtained or created by this investigation.
 
 - Audius: try the documented read-only API first; create a key only if required
   by the selected endpoints or rate limits. Use the official portal above.
-- Internet Archive: public search/metadata endpoints can be prototyped without
-  a key. Account credentials are not needed for basic public metadata reads.
+- Internet Archive: public search/metadata endpoints can be prototyped without a
+  key. Account credentials are not needed for basic public metadata reads.
 - YouTube: the user (or an authorized account holder) must create/select a
   Google Cloud project, enable YouTube Data API v3, and create an API key.
   Restrict the key to the intended APIs and web origins where practical. Never
