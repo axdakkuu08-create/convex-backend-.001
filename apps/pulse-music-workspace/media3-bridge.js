@@ -4,10 +4,7 @@
     !!capacitor &&
     typeof capacitor.isNativePlatform === "function" &&
     capacitor.isNativePlatform();
-  const plugin =
-    nativePlatform &&
-    capacitor.Plugins &&
-    capacitor.Plugins.PulseMedia3;
+  const plugin = nativePlatform && capacitor.Plugins && capacitor.Plugins.PulseMedia3;
 
   const bridge = {
     available: !!plugin,
