@@ -277,12 +277,14 @@ function loadMusicEmbed(raw) {
 function setTrack(i, autoplay = false) {
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
+  const wasNativeTrack = nativeTrackActive;
   nativeTrackActive = !!(
     window.PulseMedia3 &&
     window.PulseMedia3.isNative &&
     /^https?:\/\//i.test(t.src)
   );
   if (nativeTrackActive) {
+    audio.pause();
     nativeEndedHandled = false;
     nativeLoadPromise = window.PulseMedia3.loadTrack({
       url: t.src,
@@ -297,6 +299,9 @@ function setTrack(i, autoplay = false) {
       toast("Native playback could not load this track.");
     });
   } else {
+    if (wasNativeTrack && window.PulseMedia3) {
+      window.PulseMedia3.pause().catch(() => {});
+    }
     audio.src = t.src;
     audio.load();
   }
