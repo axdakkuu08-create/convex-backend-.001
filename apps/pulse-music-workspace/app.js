@@ -470,7 +470,14 @@ $("repeat").onclick = () => {
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
 $("like").onclick = () => like(tracks[index].id);
-$("volume").oninput = (e) => {\n  const volume = Number(e.target.value);\n  if (nativeTrackActive) window.PulseMedia3.setVolume(volume).catch(() => {});\n  else audio.volume = volume;\n};
+$("volume").oninput = (e) => {
+  const volume = Number(e.target.value);
+  if (nativeTrackActive) {
+    window.PulseMedia3.setVolume(volume).catch(() => {});
+  } else {
+    audio.volume = volume;
+  }
+};
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
   if (Number.isFinite(audio.duration) && audio.duration > 0) {
