@@ -406,7 +406,6 @@ test("playlist manager creates, persists, and emits songs in order", () => {
   );
 });
 
-
 test("online catalog search is explicitly triggered by Enter and renders selectable results", () => {
   assert.match(appSource, /\$("search")\.addEventListener\("keydown"/);
   assert.match(appSource, /if \(event\.key === "Enter"\)/);
@@ -420,4 +419,4 @@ test("online catalog search is explicitly triggered by Enter and renders selecta
     /const id = r\.dataset\.id;\s*const track = tracks\.find\(\(t\) => String\(t\.id\) === id\)/,
   );
   assert.match(appSource, /escapeHTML\(t\.id\)/);
-});;
+});
