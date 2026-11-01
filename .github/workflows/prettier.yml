@@ -21,16 +21,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-          ref: feature/pulse-discovery-playlist-fixes
-          fetch-depth: 0
-
-      - name: Verify PR27 integration and syntax
-        run: |
-          echo "Verifying latest PR27 head"
-          node --check apps/pulse-music-workspace/app.js
-          node --check apps/pulse-music-workspace/itunes-source.js
-          node --check apps/pulse-music-workspace/playlist-manager.js
-          node --test apps/pulse-music-workspace/tests/integrations.test.cjs
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
