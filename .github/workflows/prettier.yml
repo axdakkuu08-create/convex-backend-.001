@@ -26,6 +26,7 @@ jobs:
 
       - name: Verify PR27 integration and syntax
         run: |
+          echo "Verifying latest PR27 head"
           node --check apps/pulse-music-workspace/app.js
           node --check apps/pulse-music-workspace/itunes-source.js
           node --check apps/pulse-music-workspace/playlist-manager.js
