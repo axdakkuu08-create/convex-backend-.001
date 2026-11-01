@@ -107,112 +107,79 @@
     document.body.appendChild(nav);
   }
 
-  // Load genuine country-chart songs into the mobile home instead of demo-only cards.
-  async function loadHomeArtwork() {
-    const cards = $$(".featured-card[data-home-track]");
-    const speedTracks = $$(".speed-track[data-home-track]");
-    let prefs = {};
-    try {
-      prefs = JSON.parse(localStorage.getItem("pulse.prefs") || "{}");
-    } catch (_) {}
-    const country = String(prefs.country || "IN").toLowerCase();
-    try {
-      const response = await fetch(
-        "https://itunes.apple.com/" + country + "/rss/topsongs/limit=10/json",
-        {
-          headers: { Accept: "application/json" },
-        },
-      );
-      if (!response.ok) throw new Error("Country chart unavailable");
-      const payload = await response.json();
-      const entries = payload.feed?.entry || [];
-      const popular = entries.slice(
-        0,
-        Math.max(cards.length, speedTracks.length),
-      );
-      const hydrated = await Promise.all(
-        popular.map(async (entry) => {
-          const title = entry["im:name"]?.label || "";
-          const artist = entry["im:artist"]?.label || "Unknown artist";
-          const artwork = (entry["im:image"] || []).slice(-1)[0]?.label || "";
-          const url =
-            entry.link?.attributes?.href || "https://music.apple.com/";
-          if (!title) return null;
-          try {
-            const lookup = await fetch(
-              "https://itunes.apple.com/search?term=" +
-                encodeURIComponent(title + " " + artist) +
-                "&country=" +
-                encodeURIComponent(country) +
-                "&entity=song&limit=5&media=music",
-              { headers: { Accept: "application/json" } },
-            );
-            if (!lookup.ok) throw new Error("Track lookup unavailable");
-            const data = await lookup.json();
-            const exact =
-              (data.results || []).find(
-                (item) =>
-                  (item.trackName || "").toLowerCase() ===
-                    title.toLowerCase() &&
-                  (item.artistName || "").toLowerCase() ===
-                    artist.toLowerCase(),
-              ) || (data.results || [])[0];
-            return {
-              title,
-              artist,
-              artwork:
-                exact?.artworkUrl100?.replace("100x100bb", "600x600bb") ||
-                artwork,
-              preview: exact?.previewUrl || "",
-              url: exact?.trackViewUrl || url,
-            };
-          } catch (_) {
-            return { title, artist, artwork, preview: "", url };
-          }
-        }),
-      );
-      const tracks = hydrated.filter(Boolean);
-      function applyTrack(element, item, isFeatured) {
-        if (!element || !item) return;
-        element.dataset.homeTitle = item.title;
-        element.dataset.homeArtist = item.artist;
-        element.dataset.homeAudio = item.preview;
-        element.dataset.homeUrl = item.url;
-        element.dataset.homeArtwork = item.artwork;
-        if (isFeatured) {
-          const title = $(".featured-caption b", element);
-          const artist = $(".featured-caption small", element);
-          const artTitle = $(".art-title", element);
-          if (title) title.textContent = item.title;
-          if (artist) artist.textContent = item.artist;
-          if (artTitle) artTitle.textContent = item.title.toUpperCase();
-          if (item.artwork) {
-            const image = document.createElement("img");
-            image.className = "home-real-artwork";
-            image.src = item.artwork;
-            image.alt = "";
-            image.loading = "lazy";
-            image.addEventListener("error", () => image.remove(), {
-              once: true,
-            });
-            $(".home-real-artwork", element)?.remove();
-            element.prepend(image);
-          }
-        } else {
-          const title = $(".speed-copy b", element);
-          const artist = $(".speed-copy small", element);
-          if (title) title.textContent = item.title;
-          if (artist) artist.textContent = item.artist;
-        }
-      }
-      cards.forEach((card, index) => applyTrack(card, tracks[index], true));
-      speedTracks.forEach((row, index) =>
-        applyTrack(row, tracks[index + cards.length], false),
-      );
-    } catch (_) {
-      // Keep the existing offline/demo home if the public chart endpoint is unavailable.
-    }
+  const PLAYLIST_KEY = "pulse.localPlaylists.v1";
+  let homeTracks = [];
+  let homeAlbums = [];
+
+  function makeArtworkCard(item, kind, index) {
+    const card=document.createElement("article"); card.className="home-grid-card";
+    const open=document.createElement("button"); open.type="button"; open.className="home-art-open";
+    open.dataset.homeDetailKind=kind; open.dataset.homeDetailIndex=String(index);
+    const img=document.createElement("img"); img.className="home-grid-artwork"; img.alt=""; img.loading="lazy"; img.src=item.artwork||"";
+    img.addEventListener("error",()=>{img.removeAttribute("src");img.classList.add("artwork-missing");},{once:true});
+    const title=document.createElement("strong"); title.textContent=item.title||"Untitled";
+    const sub=document.createElement("small"); sub.textContent=item.artist||item.subtitle||"";
+    open.append(img,title,sub); card.append(open); return card;
   }
+  function renderHomePlaylists() {
+    const grid=$("#homePlaylistsGrid"); if(!grid)return;
+    let lists=[]; try{const value=JSON.parse(localStorage.getItem(PLAYLIST_KEY)||"[]");lists=Array.isArray(value)?value:[];}catch(_){}
+    grid.replaceChildren();
+    if(!lists.length){const empty=document.createElement("p");empty.className="home-grid-empty";empty.textContent="Your playlists will appear here. Create a playlist or save a song to get started.";grid.append(empty);return;}
+    lists.forEach((list,index)=>{
+      const card=makeArtworkCard({title:list.name,artist:(list.tracks||[]).length+" songs",artwork:list.tracks?.find(t=>t.artwork)?.artwork||""},"playlist",index);
+      const play=document.createElement("button");play.type="button";play.className="home-grid-play";play.textContent="▶";play.setAttribute("aria-label","Play "+list.name);
+      play.addEventListener("click",()=>window.PulsePlaylistStore?.play?.(list.id));card.append(play);grid.append(card);
+    });
+  }
+  function showHomeDetails(item,kind) {
+    const dialog=$("#homeTrackDetails"),content=$("#homeDetailContent");if(!dialog||!content||!item)return;
+    content.replaceChildren();
+    const img=document.createElement("img");img.className="home-detail-artwork";img.src=item.artwork||"";img.alt="";
+    const title=document.createElement("h2");title.id="homeDetailTitle";title.textContent=item.title||"Untitled";
+    const artist=document.createElement("p");artist.textContent=item.artist||"";
+    content.append(img,title,artist);
+    if(kind==="song"&&item.preview){const play=document.createElement("button");play.type="button";play.textContent="▶ Play preview";play.addEventListener("click",()=>window.dispatchEvent(new CustomEvent("pulse:play-catalog-track",{detail:{title:item.title,artist:item.artist,src:item.preview,url:item.url,artwork:item.artwork,source:"Apple/iTunes Top Songs"}})));content.append(play);}
+    if(item.url){const link=document.createElement("a");link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent=kind==="album"?"Open album":"Open source";content.append(link);}
+    if(kind==="song"){const save=document.createElement("button");save.type="button";save.textContent="＋ Add to playlist";save.addEventListener("click",()=>window.dispatchEvent(new CustomEvent("pulse:add-track-to-playlist",{detail:{title:item.title,artist:item.artist,src:item.preview,url:item.url,artwork:item.artwork,source:"Apple/iTunes Top Songs"}})));content.append(save);}
+    if(typeof dialog.showModal==="function")dialog.showModal();else dialog.setAttribute("open","");
+  }
+  async function loadHomeArtwork() {
+    let prefs={};try{prefs=JSON.parse(localStorage.getItem("pulse.prefs")||"{}");}catch(_){}
+    const country=String(prefs.country||"IN").toLowerCase();
+    try{
+      const response=await fetch("https://itunes.apple.com/"+country+"/rss/topsongs/limit=24/json",{headers:{Accept:"application/json"}});
+      if(!response.ok)throw Error("Country chart unavailable");
+      const payload=await response.json(),entries=payload.feed?.entry||[];
+      const results=await Promise.all(entries.map(async entry=>{
+        const title=entry["im:name"]?.label||"",artist=entry["im:artist"]?.label||"Unknown artist",artwork=(entry["im:image"]||[]).slice(-1)[0]?.label||"",url=entry.link?.attributes?.href||"https://music.apple.com/";
+        if(!title)return null;
+        try{
+          const response=await fetch("https://itunes.apple.com/search?term="+encodeURIComponent(title+" "+artist)+"&country="+encodeURIComponent(country)+"&entity=song&limit=5&media=music",{headers:{Accept:"application/json"}});
+          if(!response.ok)throw Error("Lookup unavailable");
+          const data=await response.json(),exact=(data.results||[]).find(x=>(x.trackName||"").toLowerCase()===title.toLowerCase()&&(x.artistName||"").toLowerCase()===artist.toLowerCase())||(data.results||[])[0];
+          return {title,artist,artwork:exact?.artworkUrl100?.replace("100x100bb","600x600bb")||artwork,preview:exact?.previewUrl||"",url:exact?.trackViewUrl||url,album:exact?.collectionName||"",albumUrl:exact?.collectionViewUrl||url,albumId:exact?.collectionId||exact?.collectionName||title};
+        }catch(_){return {title,artist,artwork,preview:"",url,album:"",albumUrl:url,albumId:title};}
+      }));
+      homeTracks=results.filter(Boolean);
+      const songs=$("#homeSongsGrid");if(songs){songs.replaceChildren();homeTracks.slice(0,12).forEach((item,i)=>{const card=makeArtworkCard(item,"song",i),play=document.createElement("button");play.type="button";play.className="home-grid-play";play.textContent="▶";play.setAttribute("aria-label","Play "+item.title);play.dataset.homeSongPlay=String(i);card.append(play);songs.append(card);});}
+      const seen=new Set();homeAlbums=[];homeTracks.forEach(track=>{const key=String(track.albumId);if(!seen.has(key)){seen.add(key);homeAlbums.push({title:track.album||track.title,artist:track.artist,artwork:track.artwork,url:track.albumUrl});}});
+      const albums=$("#homeAlbumsGrid");if(albums){albums.replaceChildren();homeAlbums.slice(0,8).forEach((item,i)=>albums.append(makeArtworkCard(item,"album",i)));}
+    }catch(_){const songs=$("#homeSongsGrid");if(songs&&!songs.children.length){const empty=document.createElement("p");empty.className="home-grid-empty";empty.textContent="Music discovery is temporarily unavailable. Your saved playlists remain available.";songs.append(empty);}}
+    renderHomePlaylists();
+  }
+  document.addEventListener("click",event=>{
+    const detail=event.target.closest("[data-home-detail-index]");
+    if(detail){const kind=detail.dataset.homeDetailKind,index=Number(detail.dataset.homeDetailIndex);
+      if(kind==="song")showHomeDetails(homeTracks[index],kind);
+      if(kind==="album")showHomeDetails(homeAlbums[index],kind);
+      if(kind==="playlist"){let lists=[];try{lists=JSON.parse(localStorage.getItem(PLAYLIST_KEY)||"[]");}catch(_){}const list=lists[index];if(list)showHomeDetails({title:list.name,artist:(list.tracks||[]).length+" songs",artwork:list.tracks?.find(t=>t.artwork)?.artwork||""},kind);}
+    }
+    const play=event.target.closest("[data-home-song-play]");if(play){const item=homeTracks[Number(play.dataset.homeSongPlay)];if(item?.preview)window.dispatchEvent(new CustomEvent("pulse:play-catalog-track",{detail:{title:item.title,artist:item.artist,src:item.preview,url:item.url,artwork:item.artwork,source:"Apple/iTunes Top Songs"}}));else if(item?.url)window.open(item.url,"_blank","noopener,noreferrer");}
+  });
+  $("#homeDetailClose")?.addEventListener("click",()=>$("#homeTrackDetails")?.close?.());
+  window.addEventListener("pulse:playlists-updated",renderHomePlaylists);
+  renderHomePlaylists();void loadHomeArtwork();
 
   window.addEventListener("pulse:preferences-changed", () => {
     void loadHomeArtwork();
