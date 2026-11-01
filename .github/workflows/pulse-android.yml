@@ -55,6 +55,9 @@ jobs:
       - name: Generate Android project
         run: npx cap add android
 
+      - name: Install native Media3 integration
+        run: node scripts/install-native-android.mjs
+
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
