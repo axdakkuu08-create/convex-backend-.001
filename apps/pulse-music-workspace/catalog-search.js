@@ -120,7 +120,7 @@
           term +
           "&country=" +
           country +
-          "&entity=song&limit=18&media=music",
+          "&entity=song&limit=18&media=music&explicit=No",
         {
           headers: { Accept: "application/json" },
         },
@@ -140,6 +140,8 @@
                 ? track.artworkUrl100.replace("100x100bb", "300x300bb")
                 : "",
               preview: track.previewUrl || "",
+              catalogId: track.trackId ? String(track.trackId) : "",
+              releaseDate: String(track.releaseDate || ""),
               url:
                 track.trackViewUrl ||
                 track.collectionViewUrl ||
@@ -155,7 +157,19 @@
                 track.genre
                   .toLowerCase()
                   .includes(preferences.genre.toLowerCase()),
-            ),
+            )
+            .filter((track, index, all) =>
+              track.catalogId
+                ? all.findIndex((item) => item.catalogId === track.catalogId) === index
+                : true,
+            )
+            .sort((a, b) => {
+              const dateA = Date.parse(a.releaseDate || "");
+              const dateB = Date.parse(b.releaseDate || "");
+              const safeA = Number.isFinite(dateA) ? dateA : 0;
+              const safeB = Number.isFinite(dateB) ? dateB : 0;
+              return safeB - safeA || a.title.localeCompare(b.title);
+            }),
         ),
       window.PulseArchive.search(q, 24, {
         genre: preferences.genre,
@@ -240,6 +254,7 @@
             artwork: item.artwork || "",
             license: item.license || "",
             duration: item.duration || "",
+            catalogId: item.catalogId || item.id || "",
           },
         }),
       );
@@ -260,6 +275,7 @@
             artwork: item.artwork || "",
             license: item.license || "",
             source: item.source,
+            catalogId: item.catalogId || item.id || "",
           },
         }),
       );
