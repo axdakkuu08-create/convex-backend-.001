@@ -23,7 +23,8 @@
               src: trackButton.dataset.homeAudio,
               url: trackButton.dataset.homeUrl,
               artwork: trackButton.dataset.homeArtwork,
-              source: "Apple/iTunes Top Songs",
+              source: "Apple/iTunes catalogue",
+              catalogId: trackButton.dataset.homeCatalogId || "",
             },
           }),
         );
@@ -323,6 +324,7 @@
               album: exact?.collectionName || "",
               albumUrl: exact?.collectionViewUrl || url,
               albumId: exact?.collectionId || exact?.collectionName || title,
+              catalogId: exact?.trackId ? String(exact.trackId) : "",
             };
           } catch (_) {
             return {
@@ -353,6 +355,43 @@
           play.dataset.homeSongPlay = String(index);
           card.append(play);
           songsGrid.append(card);
+        });
+      }
+
+      const speedList = $(".speed-list");
+      if (speedList) {
+        speedList.replaceChildren();
+        homeTracks.slice(0, 4).forEach((item, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "speed-track";
+          button.dataset.homeTrack = String(index);
+          button.dataset.homeTitle = item.title;
+          button.dataset.homeArtist = item.artist;
+          button.dataset.homeUrl = item.url || "";
+          button.dataset.homeArtwork = item.artwork || "";
+          button.dataset.homeCatalogId = item.catalogId || "";
+          if (item.preview) button.dataset.homeAudio = item.preview;
+          const cover = document.createElement("span");
+          cover.className = "speed-cover";
+          if (item.artwork) {
+            cover.style.backgroundImage = 'url("' + item.artwork.replace(/["\\]/g, "") + '")';
+            cover.style.backgroundSize = "cover";
+          } else {
+            cover.textContent = "♫";
+          }
+          const copy = document.createElement("span");
+          copy.className = "speed-copy";
+          const title = document.createElement("b");
+          title.textContent = item.title;
+          const artist = document.createElement("small");
+          artist.textContent = item.artist;
+          copy.append(title, artist);
+          const play = document.createElement("span");
+          play.className = "speed-play";
+          play.textContent = "▶";
+          button.append(cover, copy, play);
+          speedList.append(button);
         });
       }
 
