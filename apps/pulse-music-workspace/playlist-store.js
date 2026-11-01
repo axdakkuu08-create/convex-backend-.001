@@ -107,12 +107,18 @@
     playlists = read();
     const target =
       playlists[selectedIndex >= 0 ? selectedIndex : playlists.length - 1];
-    const duplicate = target.tracks.some((item) => item.src === track.src);
+    const catalogId = String(track.catalogId || "");
+    const duplicate = target.tracks.some(
+      (item) =>
+        (catalogId && String(item.catalogId || "") === catalogId) ||
+        (track.src && item.src === track.src),
+    );
     if (!duplicate)
       target.tracks.push({
         title: String(track.title || "Untitled track"),
         artist: String(track.artist || "Unknown artist"),
         src: track.src,
+        catalogId,
         url: track.url || "",
         artwork: track.artwork || "",
         license: track.license || "",
@@ -123,6 +129,31 @@
     if (status)
       status.textContent =
         (duplicate ? "Already saved in " : "Added to ") + target.name + ".";
+  }
+  function createFromTracks(name, tracks) {
+    const clean = String(name || "Archive Mix").trim().slice(0, 60);
+    const items = (Array.isArray(tracks) ? tracks : [])
+      .filter((track) => track && track.src)
+      .slice(0, 24)
+      .map((track) => ({
+        title: String(track.title || "Untitled track"),
+        artist: String(track.artist || "Unknown artist"),
+        src: String(track.src),
+        catalogId: String(track.catalogId || ""),
+        url: String(track.url || ""),
+        artwork: String(track.artwork || ""),
+        license: String(track.license || ""),
+        source: String(track.source || "Internet Archive"),
+      }));
+    if (!clean || !items.length) return null;
+    const playlist = {
+      id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+      name: clean,
+      tracks: items,
+      createdAt: Date.now(),
+    };
+    write([...read(), playlist]);
+    return playlist;
   }
   function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
@@ -179,5 +210,11 @@
       });
   });
   render();
-  window.PulsePlaylistStore = { read, create, render, play: playFromPlaylist };
+  window.PulsePlaylistStore = {
+    read,
+    create,
+    createFromTracks,
+    render,
+    play: playFromPlaylist,
+  };
 })();
