@@ -78,42 +78,21 @@
             <button class="genre-chip" data-home-mood="Night">Romance</button>
             <button class="genre-chip" data-home-mood="Energy">Energy</button>
           </div>
-          <div class="home-section-heading">
-            <h2>Top picks for you</h2>
-            <span aria-hidden="true">›</span>
-          </div>
-          <div class="featured-row">
-            <button class="featured-card art-teal" data-home-track="1">
-              <span class="art-label">PULSE SESSIONS</span
-              ><span class="art-title"
-                >QUIET<br />
-                SIGNALS</span
-              >
-              <span class="featured-caption"
-                ><b>Quiet Signals</b><small>Pulse Sessions</small></span
-              >
-            </button>
-            <button class="featured-card art-violet" data-home-track="2">
-              <span class="art-label">NORTHBOUND</span
-              ><span class="art-title"
-                >BLUE<br />
-                HOUR</span
-              >
-              <span class="featured-caption"
-                ><b>Blue Hour</b><small>Northbound</small></span
-              >
-            </button>
-            <button class="featured-card art-amber" data-home-track="3">
-              <span class="art-label">SUNDAY CLUB</span
-              ><span class="art-title"
-                >LITTLE<br />
-                BY LITTLE</span
-              >
-              <span class="featured-caption"
-                ><b>Little By Little</b><small>Sunday Club</small></span
-              >
-            </button>
-          </div>
+          <section class="home-library-section" aria-labelledby="homePlaylistsHeading">
+            <div class="home-section-heading"><h2 id="homePlaylistsHeading">Playlists</h2></div>
+            <div class="home-grid" id="homePlaylistsGrid" aria-live="polite"></div>
+          </section>
+          <section class="home-library-section" aria-labelledby="homeAlbumsHeading">
+            <div class="home-section-heading"><h2 id="homeAlbumsHeading">Albums</h2></div>
+            <div class="home-grid" id="homeAlbumsGrid" aria-live="polite"></div>
+          </section>
+          <section class="home-library-section" aria-labelledby="homeSongsHeading">
+            <div class="home-section-heading"><h2 id="homeSongsHeading">Songs</h2></div>
+            <div class="home-grid" id="homeSongsGrid" aria-live="polite"></div>
+          </section>
+          <dialog class="home-detail-dialog" id="homeTrackDetails" aria-labelledby="homeDetailTitle">
+            <div id="homeDetailContent"></div><button type="button" class="home-detail-close" id="homeDetailClose">Close</button>
+          </dialog>
           <div class="home-section-heading speed-heading">
             <h2>Speed dial</h2>
             <button id="homeShuffle" aria-label="Shuffle music">⤨</button>
