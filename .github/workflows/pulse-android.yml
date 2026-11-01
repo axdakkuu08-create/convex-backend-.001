@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -63,31 +63,3 @@ jobs:
           path: apps/pulse-music-workspace/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
-
-      - name: Build signed release APK and Play Store AAB when signing is configured
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ]; then
-            echo "::notice::Release APK/AAB skipped. Configure the four Android signing secrets when an authorized release keystore is ready."
-            exit 0
-          fi
-          KEYSTORE_PATH="$RUNNER_TEMP/pulse-release.keystore"
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
-          npx cap build android --androidreleasetype APK --keystorepath "$KEYSTORE_PATH" --keystorepass "$ANDROID_KEYSTORE_PASSWORD" --keystorealias "$ANDROID_KEY_ALIAS" --keystorealiaspass "$ANDROID_KEY_PASSWORD"
-          npx cap build android --androidreleasetype AAB --keystorepath "$KEYSTORE_PATH" --keystorepass "$ANDROID_KEYSTORE_PASSWORD" --keystorealias "$ANDROID_KEY_ALIAS" --keystorealiaspass "$ANDROID_KEY_PASSWORD"
-          rm -f "$KEYSTORE_PATH"
-
-      - name: Upload signed release APK and AAB
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: pulse-android-release-artifacts
-          path: |
-            apps/pulse-music-workspace/android/app/build/outputs/apk/release/*.apk
-            apps/pulse-music-workspace/android/app/build/outputs/bundle/release/*.aab
-          if-no-files-found: ignore
-          retention-days: 30
