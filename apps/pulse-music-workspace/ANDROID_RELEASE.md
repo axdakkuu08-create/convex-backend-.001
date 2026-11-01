@@ -37,8 +37,12 @@ The debug APK is created at
 `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 The Android project is generated during CI so the repository does not acquire
-an unreviewed generated Gradle project. Native customizations should be added
-as deliberate source changes in a later reviewed PR.
+an unreviewed generated Gradle project. Native playback sources are stored in
+`android-native/` and installed into the generated project by
+`scripts/install-native-android.mjs`. The integration uses Media3 ExoPlayer and
+MediaSessionService, registered through a Capacitor plugin. Direct HTTP(S) audio
+URLs use the native bridge; local `blob:` audio files continue to use the browser
+audio element.
 
 ## GitHub Actions
 
@@ -64,11 +68,13 @@ for future updates to the same Play app.
 
 ## Current limitations to verify before release
 
-This first wrapper does not yet implement a native background audio service,
-media notification/session controls, offline audio downloads, or a full native
-audio focus lifecycle. Existing web playback and official provider embeds may
-behave differently inside Android WebView. These must be implemented or
-tested before describing them as supported.
+The native Media3 service and Capacitor control bridge are now present in source.
+The bridge configures Android media audio focus and noisy-audio handling and
+exposes play, pause, seek, volume, and playback-state updates. This source-level
+integration is not yet verified by a successful Android build or physical-device
+test. Queue-aware notification next/previous actions, offline downloads, and
+end-to-end lifecycle testing remain outstanding. Official Spotify, YouTube, and
+SoundCloud embeds continue to follow provider restrictions inside Android WebView.
 
 A successful CI build proves packaging only. It does not prove playback,
 Clerk sign-in, Convex cloud sync, queue controls, or background playback on a
