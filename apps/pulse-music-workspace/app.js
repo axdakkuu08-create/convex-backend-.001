@@ -137,7 +137,7 @@ function render() {
         escapeHTML(t.artist) +
         '</small></div></div><div class="moodcell"><span class="chip">' +
         escapeHTML(t.mood) +
-        '</span>' +
+        "</span>" +
         (t.source
           ? '<small class="source-label">' +
             escapeHTML(
