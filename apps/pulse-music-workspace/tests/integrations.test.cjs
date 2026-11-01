@@ -193,7 +193,7 @@ test("playlist library supports local persistence, add/remove, and shared-player
   assert.match(playlistSource, /window\.PULSE_PLAYLISTS/);
   assert.match(playlistSource, /pulse:playlist-play/);
   assert.match(playlistSource, /playlist\.tracks\.splice\(index, 1\)/);
-  assert.match(appSource, /window\.PULSE_PLAYLISTS\?\.add\(tracks\.find/);
+  assert.match(appSource, /window\.PULSE_PLAYLISTS\?\.add\(track\)/);
   assert.match(appSource, /window\.addEventListener\("pulse:playlist-play"/);
   assert.match(appSource, /data-playlist-add/);
   assert.match(appSource, /＋ Playlist/);
@@ -252,6 +252,14 @@ test("country-aware catalog returns recent song previews ordered by release date
             releaseDate: "2025-01-01T00:00:00Z",
             primaryGenreName: "Pop",
           },
+          {
+            trackId: 3,
+            trackName: "Unknown date",
+            artistName: "Artist",
+            previewUrl: "https://audio.example/unknown.mp3",
+            releaseDate: "not-a-date",
+            primaryGenreName: "Pop",
+          },
         ],
       }),
     };
@@ -261,10 +269,24 @@ test("country-aware catalog returns recent song previews ordered by release date
     mockFetch,
   );
   assert.equal(results[0].title, "Newer");
+  assert.equal(results[1].title, "Older");
+  assert.equal(results[2].title, "Unknown date");
   assert.equal(results[0].time, "0:30");
   assert.match(calls[0], /country=in/);
   assert.match(calls[0], /entity=song/);
+  assert.match(calls[0], /explicit=No/);
   assert.equal(results[0].source, "itunes-preview");
+});
+
+test("main search can query regional catalogs and add online results", () => {
+  assert.match(appSource, /async function searchOnlineCatalog/);
+  assert.match(appSource, /searchRegionalCatalog\(prefs, cleanTerm\)/);
+  assert.match(appSource, /Number\.isFinite\(parsed\) \? parsed : 0/);
+  assert.match(appSource, /onlineSearchIds\.add\(track\.id\)/);
+  assert.match(appSource, /onlineSearchIds\.has\(t\.id\)/);
+  assert.match(appSource, /String\(t\.id\) === id/);
+  assert.match(appSource, /escapeHTML\(t\.id\)/);
+  assert.match(indexSource, /press Enter for online results/);
 });
 
 test("Worldwide discovery combines regional catalogs", () => {
@@ -355,22 +377,51 @@ test("playlist manager creates, persists, and emits songs in order", () => {
     src: "https://audio.example/2.mp3",
     source: "itunes-preview",
   });
+  manager.add({
+    id: "catalog-a",
+    catalogId: "42",
+    title: "Catalog song",
+    src: "https://audio.example/catalog-a.mp3",
+    source: "itunes-preview",
+  });
+  manager.add({
+    id: "catalog-b",
+    catalogId: "42",
+    title: "Catalog song duplicate",
+    src: "https://audio.example/catalog-b.mp3",
+    source: "itunes-preview",
+  });
   const playlist = manager.list()[0];
   assert.equal(playlist.name, "Latest Pop");
   assert.deepEqual(
     Array.from(playlist.tracks, (track) => track.title),
-    ["First", "Second"],
+    ["First", "Second", "Catalog song"],
   );
   assert.equal(
     JSON.parse(storage.get("pulse-playlists-v1"))[0].tracks.length,
-    2,
+    3,
   );
   document.getElementById("playlistPlayAll").click();
   assert.equal(events.at(-1).type, "pulse:playlist-start");
   assert.deepEqual(
     Array.from(events.at(-1).detail, (track) => track.title),
-    ["First", "Second"],
+    ["First", "Second", "Catalog song"],
   );
+});
+
+test("online catalog search is explicitly triggered by Enter and renders selectable results", () => {
+  assert.ok(appSource.includes('$("search").addEventListener("keydown"'));
+  assert.match(appSource, /if \(event\.key === "Enter"\)/);
+  assert.match(appSource, /void searchOnlineCatalog\(query\)/);
+  assert.match(
+    appSource,
+    /onlineSearchIds\.add\(track\.id\);\s*\}\s*render\(\);/,
+  );
+  assert.match(
+    appSource,
+    /const id = r\.dataset\.id;\s*const track = tracks\.find\(\(t\) => String\(t\.id\) === id\)/,
+  );
+  assert.match(appSource, /escapeHTML\(t\.id\)/);
 });
 
 test("home Archive discovery renders candidates and creates an opt-in generated playlist", () => {

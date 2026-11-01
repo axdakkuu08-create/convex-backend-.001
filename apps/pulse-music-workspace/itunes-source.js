@@ -23,7 +23,7 @@
       entity: "song",
       media: "music",
       limit: String(Math.min(50, Math.max(1, Number(options.limit) || 40))),
-      explicit: "Yes",
+      explicit: "No",
     }).toString();
     const response = await request(url.href, {
       headers: { Accept: "application/json" },
@@ -54,12 +54,16 @@
         cover: "green",
         symbol: "♫",
       }));
-    return options.latest === false
-      ? results
-      : results.sort(
-          (a, b) =>
-            Date.parse(b.releaseDate || "") - Date.parse(a.releaseDate || ""),
-        );
+    if (options.latest === false) return results;
+    const timestamp = (value) => {
+      const parsed = Date.parse(value || "");
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    return results.sort(
+      (a, b) =>
+        timestamp(b.releaseDate) - timestamp(a.releaseDate) ||
+        a.title.localeCompare(b.title),
+    );
   }
   window.PULSE_CATALOG = Object.freeze({ search });
 })();
