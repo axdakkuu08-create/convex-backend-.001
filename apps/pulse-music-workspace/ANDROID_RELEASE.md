@@ -26,8 +26,7 @@ From this directory:
 
 ```bash
 npm install
-npm run build:web
-npx cap add android
+npm run android:add
 npx cap sync android
 cd android
 ./gradlew assembleDebug
