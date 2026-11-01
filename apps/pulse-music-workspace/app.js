@@ -73,7 +73,7 @@ let index = 0,
   liked = new Set(JSON.parse(localStorage.getItem("pulse-liked") || "[]")),
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
-let archiveItems = [];
+let archiveItems = [];\nlet nativeLoadPromise = Promise.resolve();\nlet nativeDurationSeconds = 0;\nlet nativeEndedHandled = false;
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -432,7 +432,7 @@ $("repeat").onclick = () => {
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
 $("like").onclick = () => like(tracks[index].id);
-$("volume").oninput = (e) => (audio.volume = Number(e.target.value));
+$("volume").oninput = (e) => {\n  const volume = Number(e.target.value);\n  if (window.PulseMedia3 && window.PulseMedia3.isNative) window.PulseMedia3.setVolume(volume).catch(() => {});\n  else audio.volume = volume;\n};
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
   if (Number.isFinite(audio.duration) && audio.duration > 0) {
@@ -445,7 +445,7 @@ $("progress").oninput = (e) => {
   if (Number.isFinite(audio.duration))
     audio.currentTime = (Number(e.target.value) / 100) * audio.duration;
 };
-audio.onended = () => (repeatOn ? ((audio.currentTime = 0), play()) : next());
+audio.onended = () => (repeatOn ? ((audio.currentTime = 0), play()) : next());\n\nif (window.PulseMedia3 && window.PulseMedia3.isNative) {\n  window.PulseMedia3.setVolume(0.75).catch(() => {});\n  window.PulseMedia3.addStateListener((state) => {\n    if (!state) return;\n    const position = Number(state.positionSeconds) || 0;\n    const duration = Number(state.durationSeconds) || 0;\n    nativeDurationSeconds = duration;\n    if (duration > 0) {\n      $("progress").value = (position / duration) * 100;\n      $("time").textContent = fmt(position);\n      $("duration").textContent = fmt(duration);\n    }\n    const isNowPlaying = !!state.isPlaying;\n    if (playing !== isNowPlaying) {\n      playing = isNowPlaying;\n      $("play").textContent = playing ? "Ⅱ" : "▶";\n      render();\n    }\n    if (state.playbackState === 4 && !nativeEndedHandled) {\n      nativeEndedHandled = true;\n      if (repeatOn) window.PulseMedia3.seekTo(0).then(() => play()).catch(() => {});\n      else next();\n    } else if (state.playbackState !== 4) {\n      nativeEndedHandled = false;\n    }\n  });\n}
 audio.onwaiting = () => {
   $("audioStatus").textContent =
     "Loading audio… If it stays here, the link may not be a direct audio file.";
