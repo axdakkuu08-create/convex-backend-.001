@@ -137,7 +137,19 @@ function render() {
         escapeHTML(t.artist) +
         '</small></div></div><div class="moodcell"><span class="chip">' +
         escapeHTML(t.mood) +
-        '</span></div><div class="time">' +
+        "</span>" +
+        (t.source
+          ? '<small class="source-label">' +
+            escapeHTML(
+              t.source === "Apple/iTunes catalogue"
+                ? "30-SEC PREVIEW"
+                : String(t.source).includes("Internet Archive")
+                  ? "INTERNET ARCHIVE · AUDIO"
+                  : t.source,
+            ) +
+            "</small>"
+          : "") +
+        '</div><div class="time">' +
         t.time +
         '</div><button class="rowlike ' +
         (liked.has(t.id) ? "liked" : "") +
@@ -473,8 +485,53 @@ $("newPlaylist").onclick = () => {
   $("playlists").append(b);
   toast("Playlist created for this session");
 };
-$("queue").onclick = () =>
-  toast("Queue: " + tracks.map((t) => t.title).join(" · "));
+function renderQueuePanel() {
+  const list = $("queueItems");
+  if (!list) return;
+  list.replaceChildren();
+  tracks.forEach((track, queueIndex) => {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "queue-item-button";
+    button.dataset.queueIndex = String(queueIndex);
+    button.textContent =
+      (queueIndex === index ? "▶ " : "") +
+      String(track.title || "Untitled track") +
+      " — " +
+      String(track.artist || "Unknown artist");
+    item.append(button);
+    list.append(item);
+  });
+}
+$("queue").onclick = () => {
+  const panel = $("queuePanel");
+  if (!panel) return;
+  renderQueuePanel();
+  panel.hidden = !panel.hidden;
+};
+$("queueClose")?.addEventListener("click", () => {
+  $("queuePanel").hidden = true;
+});
+$("queueItems")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-queue-index]");
+  if (!button) return;
+  const target = Number(button.dataset.queueIndex);
+  if (!Number.isInteger(target) || !tracks[target]) return;
+  setTrack(target, true);
+  renderQueuePanel();
+});
+$("queuePrev")?.addEventListener("click", () => $("prev").click());
+$("queueNext")?.addEventListener("click", () => $("next").click());
+$("queueClear")?.addEventListener("click", () => {
+  const current = tracks[index];
+  if (!current) return;
+  tracks.splice(0, tracks.length, current);
+  index = 0;
+  render();
+  renderQueuePanel();
+  toast("Queue cleared");
+});
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
 document.addEventListener("click", (e) => {
   if (
@@ -639,6 +696,7 @@ $("archiveResults").addEventListener("click", (e) => {
     customUrl: true,
     archivePage: item.pageUrl,
     archiveLicense: item.license,
+    source: "Internet Archive",
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -650,6 +708,8 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   if (!item.src || !/^https?:/.test(item.src)) return;
   const track = {
     id: Date.now() + Math.floor(Math.random() * 1000),
+    catalogId: String(item.catalogId || item.id || ""),
+    source: String(item.source || "Catalogue"),
     title: String(item.title || "Catalogue track"),
     artist: String(item.artist || "Unknown artist"),
     mood: item.source || "Catalogue",

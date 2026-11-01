@@ -171,3 +171,61 @@ test("Internet Archive UI is included without replacing existing providers or cl
   assert.match(html, /savedPlaylists/);
   assert.match(html, /sourceFrame/);
 });
+
+test("regional catalogue search excludes explicit content and sorts invalid dates safely", () => {
+  const catalog = fs.readFileSync(
+    path.join(__dirname, "..", "catalog-search.js"),
+    "utf8",
+  );
+  assert.match(catalog, /explicit=No/);
+  assert.match(catalog, /catalogId: track\.trackId/);
+  assert.match(catalog, /Number\.isFinite\(dateA\)/);
+  assert.match(catalog, /item\.catalogId === track\.catalogId/);
+});
+
+test("local playlists deduplicate catalogue IDs and can save generated mixes", () => {
+  const playlists = fs.readFileSync(
+    path.join(__dirname, "..", "playlist-store.js"),
+    "utf8",
+  );
+  assert.match(playlists, /String\(track\.catalogId \|\| ""\)/);
+  assert.match(playlists, /createFromTracks/);
+  assert.match(playlists, /catalogId,/);
+});
+
+test("home Archive discovery creates a multi-search local mix with rights links", () => {
+  const discovery = fs.readFileSync(
+    path.join(__dirname, "..", "home-archive-discovery.js"),
+    "utf8",
+  );
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  assert.match(discovery, /Promise\.allSettled/);
+  assert.match(discovery, /createFromTracks/);
+  assert.match(discovery, /check each item's rights/i);
+  assert.match(html, /homeArchiveForm/);
+  assert.match(html, /homeArchiveMix/);
+  assert.match(html, /home-archive-discovery\.js/);
+});
+
+test("mobile home speed dial uses country-chart metadata and queue controls are reachable", () => {
+  const home = fs.readFileSync(
+    path.join(__dirname, "..", "home-refresh.js"),
+    "utf8",
+  );
+  const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  assert.match(home, /speedList\.replaceChildren/);
+  assert.match(home, /catalogId: exact\?\.trackId/);
+  assert.match(app, /30-SEC PREVIEW/);
+  assert.match(app, /source-label/);
+  assert.match(app, /function renderQueuePanel/);
+  assert.match(app, /queueClear/);
+  assert.match(html, /id="queue"/);
+  assert.match(html, /id="queuePanel"/);
+});

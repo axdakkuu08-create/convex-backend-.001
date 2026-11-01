@@ -79,6 +79,45 @@
             <button class="genre-chip" data-home-mood="Energy">Energy</button>
           </div>
           <section
+            class="home-archive-shelf"
+            id="homeArchiveShelf"
+            aria-labelledby="homeArchiveHeading"
+          >
+            <div class="home-section-heading">
+              <div>
+                <p class="home-archive-kicker">OPEN AUDIO DISCOVERY</p>
+                <h2 id="homeArchiveHeading">Internet Archive finds</h2>
+              </div>
+              <button
+                id="homeArchiveMix"
+                class="home-archive-mix"
+                type="button"
+              >
+                Make a mix
+              </button>
+            </div>
+            <form id="homeArchiveForm" class="home-archive-form">
+              <input
+                id="homeArchiveQuery"
+                type="search"
+                minlength="2"
+                placeholder="Search recordings, artists or moods"
+                aria-label="Search Internet Archive recordings"
+              />
+              <button class="primary" type="submit">Discover</button>
+            </form>
+            <p
+              id="homeArchiveStatus"
+              class="home-archive-status"
+              role="status"
+              aria-live="polite"
+            >
+              Find playable recordings and check each item's rights before
+              reuse.
+            </p>
+            <div id="homeArchiveResults" class="home-archive-results"></div>
+          </section>
+          <section
             class="home-library-section"
             aria-labelledby="homePlaylistsHeading"
           >
@@ -105,7 +144,7 @@
             aria-labelledby="homeSongsHeading"
           >
             <div class="home-section-heading">
-              <h2 id="homeSongsHeading">Songs</h2>
+              <h2 id="homeSongsHeading">Top picks</h2>
             </div>
             <div class="home-grid" id="homeSongsGrid" aria-live="polite"></div>
           </section>
@@ -452,7 +491,14 @@
         <div>
           <button id="shuffle">⤨</button><button id="prev">|◀</button
           ><button id="play" class="play">▶</button><button id="next">▶|</button
-          ><button id="repeat">↻</button>
+          ><button id="repeat">↻</button
+          ><button
+            id="queue"
+            aria-label="Open playback queue"
+            title="Playback queue"
+          >
+            ☷
+          </button>
         </div>
         <div class="timeline">
           <span id="time">0:00</span
@@ -471,9 +517,28 @@
           max="1"
           step=".01"
           value=".75"
-        /><button id="queue">☷</button>
+        />
       </div>
       <audio id="audio" preload="metadata"></audio>
+    </section>
+    <section
+      id="queuePanel"
+      class="queue-panel"
+      aria-label="Playback queue"
+      hidden
+    >
+      <div class="queue-panel-heading">
+        <strong>Playback queue</strong>
+        <button id="queueClose" type="button" aria-label="Close queue">
+          ×
+        </button>
+      </div>
+      <ol id="queueItems" class="queue-items"></ol>
+      <div class="queue-panel-actions">
+        <button id="queuePrev" type="button">Previous</button>
+        <button id="queueNext" type="button">Next</button>
+        <button id="queueClear" type="button">Clear queue</button>
+      </div>
     </section>
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
@@ -483,5 +548,6 @@
     <script type="module" src="cloud-sync.js"></script>
     <script src="home-refresh.js"></script>
     <script src="playlist-store.js"></script>
+    <script src="home-archive-discovery.js"></script>
   </body>
 </html>
