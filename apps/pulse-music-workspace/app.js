@@ -684,6 +684,7 @@ $("archiveResults").addEventListener("click", (e) => {
     customUrl: true,
     archivePage: item.pageUrl,
     archiveLicense: item.license,
+    source: "Internet Archive",
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
