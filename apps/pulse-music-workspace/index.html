@@ -23,10 +23,18 @@
         <button class="nav" data-view="sources">◉　Sources</button>
         <div class="sidebar-moods" aria-label="Pick a mood">
           <small>PICK A MOOD</small>
-          <button class="mood-link" data-mood="Focus" type="button"><span>◉</span> Deep focus</button>
-          <button class="mood-link" data-mood="Ambient" type="button"><span>✳</span> Ambient drift</button>
-          <button class="mood-link" data-mood="Energy" type="button"><span>ϟ</span> Good energy</button>
-          <button class="mood-link" data-mood="Night" type="button"><span>☾</span> After hours</button>
+          <button class="mood-link" data-mood="Focus" type="button">
+            <span>◉</span> Deep focus
+          </button>
+          <button class="mood-link" data-mood="Ambient" type="button">
+            <span>✳</span> Ambient drift
+          </button>
+          <button class="mood-link" data-mood="Energy" type="button">
+            <span>ϟ</span> Good energy
+          </button>
+          <button class="mood-link" data-mood="Night" type="button">
+            <span>☾</span> After hours
+          </button>
         </div>
         <hr />
         <small
@@ -77,7 +85,10 @@
           <div>
             <small class="eyebrow">— YOUR SOUND, ORGANIZED</small>
             <h1 id="heading">Find your <span>next favourite.</span></h1>
-            <p>Pick a mood, discover a sound, and build your next favourite playlist.</p>
+            <p>
+              Pick a mood, discover a sound, and build your next favourite
+              playlist.
+            </p>
           </div>
           <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
         </section>
@@ -94,7 +105,11 @@
           <div class="orb"><span>p.</span></div>
           <label class="heroNo">01 — 03</label>
         </section>
-        <section class="sourcehub view-panel" id="sourceHub" aria-label="Music sources">
+        <section
+          class="sourcehub view-panel"
+          id="sourceHub"
+          aria-label="Music sources"
+        >
           <div class="sectionhead">
             <div>
               <small>LISTEN YOUR WAY</small>
@@ -264,14 +279,37 @@
             </button>
           </div>
         </section>
-        <section class="archive-discovery" id="archiveDiscovery" data-home-panel>
+        <section
+          class="archive-discovery"
+          id="archiveDiscovery"
+          data-home-panel
+        >
           <div class="sectionhead">
-            <div><small>FRESH FINDS · INTERNET ARCHIVE</small><h2>Discover something new</h2></div>
-            <button id="generateArchiveMix" class="primary" type="button">✦ Generate my mix</button>
+            <div>
+              <small>FRESH FINDS · INTERNET ARCHIVE</small>
+              <h2>Discover something new</h2>
+            </div>
+            <button id="generateArchiveMix" class="primary" type="button">
+              ✦ Generate my mix
+            </button>
           </div>
-          <p class="source-copy">Pulse searches public Archive audio metadata and builds a playlist from items with supported audio files. Rights and playback vary by item.</p>
-          <p id="archiveDiscoveryStatus" class="audio-status" role="status" aria-live="polite">Finding fresh audio…</p>
-          <div id="archiveDiscoveryResults" class="archive-discovery-results"></div>
+          <p class="source-copy">
+            Pulse searches public Archive audio metadata and builds a playlist
+            from items with supported audio files. Rights and playback vary by
+            item.
+          </p>
+          <p
+            id="archiveDiscoveryStatus"
+            class="audio-status"
+            role="status"
+            aria-live="polite"
+          >
+            Finding fresh audio…
+          </p>
+          <div
+            id="archiveDiscoveryResults"
+            class="archive-discovery-results"
+          ></div>
         </section>
         <section class="playlist-library" id="playlistLibrary" data-home-panel>
           <div class="sectionhead">

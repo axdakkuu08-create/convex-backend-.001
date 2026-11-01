@@ -565,7 +565,6 @@ $("archiveForm")?.addEventListener("submit", (event) => {
   void searchInternetArchive($("archiveQuery").value);
 });
 
-
 /* Automatic Archive discovery for the home page. This is opt-in playback: nothing autoplays. */
 let archiveDiscoveryItems = [];
 function renderArchiveDiscovery(items) {
@@ -670,9 +669,7 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
         "public domain music",
       ];
       const batches = await Promise.all(
-        terms.map((term) =>
-          window.PULSE_ARCHIVE.search(term).catch(() => []),
-        ),
+        terms.map((term) => window.PULSE_ARCHIVE.search(term).catch(() => [])),
       );
       const seen = new Set();
       items = batches
@@ -717,8 +714,7 @@ $("generateArchiveMix")?.addEventListener("click", async () => {
       " candidate tracks. Some items may not stream; rights vary by item.";
     toast("Your Archive mix is ready.");
   } catch (error) {
-    status.textContent =
-      error.message || "Could not build a mix right now.";
+    status.textContent = error.message || "Could not build a mix right now.";
   } finally {
     button.disabled = false;
     button.textContent = "✦ Generate my mix";
@@ -894,7 +890,13 @@ function setView(v) {
   document.body.dataset.view = v;
   mood = "";
   $("crumb").textContent =
-    v === "library" ? "Your library" : v === "recent" ? "Recently played" : v === "sources" ? "Sources" : "Discover";
+    v === "library"
+      ? "Your library"
+      : v === "recent"
+        ? "Recently played"
+        : v === "sources"
+          ? "Sources"
+          : "Discover";
   $("trackHeading").textContent =
     v === "library"
       ? "Saved tracks"
@@ -902,7 +904,13 @@ function setView(v) {
         ? "Recently played"
         : "Made for the moment";
   $("heading").innerHTML =
-    v === "library" ? "Your music, <span>your rules.</span>" : v === "recent" ? "Pick up <span>where you left off.</span>" : v === "sources" ? "Every source, <span>one place.</span>" : "Find your <span>next favourite.</span>";
+    v === "library"
+      ? "Your music, <span>your rules.</span>"
+      : v === "recent"
+        ? "Pick up <span>where you left off.</span>"
+        : v === "sources"
+          ? "Every source, <span>one place.</span>"
+          : "Find your <span>next favourite.</span>";
   document
     .querySelectorAll(".nav")
     .forEach((b) => b.classList.toggle("active", b.dataset.view === v));
@@ -1045,10 +1053,18 @@ function renderSavedForLater() {
     retry.addEventListener("click", () => {
       let track = tracks.find((candidate) => candidate.src === item.src);
       if (!track) {
-        track = { ...item, id: Date.now(), cover: item.cover || "blue", symbol: item.symbol || "♫" };
+        track = {
+          ...item,
+          id: Date.now(),
+          cover: item.cover || "blue",
+          symbol: item.symbol || "♫",
+        };
         tracks.push(track);
       }
-      setTrack(tracks.findIndex((candidate) => candidate.id === track.id), true);
+      setTrack(
+        tracks.findIndex((candidate) => candidate.id === track.id),
+        true,
+      );
     });
     const remove = document.createElement("button");
     remove.type = "button";
