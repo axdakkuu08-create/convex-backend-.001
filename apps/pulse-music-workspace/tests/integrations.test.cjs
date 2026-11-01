@@ -192,7 +192,6 @@ test("playlist library supports local persistence, add/remove, and shared-player
   assert.match(appSource, /＋ Playlist/);
 });
 
-
 test("home Archive discovery renders candidates and creates an opt-in generated playlist", () => {
   assert.match(indexSource, /id="archiveDiscovery"/);
   assert.match(indexSource, /id="archiveDiscoveryStatus"/);
