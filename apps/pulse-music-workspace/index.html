@@ -75,9 +75,11 @@
           <button id="menu" class="mobile">☰</button>
           <div>Workspace <i>/</i> <b id="crumb">Discover</b></div>
           <label class="search"
-            >⌕ <input id="search" placeholder="Search tracks, moods…" /><kbd
-              >/</kbd
-            ></label
+            >⌕
+            <input
+              id="search"
+              placeholder="Search tracks, artists, or press Enter for online results…"
+            /><kbd>/</kbd></label
           >
           <div class="avatar">P</div>
         </header>
@@ -286,7 +288,7 @@
         >
           <div class="sectionhead">
             <div>
-              <small>FRESH FINDS · INTERNET ARCHIVE</small>
+              <small>FRESH FINDS · COUNTRY + GENRE</small>
               <h2>Discover something new</h2>
             </div>
             <button id="generateArchiveMix" class="primary" type="button">
@@ -294,9 +296,60 @@
             </button>
           </div>
           <p class="source-copy">
-            Pulse searches public Archive audio metadata and builds a playlist
-            from items with supported audio files. Rights and playback vary by
-            item.
+            Discover recent releases by country and genre, or fall back to
+            public Archive recordings. Catalog playback uses short previews;
+            availability varies by region.
+          </p>
+          <div
+            class="discovery-preferences"
+            aria-label="Music discovery preferences"
+          >
+            <label for="discoveryCountry"
+              >Country / region
+              <select id="discoveryCountry">
+                <option value="Worldwide">Worldwide</option>
+                <option value="India">India</option>
+                <option value="United States">United States</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="South Korea">South Korea</option>
+                <option value="Japan">Japan</option>
+                <option value="France">France</option>
+                <option value="Brazil">Brazil</option>
+              </select>
+            </label>
+            <label for="discoveryGenre"
+              >Preferred genre
+              <select id="discoveryGenre">
+                <option value="ambient">Ambient</option>
+                <option value="pop">Pop</option>
+                <option value="rock">Rock</option>
+                <option value="hip hop">Hip-hop</option>
+                <option value="electronic">Electronic</option>
+                <option value="jazz">Jazz</option>
+                <option value="classical">Classical</option>
+                <option value="indie">Indie</option>
+                <option value="lofi">Lo-fi</option>
+                <option value="folk">Folk</option>
+                <option value="soundtrack">Soundtracks</option>
+                <option value="devotional">Devotional</option>
+              </select>
+            </label>
+            <label class="discovery-latest"
+              ><input id="discoveryLatest" type="checkbox" checked /> Latest
+              additions first</label
+            >
+            <button
+              id="saveDiscoveryPreferences"
+              class="secondary"
+              type="button"
+            >
+              Apply preferences
+            </button>
+          </div>
+          <p class="embed-note">
+            Latest additions means recently added to Internet Archive, not
+            necessarily the newest commercial releases. Country matching depends
+            on each item's metadata.
           </p>
           <p
             id="archiveDiscoveryStatus"
@@ -447,6 +500,7 @@
     <div id="toast" role="status"></div>
     <script src="config.js"></script>
     <script src="archive-source.js"></script>
+    <script src="itunes-source.js"></script>
     <script src="app.js"></script>
     <script src="playlist-manager.js"></script>
     <script type="module" src="cloud-sync.js"></script>

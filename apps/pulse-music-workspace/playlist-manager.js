@@ -16,6 +16,7 @@
         })[ch],
     );
   let activeId = "";
+  let storageUnavailable = false;
 
   function load() {
     try {
@@ -33,7 +34,17 @@
   let playlists = load();
 
   function save() {
-    localStorage.setItem(KEY, JSON.stringify(playlists));
+    try {
+      localStorage.setItem(KEY, JSON.stringify(playlists));
+      storageUnavailable = false;
+      return true;
+    } catch (_) {
+      storageUnavailable = true;
+      toast(
+        "Playlist changes are only temporary because browser storage is unavailable or full.",
+      );
+      return false;
+    }
   }
 
   function active() {
@@ -201,6 +212,13 @@
     toast("Created playlist: " + clean);
   }
 
+  function trackIdentity(track) {
+    if (track?.catalogId) return "catalog:" + track.catalogId;
+    if (track?.archiveId) return "archive:" + track.archiveId;
+    if (track?.jamendoId) return "jamendo:" + track.jamendoId;
+    return track?.src || "";
+  }
+
   function add(track) {
     if (!track || !track.src || !/^https?:\/\//i.test(track.src)) {
       toast("This item has no reusable web audio URL.");
@@ -216,19 +234,10 @@
     const selected = $("playlistTarget")?.value;
     const playlist =
       playlists.find((p) => p.id === selected) || active() || playlists[0];
-    const identity = track.archiveId
-      ? "archive:" + track.archiveId
-      : track.jamendoId
-        ? "jamendo:" + track.jamendoId
-        : track.src;
+    const identity = trackIdentity(track);
     if (
       playlist.tracks.some(
-        (t) =>
-          (t.archiveId
-            ? "archive:" + t.archiveId
-            : t.jamendoId
-              ? "jamendo:" + t.jamendoId
-              : t.src) === identity,
+        (savedTrack) => trackIdentity(savedTrack) === identity,
       )
     ) {
       toast("That song is already in " + playlist.name + ".");
@@ -248,6 +257,9 @@
       "sourceUrl",
       "source",
       "archiveId",
+      "catalogId",
+      "sourcePage",
+      "releaseDate",
       "jamendoId",
       "artworkUrl",
       "licenseUrl",
@@ -327,7 +339,9 @@
   function toast(message) {
     const node = $("toast");
     if (node) {
-      node.textContent = message;
+      node.textContent = storageUnavailable
+        ? message + " — changes may be lost when you refresh."
+        : message;
       node.classList.add("show");
     }
   }
