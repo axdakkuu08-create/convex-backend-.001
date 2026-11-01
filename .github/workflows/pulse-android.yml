@@ -2,6 +2,9 @@ name: Pulse Android build
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/pulse-android-capacitor
   pull_request:
     branches:
       - main
