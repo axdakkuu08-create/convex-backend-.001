@@ -7,6 +7,7 @@ const output = path.join(root, "www");
 const excluded = new Set([
   ".git",
   "android",
+  "android-native",
   "node_modules",
   "scripts",
   "tests",
