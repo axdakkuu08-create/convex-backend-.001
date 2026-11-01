@@ -222,6 +222,8 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
   );
   assert.match(home, /speedList\.replaceChildren/);
   assert.match(home, /catalogId: exact\?\.trackId/);
+  assert.match(app, /30-SEC PREVIEW/);
+  assert.match(app, /source-label/);
   assert.match(app, /function renderQueuePanel/);
   assert.match(app, /queueClear/);
   assert.match(html, /id="queue"/);
