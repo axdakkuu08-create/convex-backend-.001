@@ -19,7 +19,8 @@ does not replace the website or change the Convex deployment.
 
 ## Build locally
 
-Use Node.js 24, Android Studio, and an Android SDK installation.
+Use Node.js 22, Android Studio, and an Android SDK installation. This project
+pins Capacitor 8.5.0 for a stable first native build.
 
 From this directory:
 
@@ -42,27 +43,19 @@ as deliberate source changes in a later reviewed PR.
 ## GitHub Actions
 
 The `Pulse Android build` workflow runs on pull requests that change the Pulse
-workspace and can also be started manually. It always attempts a debug APK and
-uploads it as a workflow artifact.
+workspace and can also be started manually. It builds a debug APK and uploads
+it as a workflow artifact for device testing.
 
-A signed release APK and Play Store AAB are built only when all four repository
-Actions secrets are configured:
-
-- `ANDROID_KEYSTORE_BASE64`
-- `ANDROID_KEYSTORE_PASSWORD`
-- `ANDROID_KEY_ALIAS`
-- `ANDROID_KEY_PASSWORD`
-
-The keystore must be an authorized release key, backed up securely, and reused
-for future updates to the same Play app. Never commit the keystore or passwords.
-Without signing secrets, CI deliberately skips release artifacts rather than
-creating an upload that cannot be used for Play distribution.
+A signed release APK and Play Store AAB are a separate release step. They must
+use an authorized release keystore stored in GitHub Actions secrets; do not
+commit the keystore or passwords. The same signing identity must be preserved
+for future updates to the same Play app.
 
 ## Distribution
 
-- Direct installation: use the signed release APK after signing is configured.
-  The CI debug APK is for testing only and is not the public release build.
-- Google Play: upload the signed AAB through the Play Console after completing
+- Direct installation: use a signed release APK. The CI debug APK is for
+  testing only and is not the public release build.
+- Google Play: upload a signed AAB through the Play Console after completing
   the store listing, privacy disclosures, content declarations, testing track,
   and applicable review requirements. An eligible adult account holder must
   manage Play Console registration and publishing.
@@ -74,8 +67,8 @@ creating an upload that cannot be used for Play distribution.
 This first wrapper does not yet implement a native background audio service,
 media notification/session controls, offline audio downloads, or a full native
 audio focus lifecycle. Existing web playback and official provider embeds may
-behave differently inside Android WebView. These must be implemented or tested
-before describing them as supported.
+behave differently inside Android WebView. These must be implemented or
+tested before describing them as supported.
 
 A successful CI build proves packaging only. It does not prove playback,
 Clerk sign-in, Convex cloud sync, queue controls, or background playback on a
