@@ -286,8 +286,7 @@
         entries.map(async (entry) => {
           const title = entry["im:name"]?.label || "";
           const artist = entry["im:artist"]?.label || "Unknown artist";
-          const artwork =
-            (entry["im:image"] || []).slice(-1)[0]?.label || "";
+          const artwork = (entry["im:image"] || []).slice(-1)[0]?.label || "";
           const url =
             entry.link?.attributes?.href || "https://music.apple.com/";
           if (!title) return null;
