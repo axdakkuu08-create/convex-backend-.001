@@ -12,9 +12,6 @@ on:
   pull_request:
     branches: ["**", "!release"]
 
-permissions:
-  contents: write
-
 jobs:
   check:
     name: Prettier
@@ -23,8 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          persist-credentials: true
-          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
@@ -35,29 +31,6 @@ jobs:
       - name: Get dprint version
         run: |
           echo DPRINT_VERSION=$(node -p "require('./scripts/package.json').devDependencies['dprint']") >> $GITHUB_ENV
-
-      - name: Format PR25 recovery targets with pinned dprint
-        run: |
-          curl -fsSL https://dprint.dev/install.sh | sh -s "$DPRINT_VERSION"
-          ~/.dprint/bin/dprint fmt apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/styles.css
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/styles.css
-          if ! git diff --cached --quiet; then
-            git commit -m "style: fix formatting in PR #25"
-            git push origin "HEAD:$GITHUB_HEAD_REF"
-          fi
-          ~/.dprint/bin/dprint check apps/pulse-music-workspace/app.js apps/pulse-music-workspace/index.html apps/pulse-music-workspace/playlist-manager.js apps/pulse-music-workspace/styles.css
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: pr25-dprint-formatted
-          path: |
-            apps/pulse-music-workspace/app.js
-            apps/pulse-music-workspace/index.html
-            apps/pulse-music-workspace/playlist-manager.js
-            apps/pulse-music-workspace/styles.css
 
       - uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
         with:
