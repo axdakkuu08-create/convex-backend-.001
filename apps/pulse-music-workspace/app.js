@@ -1152,29 +1152,25 @@ async function searchOnlineCatalog(term) {
           (item.id && !item.catalogId && track.archiveId === item.id) ||
           track.src === item.src,
       );
-      const track =
-        existing ||
-        {
-          id: item.catalogId
-            ? "itunes:" + item.catalogId
-            : "archive:" + item.id,
-          catalogId: item.catalogId,
-          archiveId: item.catalogId ? undefined : item.id,
-          title: item.title || "Untitled track",
-          artist: item.artist || "Unknown artist",
-          mood: item.genre || "Archive",
-          time: item.time || "—",
-          cover: item.cover || "blue",
-          symbol: item.symbol || "♫",
-          src: item.src,
-          sourceUrl: item.sourceUrl || item.src,
-          sourcePage: item.sourcePage || "",
-          source: item.source || "internet-archive",
-          artworkUrl: item.artworkUrl || undefined,
-          releaseDate: item.releaseDate || "",
-          licenseUrl: item.licenseUrl || undefined,
-          rights: item.rights || undefined,
-        };
+      const track = existing || {
+        id: item.catalogId ? "itunes:" + item.catalogId : "archive:" + item.id,
+        catalogId: item.catalogId,
+        archiveId: item.catalogId ? undefined : item.id,
+        title: item.title || "Untitled track",
+        artist: item.artist || "Unknown artist",
+        mood: item.genre || "Archive",
+        time: item.time || "—",
+        cover: item.cover || "blue",
+        symbol: item.symbol || "♫",
+        src: item.src,
+        sourceUrl: item.sourceUrl || item.src,
+        sourcePage: item.sourcePage || "",
+        source: item.source || "internet-archive",
+        artworkUrl: item.artworkUrl || undefined,
+        releaseDate: item.releaseDate || "",
+        licenseUrl: item.licenseUrl || undefined,
+        rights: item.rights || undefined,
+      };
       if (!existing) {
         tracks.push(track);
       }

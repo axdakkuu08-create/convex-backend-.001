@@ -393,7 +393,10 @@ test("playlist manager creates, persists, and emits songs in order", () => {
     Array.from(playlist.tracks, (track) => track.title),
     ["First", "Second", "Catalog song"],
   );
-  assert.equal(JSON.parse(storage.get("pulse-playlists-v1"))[0].tracks.length, 3);
+  assert.equal(
+    JSON.parse(storage.get("pulse-playlists-v1"))[0].tracks.length,
+    3,
+  );
   document.getElementById("playlistPlayAll").click();
   assert.equal(events.at(-1).type, "pulse:playlist-start");
   assert.deepEqual(
