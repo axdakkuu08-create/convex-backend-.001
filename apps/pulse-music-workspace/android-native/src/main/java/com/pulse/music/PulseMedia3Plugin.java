@@ -23,7 +23,15 @@ public final class PulseMedia3Plugin extends Plugin {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private ListenableFuture<MediaController> controllerFuture;
     private MediaController controller;
-    private final Runnable positionTicker = new Runnable() {\n        @Override\n        public void run() {\n            if (controller != null) {\n                emitState(controller);\n                if (controller.isPlaying()) mainHandler.postDelayed(this, 500);\n            }\n        }\n    };
+    private final Runnable positionTicker = new Runnable() {
+        @Override
+        public void run() {
+            if (controller != null) {
+                emitState(controller);
+                if (controller.isPlaying()) mainHandler.postDelayed(this, 500);
+            }
+        }
+    };
 
     private interface ControllerAction {
         void run(MediaController mediaController);
