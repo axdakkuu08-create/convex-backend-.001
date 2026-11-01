@@ -407,7 +407,7 @@ test("playlist manager creates, persists, and emits songs in order", () => {
 });
 
 test("online catalog search is explicitly triggered by Enter and renders selectable results", () => {
-  assert.match(appSource, /\$("search")\.addEventListener\("keydown"/);
+  assert.ok(appSource.includes('$("search").addEventListener("keydown"'));
   assert.match(appSource, /if \(event\.key === "Enter"\)/);
   assert.match(appSource, /void searchOnlineCatalog\(query\)/);
   assert.match(
