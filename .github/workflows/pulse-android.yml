@@ -47,6 +47,13 @@ jobs:
           sdkmanager "platform-tools" "platforms;android-36"
           "build-tools;36.0.0"
 
+      - name: Validate Pulse JavaScript and package metadata
+        run: |
+          node --check app.js
+          node --check media3-bridge.js
+          node --check scripts/install-native-android.mjs
+          node -e "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8'))"
+
       - name: Install Capacitor dependencies
         run: npm install --no-audit --no-fund
 
