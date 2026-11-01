@@ -191,3 +191,20 @@ test("playlist library supports local persistence, add/remove, and shared-player
   assert.match(appSource, /data-playlist-add/);
   assert.match(appSource, /＋ Playlist/);
 });
+
+test("home Archive discovery renders candidates and creates an opt-in generated playlist", () => {
+  assert.match(indexSource, /id="archiveDiscovery"/);
+  assert.match(indexSource, /id="archiveDiscoveryStatus"/);
+  assert.match(indexSource, /id="archiveDiscoveryResults"/);
+  assert.match(indexSource, /id="generateArchiveMix"/);
+  assert.match(appSource, /async function loadArchiveDiscovery/);
+  assert.match(appSource, /renderArchiveDiscovery\(items\)/);
+  assert.match(appSource, /window\.PULSE_PLAYLISTS\.create\(name\)/);
+  assert.match(appSource, /window\.PULSE_PLAYLISTS\.add\(/);
+  assert.match(
+    appSource,
+    /items = items\.filter\(\(item\) => item\.id && item\.src\)\.slice\(0, 12\)/,
+  );
+  assert.match(appSource, /seen\.has\(key\)/);
+  assert.match(appSource, /Check item rights before reuse/);
+});
