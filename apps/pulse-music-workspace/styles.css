@@ -1128,3 +1128,127 @@ footer {
     flex-direction: column;
   }
 }
+
+/* Country and genre preferences for local-first discovery. */
+.music-preferences {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.music-preferences label {
+  display: grid;
+  gap: 6px;
+  color: #a5a6b0;
+  font-size: 11px;
+}
+.music-preferences select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #34353d;
+  border-radius: 9px;
+  background: #101115;
+  color: #f6f6f8;
+  padding: 11px;
+  font: inherit;
+}
+.catalog-result {
+  align-items: center;
+}
+.catalog-rights {
+  display: block !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  color: #b5b6c0 !important;
+  line-height: 1.45;
+}
+.catalog-rights a {
+  color: #ff9bb0;
+  text-decoration: underline;
+}
+@media (max-width: 700px) {
+  .music-preferences {
+    grid-template-columns: 1fr 1fr;
+  }
+  .music-preferences select {
+    min-height: 44px;
+  }
+  .catalog-result {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .catalog-copy {
+    min-width: calc(100% - 70px);
+  }
+  .catalog-result .catalog-preview,
+  .catalog-result .catalog-open {
+    margin-left: 62px;
+  }
+}
+
+/* Local playlist manager and per-result save actions. */
+.saved-playlists {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 16px;
+}
+.local-playlist-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.local-playlist-open {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  color: #d8d8df;
+  padding: 9px 10px;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.local-playlist-delete {
+  width: 32px;
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #9b9ca7;
+}
+.catalog-add {
+  flex: 0 0 auto;
+  border: 1px solid #454650;
+  border-radius: 8px;
+  background: #262730;
+  color: #e7e7eb;
+  padding: 8px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.catalog-add:hover,
+.local-playlist-open:hover {
+  border-color: #b8f36b;
+  color: #fff;
+}
+.archive-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+@media (max-width: 560px) {
+  .archive-actions {
+    width: 100%;
+  }
+  .archive-actions button {
+    flex: 1;
+    min-height: 42px;
+  }
+  .catalog-result .catalog-add {
+    margin-left: 62px;
+  }
+}

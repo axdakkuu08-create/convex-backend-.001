@@ -31,6 +31,11 @@
           ><button class="playlist" data-mood="Night">●　Late night</button
           ><button class="playlist" data-mood="Energy">●　Good energy</button>
         </div>
+        <div
+          id="savedPlaylists"
+          class="saved-playlists"
+          aria-label="Your local playlists"
+        ></div>
         <div class="cloud-account" aria-label="Cloud account">
           <small>ACCOUNT / CLOUD</small>
           <p id="cloudStatus" role="status" aria-live="polite">
@@ -73,42 +78,51 @@
             <button class="genre-chip" data-home-mood="Night">Romance</button>
             <button class="genre-chip" data-home-mood="Energy">Energy</button>
           </div>
-          <div class="home-section-heading">
-            <h2>Top picks for you</h2>
-            <span aria-hidden="true">›</span>
-          </div>
-          <div class="featured-row">
-            <button class="featured-card art-teal" data-home-track="1">
-              <span class="art-label">PULSE SESSIONS</span
-              ><span class="art-title"
-                >QUIET<br />
-                SIGNALS</span
-              >
-              <span class="featured-caption"
-                ><b>Quiet Signals</b><small>Pulse Sessions</small></span
-              >
+          <section
+            class="home-library-section"
+            aria-labelledby="homePlaylistsHeading"
+          >
+            <div class="home-section-heading">
+              <h2 id="homePlaylistsHeading">Playlists</h2>
+            </div>
+            <div
+              class="home-grid"
+              id="homePlaylistsGrid"
+              aria-live="polite"
+            ></div>
+          </section>
+          <section
+            class="home-library-section"
+            aria-labelledby="homeAlbumsHeading"
+          >
+            <div class="home-section-heading">
+              <h2 id="homeAlbumsHeading">Albums</h2>
+            </div>
+            <div class="home-grid" id="homeAlbumsGrid" aria-live="polite"></div>
+          </section>
+          <section
+            class="home-library-section"
+            aria-labelledby="homeSongsHeading"
+          >
+            <div class="home-section-heading">
+              <h2 id="homeSongsHeading">Songs</h2>
+            </div>
+            <div class="home-grid" id="homeSongsGrid" aria-live="polite"></div>
+          </section>
+          <dialog
+            class="home-detail-dialog"
+            id="homeTrackDetails"
+            aria-labelledby="homeDetailTitle"
+          >
+            <div id="homeDetailContent"></div>
+            <button
+              type="button"
+              class="home-detail-close"
+              id="homeDetailClose"
+            >
+              Close
             </button>
-            <button class="featured-card art-violet" data-home-track="2">
-              <span class="art-label">NORTHBOUND</span
-              ><span class="art-title"
-                >BLUE<br />
-                HOUR</span
-              >
-              <span class="featured-caption"
-                ><b>Blue Hour</b><small>Northbound</small></span
-              >
-            </button>
-            <button class="featured-card art-amber" data-home-track="3">
-              <span class="art-label">SUNDAY CLUB</span
-              ><span class="art-title"
-                >LITTLE<br />
-                BY LITTLE</span
-              >
-              <span class="featured-caption"
-                ><b>Little By Little</b><small>Sunday Club</small></span
-              >
-            </button>
-          </div>
+          </dialog>
           <div class="home-section-heading speed-heading">
             <h2>Speed dial</h2>
             <button id="homeShuffle" aria-label="Shuffle music">⤨</button>
@@ -233,10 +247,65 @@
             </p>
           </div>
           <div class="unified-search-panel">
-            <div class="sectionhead"><div><small>UNIFIED DISCOVERY</small><h3>Search all music</h3></div><span class="source-badge">LIVE CATALOGUES</span></div>
-            <p class="source-copy">Search track metadata and real album artwork alongside open-audio results. Commercial catalogue previews and full playback remain subject to each provider's rules.</p>
-            <form id="unifiedSearchForm" class="source-form"><label class="source-input-label" for="unifiedQuery">Song, artist or album</label><div class="source-input-row"><input id="unifiedQuery" type="search" placeholder="Search a song or artist…" autocomplete="off" required /><button class="primary" type="submit">Search music</button></div></form>
-            <p id="unifiedSearchStatus" class="unified-search-status" role="status" aria-live="polite">Search music metadata and open-audio catalogues in one place.</p><div id="unifiedSearchResults" class="unified-search-results"></div>
+            <div class="sectionhead">
+              <div>
+                <small>UNIFIED DISCOVERY</small>
+                <h3>Search all music</h3>
+              </div>
+              <span class="source-badge">LIVE CATALOGUES</span>
+            </div>
+            <p class="source-copy">
+              Search track metadata and real album artwork alongside open-audio
+              results. Commercial catalogue previews and full playback remain
+              subject to each provider's rules.
+            </p>
+            <form id="unifiedSearchForm" class="source-form">
+              <label class="source-input-label" for="unifiedQuery"
+                >Song, artist or album</label
+              >
+              <div class="source-input-row">
+                <input
+                  id="unifiedQuery"
+                  type="search"
+                  placeholder="Search a genuine song or artist…"
+                  autocomplete="off"
+                  required
+                /><button class="primary" type="submit">Search music</button>
+              </div>
+              <div class="music-preferences">
+                <label for="musicCountry"
+                  >Country<select id="musicCountry">
+                    <option value="IN">India</option>
+                    <option value="US">United States</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="CA">Canada</option>
+                    <option value="AU">Australia</option>
+                  </select></label
+                ><label for="musicGenre"
+                  >Genre<select id="musicGenre">
+                    <option value="">All genres</option>
+                    <option>Pop</option>
+                    <option>Rock</option>
+                    <option>Hip-Hop</option>
+                    <option>Electronic</option>
+                    <option>Classical</option>
+                    <option>Jazz</option>
+                    <option>Ambient</option>
+                    <option>Instrumental</option>
+                    <option>Indie</option>
+                  </select></label
+                >
+              </div>
+            </form>
+            <p
+              id="unifiedSearchStatus"
+              class="unified-search-status"
+              role="status"
+              aria-live="polite"
+            >
+              Search music metadata and open-audio catalogues in one place.
+            </p>
+            <div id="unifiedSearchResults" class="unified-search-results"></div>
           </div>
           <div class="archive-search-panel">
             <div class="sectionhead">
@@ -413,5 +482,6 @@
     <script src="app.js"></script>
     <script type="module" src="cloud-sync.js"></script>
     <script src="home-refresh.js"></script>
+    <script src="playlist-store.js"></script>
   </body>
 </html>

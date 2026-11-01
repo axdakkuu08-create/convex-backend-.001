@@ -290,7 +290,12 @@ async function play() {
   try {
     await audio.play();
     playing = true;
-    $("audioStatus").textContent = "Playing · " + tracks[index].title;
+    $("audioStatus").textContent = tracks[index].archivePage
+      ? "Playing · " +
+        tracks[index].title +
+        " · Rights: " +
+        (tracks[index].archiveLicense || "check the Archive item page")
+      : "Playing · " + tracks[index].title;
     $("play").textContent = "Ⅱ";
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
     recent = recent.slice(0, 6);
@@ -577,7 +582,8 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
     "Searching Internet Archive and checking for playable audio files…";
   results.innerHTML = "";
   try {
-    archiveItems = await window.PulseArchive.search(query, 8);
+    archiveItems = await window.PulseArchive.search(query, 24);
+    window.PulseArchiveResults = archiveItems;
     if (!archiveItems.length) {
       status.textContent =
         "No playable audio files were found for that search. Try a broader title or artist.";
@@ -594,6 +600,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           "</strong><small>" +
           escapeHTML(item.artist) +
           (item.year ? " · " + escapeHTML(item.year) : "") +
+          (item.durationSeconds ? " · " + fmt(item.durationSeconds) : "") +
           '</small><small class="archive-rights">' +
           (item.license
             ? "Rights/licence: " + escapeHTML(item.license)
@@ -601,9 +608,11 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           '</small><a href="' +
           escapeHTML(item.pageUrl) +
           '" target="_blank" rel="noopener noreferrer">View item & rights ↗</a></div>' +
-          '<button class="primary archive-play" type="button" data-archive-index="' +
+          '<div class="archive-actions"><button class="primary archive-play" type="button" data-archive-index="' +
           i +
-          '">▶ Play</button></article>',
+          '">▶ Play</button><button class="catalog-add" type="button" data-add-archive-index="' +
+          i +
+          '">＋ Playlist</button></div></article>',
       )
       .join("");
   } catch (error) {
@@ -623,7 +632,7 @@ $("archiveResults").addEventListener("click", (e) => {
     title: item.title,
     artist: item.artist,
     mood: "Internet Archive",
-    time: "—",
+    time: item.durationSeconds ? fmt(item.durationSeconds) : "—",
     cover: "blue",
     symbol: "♫",
     src: item.audioUrl,
@@ -631,9 +640,9 @@ $("archiveResults").addEventListener("click", (e) => {
     archivePage: item.pageUrl,
     archiveLicense: item.license,
   };
-  tracks.push(track);
-  setTrack(tracks.length - 1, true);
-  toast("Playing archive audio");
+  tracks.splice(index + 1, 0, track);
+  setTrack(index + 1, true);
+  toast("Playing archive audio · next track stays in sequence");
 });
 
 window.addEventListener("pulse:play-catalog-track", (event) => {
@@ -644,25 +653,32 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
     title: String(item.title || "Catalogue track"),
     artist: String(item.artist || "Unknown artist"),
     mood: item.source || "Catalogue",
-    time: "Preview",
+    time:
+      item.duration ||
+      (item.source === "Apple/iTunes catalogue" ? "Preview" : "—"),
     cover: "violet",
     symbol: "♫",
     src: item.src,
     customUrl: true,
     artwork: item.artwork || "",
     sourcePage: item.url || "",
+    archivePage: String(item.source || "").includes("Internet Archive")
+      ? item.url || ""
+      : "",
     archiveLicense: item.license || "",
   };
-  tracks.push(track);
-  setTrack(tracks.length - 1, true);
+  tracks.splice(index + 1, 0, track);
+  setTrack(index + 1, true);
   if (item.artwork) {
-    $("cover").style.backgroundImage = 'url("' + item.artwork.replace(/["\\]/g, "") + '")';
+    $("cover").style.backgroundImage =
+      'url("' + item.artwork.replace(/["\\]/g, "") + '")';
     $("cover").style.backgroundSize = "cover";
     $("cover").textContent = "";
   }
-  $("audioStatus").textContent = item.source === "Apple/iTunes catalogue"
-    ? "Playing the available catalogue preview. Open the provider page for full-track options."
-    : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
+  $("audioStatus").textContent =
+    item.source === "Apple/iTunes catalogue"
+      ? "Playing the available catalogue preview. Open the provider page for full-track options."
+      : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
   toast("Loading " + track.title);
 });
 
