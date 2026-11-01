@@ -6,6 +6,15 @@ on:
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-archive-smoke.yml"
+  pull_request:
+    branches:
+      - feature/pulse-internet-archive
+      - feature/pulse-archive-playlists
+      - feature/pulse-discovery-polish
+      - feature/pulse-convx-glass-adaptation
+    paths:
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-archive-smoke.yml"
 
 permissions:
   contents: read
