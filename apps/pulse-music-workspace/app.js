@@ -533,7 +533,7 @@ if (window.PulseMedia3 && window.PulseMedia3.isNative) {
       nativeEndedHandled = false;
     }
   });
-};\n\nif (window.PulseMedia3 && window.PulseMedia3.isNative) {\n  window.PulseMedia3.setVolume(0.75).catch(() => {});\n  window.PulseMedia3.addStateListener((state) => {\n    if (!state) return;\n    const position = Number(state.positionSeconds) || 0;\n    const duration = Number(state.durationSeconds) || 0;\n    nativePositionSeconds = position;\n    nativeDurationSeconds = duration;\n    if (duration > 0) {\n      $("progress").value = (position / duration) * 100;\n      $("time").textContent = fmt(position);\n      $("duration").textContent = fmt(duration);\n    }\n    const isNowPlaying = !!state.isPlaying;\n    if (playing !== isNowPlaying) {\n      playing = isNowPlaying;\n      $("play").textContent = playing ? "Ⅱ" : "▶";\n      render();\n    }\n    if (state.playbackState === 4 && !nativeEndedHandled) {\n      nativeEndedHandled = true;\n      if (repeatOn) window.PulseMedia3.seekTo(0).then(() => play()).catch(() => {});\n      else next();\n    } else if (state.playbackState !== 4) {\n      nativeEndedHandled = false;\n    }\n  });\n}
+};}
 audio.onwaiting = () => {
   $("audioStatus").textContent =
     "Loading audio… If it stays here, the link may not be a direct audio file.";
