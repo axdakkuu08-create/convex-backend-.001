@@ -159,34 +159,23 @@
   }
   function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
-    if (!playlist || !playlist.tracks.length) {
+    if (
+      !playlist ||
+      !Array.isArray(playlist.tracks) ||
+      !playlist.tracks.length
+    ) {
       alert("This playlist is empty. Add songs from search results.");
       return;
     }
-    const choices = playlist.tracks
-      .map(
-        (track, index) => index + 1 + ". " + track.title + " — " + track.artist,
-      )
-      .join("\n");
-    const answer = prompt(
-      "Choose a song number to play from " + playlist.name + ":\n" + choices,
-    );
-    const index = Number(answer) - 1;
-    const track = playlist.tracks[index];
-    if (!track) return;
-    window.dispatchEvent(
-      new CustomEvent("pulse:play-catalog-track", {
-        detail: {
-          title: track.title,
-          artist: track.artist,
-          src: track.src,
-          url: track.url,
-          artwork: track.artwork,
-          license: track.license,
-          source: track.source,
-        },
-      }),
-    );
+    const started = window.PulsePlaylistPlayback?.start?.(playlist);
+    if (!started) {
+      alert("This playlist has no playable tracks yet.");
+      return;
+    }
+    const status = $("unifiedSearchStatus");
+    if (status)
+      status.textContent =
+        'Playing all tracks in "' + playlist.name + '" in saved order.';
   }
 
   createButton.onclick = () => {
