@@ -287,7 +287,7 @@ function setTrack(i, autoplay = false) {
     audio.pause();
     nativeEndedHandled = false;
     const nativeQueue = tracks.filter((candidate) =>
-      /^https?:\\/\\//i.test(candidate.src),
+      /^https?:\/\//i.test(candidate.src),
     );
     const nativeQueueIndex = nativeQueue.findIndex(
       (candidate) => String(candidate.id) === String(t.id),
