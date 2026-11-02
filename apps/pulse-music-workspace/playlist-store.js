@@ -159,7 +159,11 @@
   }
   function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
-    if (!playlist || !Array.isArray(playlist.tracks) || !playlist.tracks.length) {
+    if (
+      !playlist ||
+      !Array.isArray(playlist.tracks) ||
+      !playlist.tracks.length
+    ) {
       alert("This playlist is empty. Add songs from search results.");
       return;
     }
@@ -169,7 +173,9 @@
       return;
     }
     const status = $("unifiedSearchStatus");
-    if (status) status.textContent = 'Playing all tracks in "' + playlist.name + '" in saved order.';
+    if (status)
+      status.textContent =
+        'Playing all tracks in "' + playlist.name + '" in saved order.';
   }
 
   createButton.onclick = () => {
