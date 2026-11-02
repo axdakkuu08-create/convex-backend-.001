@@ -237,7 +237,6 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
   assert.match(html, /id="queuePanel"/);
 });
 
-
 const playbackSource = fs.readFileSync(
   path.join(__dirname, "..", "playlist-playback.js"),
   "utf8",
@@ -261,7 +260,10 @@ vm.runInNewContext(playbackSource, playbackSandbox);
 
 test("playlist playback handles an empty playlist without starting", () => {
   assert.equal(
-    playbackSandbox.window.PulsePlaylistPlayback.start({ name: "Empty", tracks: [] }),
+    playbackSandbox.window.PulsePlaylistPlayback.start({
+      name: "Empty",
+      tracks: [],
+    }),
     false,
   );
   assert.equal(playbackEvents.length, 0);
@@ -275,9 +277,18 @@ test("one-track playlist queues exactly one playable track and then stops", () =
   const playlist = {
     id: "one",
     name: "One track",
-    tracks: [{ title: "Track 1", artist: "Artist", src: "https://audio.example/1.mp3" }],
+    tracks: [
+      {
+        title: "Track 1",
+        artist: "Artist",
+        src: "https://audio.example/1.mp3",
+      },
+    ],
   };
-  assert.equal(playbackSandbox.window.PulsePlaylistPlayback.start(playlist), true);
+  assert.equal(
+    playbackSandbox.window.PulsePlaylistPlayback.start(playlist),
+    true,
+  );
   assert.equal(playbackEvents.at(-1).type, "pulse:play-playlist");
   assert.equal(playbackEvents.at(-1).detail.tracks.length, 1);
   assert.equal(
@@ -298,10 +309,16 @@ test("multi-track playlist preserves saved order and advances on track end", () 
   };
   assert.equal(playbackSandbox.window.PulsePlaylistPlayback.start(playlist), true);
   const queue = playbackEvents.at(-1).detail.tracks;
-  assert.deepEqual(Array.from(queue, (track) => track.title), ["First", "Second", "Third"]);
+  assert.deepEqual(
+    Array.from(queue, (track) => track.title),
+    ["First", "Second", "Third"],
+  );
   assert.equal(playbackSandbox.window.PulsePlaylistPlayback.nextIndex(0, 3), 1);
   assert.equal(playbackSandbox.window.PulsePlaylistPlayback.nextIndex(1, 3), 2);
-  assert.equal(playbackSandbox.window.PulsePlaylistPlayback.nextIndex(2, 3), null);
+  assert.equal(
+    playbackSandbox.window.PulsePlaylistPlayback.nextIndex(2, 3),
+    null,
+  );
   assert.match(fs.readFileSync(appPath, "utf8"), /audio\.onended = .*next\(\)/);
 });
 
