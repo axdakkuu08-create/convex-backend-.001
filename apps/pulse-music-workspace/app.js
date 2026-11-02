@@ -334,8 +334,11 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
-  let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
-  if (n >= tracks.length && !repeatOn) {
+  const n = window.PulsePlaylistPlayback.nextIndex(index, tracks.length, {
+    shuffle: shuffleOn,
+    repeat: repeatOn,
+  });
+  if (n === null) {
     pause();
     audio.currentTime = 0;
     return;
@@ -701,6 +704,32 @@ $("archiveResults").addEventListener("click", (e) => {
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
   toast("Playing archive audio · next track stays in sequence");
+});
+
+window.addEventListener("pulse:play-playlist", (event) => {
+  const queue = event.detail?.tracks || [];
+  if (!queue.length) return;
+  tracks.splice(0, tracks.length, ...queue.map((item, queueIndex) => ({
+    id: Date.now() + queueIndex,
+    title: String(item.title || "Untitled track"),
+    artist: String(item.artist || "Unknown artist"),
+    mood: "Playlist",
+    time: item.duration || "—",
+    cover: "violet",
+    symbol: "♫",
+    src: item.src,
+    customUrl: true,
+    catalogId: String(item.catalogId || ""),
+    artwork: item.artwork || "",
+    source: item.source || "Saved playlist",
+    archivePage: String(item.source || "").includes("Internet Archive") ? item.url || "" : "",
+    archiveLicense: item.license || "",
+  })));
+  index = 0;
+  shuffleOn = false;
+  setTrack(0, true);
+  renderQueuePanel();
+  toast("Playing playlist · " + queue.length + " tracks in saved order");
 });
 
 window.addEventListener("pulse:play-catalog-track", (event) => {
