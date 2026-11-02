@@ -100,6 +100,24 @@ const configSource = fs.readFileSync(
   "utf8",
 );
 
+test("Android Media3 lock-screen session receives the playable Pulse queue", () => {
+  const plugin = fs.readFileSync(
+    path.join(__dirname, "..", "android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java"),
+    "utf8",
+  );
+  const bridge = fs.readFileSync(
+    path.join(__dirname, "..", "media3-bridge.js"),
+    "utf8",
+  );
+  assert.match(plugin, /public void setQueue\\(PluginCall call\\)/);
+  assert.match(plugin, /setMediaItems\\(items, startIndex, 0L\\)/);
+  assert.match(plugin, /setMediaId\\(mediaId\\)/);
+  assert.match(plugin, /put\\("mediaId"/);
+  assert.match(bridge, /async setQueue\\(tracks, startIndex = 0\\)/);
+  assert.match(source, /window\\.PulseMedia3\\.setQueue/);
+  assert.match(source, /transitionedIndex/);
+});
+
 test("cloud playlists are opt-in and use owner-scoped backend functions", () => {
   assert.match(
     cloudSource,
