@@ -109,12 +109,12 @@ test("Android Media3 lock-screen session receives the playable Pulse queue", () 
     path.join(__dirname, "..", "media3-bridge.js"),
     "utf8",
   );
-  assert.match(plugin, /public void setQueue\\(PluginCall call\\)/);
-  assert.match(plugin, /setMediaItems\\(items, startIndex, 0L\\)/);
-  assert.match(plugin, /setMediaId\\(mediaId\\)/);
-  assert.match(plugin, /put\\("mediaId"/);
-  assert.match(bridge, /async setQueue\\(tracks, startIndex = 0\\)/);
-  assert.match(source, /window\\.PulseMedia3\\.setQueue/);
+  assert.match(plugin, /public void setQueue\(PluginCall call\)/);
+  assert.match(plugin, /setMediaItems\(items, startIndex, 0L\)/);
+  assert.match(plugin, /setMediaId\(mediaId\)/);
+  assert.match(plugin, /put\("mediaId"/);
+  assert.match(bridge, /async setQueue\(tracks, startIndex = 0\)/);
+  assert.match(source, /window\.PulseMedia3\.setQueue/);
   assert.match(source, /transitionedIndex/);
 });
 
