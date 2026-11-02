@@ -286,11 +286,21 @@ function setTrack(i, autoplay = false) {
   if (nativeTrackActive) {
     audio.pause();
     nativeEndedHandled = false;
-    nativeLoadPromise = window.PulseMedia3.loadTrack({
-      url: t.src,
-      title: t.title,
-      artist: t.artist,
-    });
+    const nativeQueue = tracks.filter((candidate) =>
+      /^https?:\\/\\//i.test(candidate.src),
+    );
+    const nativeQueueIndex = nativeQueue.findIndex(
+      (candidate) => String(candidate.id) === String(t.id),
+    );
+    nativeLoadPromise = window.PulseMedia3.setQueue(
+      nativeQueue.map((candidate) => ({
+        id: String(candidate.id),
+        url: candidate.src,
+        title: candidate.title,
+        artist: candidate.artist,
+      })),
+      Math.max(0, nativeQueueIndex),
+    );
     nativeLoadPromise.catch((error) => {
       $("audioStatus").textContent =
         error && error.message
@@ -514,6 +524,23 @@ if (window.PulseMedia3 && window.PulseMedia3.isNative) {
   window.PulseMedia3.setVolume(0.75).catch(() => {});
   window.PulseMedia3.addStateListener((state) => {
     if (!state) return;
+    const mediaId = String(state.mediaId || "");
+    const transitionedIndex = mediaId
+      ? tracks.findIndex((track) => String(track.id) === mediaId)
+      : -1;
+    if (transitionedIndex >= 0 && transitionedIndex !== index) {
+      index = transitionedIndex;
+      const currentTrack = tracks[index];
+      $("nowTitle").textContent = currentTrack.title;
+      $("nowArtist").textContent = currentTrack.artist;
+      $("cover").className = "cover " + currentTrack.cover;
+      $("cover").textContent = currentTrack.symbol;
+      $("like").textContent = liked.has(currentTrack.id) ? "♥" : "♡";
+      $("like").classList.toggle("liked", liked.has(currentTrack.id));
+      $("duration").textContent = currentTrack.time;
+      render();
+      renderQueuePanel();
+    }
     const position = Number(state.positionSeconds) || 0;
     const duration = Number(state.durationSeconds) || 0;
     nativePositionSeconds = position;
@@ -623,8 +650,10 @@ $("queueNext")?.addEventListener("click", () => $("next").click());
 $("queueClear")?.addEventListener("click", () => {
   const current = tracks[index];
   if (!current) return;
+  const wasPlaying = playing;
   tracks.splice(0, tracks.length, current);
   index = 0;
+  if (nativeTrackActive) setTrack(0, wasPlaying);
   render();
   renderQueuePanel();
   toast("Queue cleared");
