@@ -19,6 +19,11 @@
       });
       return true;
     },
+    async setQueue(tracks, startIndex = 0) {
+      if (!plugin) return false;
+      await plugin.setQueue({ tracks, startIndex });
+      return true;
+    },
     async play() {
       if (!plugin) return false;
       await plugin.play();
