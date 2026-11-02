@@ -102,7 +102,11 @@ const configSource = fs.readFileSync(
 
 test("Android Media3 lock-screen session receives the playable Pulse queue", () => {
   const plugin = fs.readFileSync(
-    path.join(__dirname, "..", "android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java"),
+    path.join(
+      __dirname,
+      "..",
+      "android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java",
+    ),
     "utf8",
   );
   const bridge = fs.readFileSync(
