@@ -115,7 +115,7 @@ test("cloud playlists are opt-in and use owner-scoped backend functions", () => 
   assert.match(configSource, /convexUrl: ""/);
   assert.match(configSource, /clerkPublishableKey: ""/);
   assert.match(cloudSource, /fetch\("\/api\/pulse-config"/);
-  assert.match(cloudSource, /PULSE_CONVEX_URL/);
+  const runtimeConfigSource = fs.readFileSync(\n    path.join(__dirname, "..", "api", "pulse-config.js"),\n    "utf8",\n  );\n  assert.match(runtimeConfigSource, /PULSE_CONVEX_URL/);\n  assert.match(runtimeConfigSource, /PULSE_CLERK_PUBLISHABLE_KEY/);
   assert.doesNotMatch(configSource, /sk_test_|sk_live_|convex deploy key/i);
 });
 
