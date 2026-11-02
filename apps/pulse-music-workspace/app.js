@@ -709,22 +709,28 @@ $("archiveResults").addEventListener("click", (e) => {
 window.addEventListener("pulse:play-playlist", (event) => {
   const queue = event.detail?.tracks || [];
   if (!queue.length) return;
-  tracks.splice(0, tracks.length, ...queue.map((item, queueIndex) => ({
-    id: Date.now() + queueIndex,
-    title: String(item.title || "Untitled track"),
-    artist: String(item.artist || "Unknown artist"),
-    mood: "Playlist",
-    time: item.duration || "—",
-    cover: "violet",
-    symbol: "♫",
-    src: item.src,
-    customUrl: true,
-    catalogId: String(item.catalogId || ""),
-    artwork: item.artwork || "",
-    source: item.source || "Saved playlist",
-    archivePage: String(item.source || "").includes("Internet Archive") ? item.url || "" : "",
-    archiveLicense: item.license || "",
-  })));
+  tracks.splice(
+    0,
+    tracks.length,
+    ...queue.map((item, queueIndex) => ({
+      id: Date.now() + queueIndex,
+      title: String(item.title || "Untitled track"),
+      artist: String(item.artist || "Unknown artist"),
+      mood: "Playlist",
+      time: item.duration || "—",
+      cover: "violet",
+      symbol: "♫",
+      src: item.src,
+      customUrl: true,
+      catalogId: String(item.catalogId || ""),
+      artwork: item.artwork || "",
+      source: item.source || "Saved playlist",
+      archivePage: String(item.source || "").includes("Internet Archive")
+        ? item.url || ""
+        : "",
+      archiveLicense: item.license || "",
+    })),
+  );
   index = 0;
   shuffleOn = false;
   setTrack(0, true);
