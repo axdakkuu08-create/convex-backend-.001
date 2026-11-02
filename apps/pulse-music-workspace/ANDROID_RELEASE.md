@@ -39,8 +39,8 @@ unreviewed generated Gradle project. Native playback sources are stored in
 `android-native/` and installed into the generated project by
 `scripts/install-native-android.mjs`. The integration uses Media3 ExoPlayer and
 MediaSessionService, registered through a Capacitor plugin. Direct HTTP(S) audio
-URLs use the native bridge; local `blob:` audio files continue to use the browser
-audio element.
+URLs use the native bridge; local `blob:` audio files continue to use the
+browser audio element.
 
 ## GitHub Actions
 
