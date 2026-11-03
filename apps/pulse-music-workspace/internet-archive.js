@@ -59,6 +59,8 @@
       const params = new URLSearchParams({
         q: term,
         genre: opts.genre || "",
+        countryName: opts.countryName || "",
+        minDurationSeconds: String(opts.minDurationSeconds || 0),
         limit: String(requested),
         provider: "archive",
       });
