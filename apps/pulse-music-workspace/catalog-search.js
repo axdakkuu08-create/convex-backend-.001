@@ -125,7 +125,7 @@
       provider: "all",
     });
     try {
-      const response = await fetch(gateway.replace(/\\/$/, "") + "/api/search?" + params, {
+      const response = await fetch(gateway.replace(/\/$/, "") + "/api/search?" + params, {
         headers: { Accept: "application/json" },
       });
       if (!response.ok) throw new Error("Discovery gateway unavailable (" + response.status + ").");
