@@ -178,7 +178,16 @@ test("Cloudflare catalogue adapters enforce clean iTunes previews and deduplicat
     "utf8",
   );
   const worker = fs.readFileSync(
-    path.join(__dirname, "..", "..", "..", "cloudflare", "pulse-discovery-gateway", "src", "index.js"),
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "cloudflare",
+      "pulse-discovery-gateway",
+      "src",
+      "index.js",
+    ),
     "utf8",
   );
   assert.match(catalog, /discoveryGatewayUrl/);

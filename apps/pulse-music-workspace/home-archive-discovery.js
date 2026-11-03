@@ -79,7 +79,8 @@
                   catalogId: "archive:" + track.id,
                   duration: duration(track.durationSeconds),
                   verificationStatus: track.verificationStatus || "VERIFYING",
-                  rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+                  rightsReviewStatus:
+                    track.rightsReviewStatus || "REVIEW_REQUIRED",
                   bytesTotal: Number(track.fileSize) || 0,
                 },
               }),
@@ -101,7 +102,8 @@
                   source: "Internet Archive",
                   catalogId: "archive:" + track.id,
                   verificationStatus: track.verificationStatus || "VERIFYING",
-                  rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+                  rightsReviewStatus:
+                    track.rightsReviewStatus || "REVIEW_REQUIRED",
                   bytesTotal: Number(track.fileSize) || 0,
                 },
               }),

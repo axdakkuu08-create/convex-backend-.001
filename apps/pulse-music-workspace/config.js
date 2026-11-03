@@ -5,5 +5,6 @@ window.PULSE_CONFIG = Object.freeze({
   // Clerk publishable key only (starts with pk_test_ or pk_live_). Never use a secret key.
   clerkPublishableKey: "",
   // Public read-only Cloudflare discovery API; no secrets are stored here.
-  discoveryGatewayUrl: "https://pulse-discovery-gateway.pulse-music.workers.dev",
+  discoveryGatewayUrl:
+    "https://pulse-discovery-gateway.pulse-music.workers.dev",
 });

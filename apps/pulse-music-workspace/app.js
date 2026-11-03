@@ -744,7 +744,9 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   $("audioStatus").textContent =
     item.source === "Apple/iTunes catalogue"
       ? "Playing the available catalogue preview. Open the provider page for full-track options."
-      : "Archive stream status: " + track.verificationStatus + ". Rights review is separate; check the source page and licence.";
+      : "Archive stream status: " +
+        track.verificationStatus +
+        ". Rights review is separate; check the source page and licence.";
   toast("Loading " + track.title);
 });
 

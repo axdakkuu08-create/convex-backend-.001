@@ -53,14 +53,21 @@
         ? '<button class="primary catalog-preview" type="button" data-catalog-index="' +
           index +
           '">' +
-          (item.verificationStatus === "VERIFIED_FULL" ? "▶ Full track" : item.verificationStatus === "VERIFYING" ? "▶ Check stream" : "▶ Preview") +
+          (item.verificationStatus === "VERIFIED_FULL"
+            ? "▶ Full track"
+            : item.verificationStatus === "VERIFYING"
+              ? "▶ Check stream"
+              : "▶ Preview") +
           "</button>"
         : '<a class="catalog-open" href="' +
           esc(item.url) +
           '" target="_blank" rel="noopener noreferrer">Open source ↗</a>';
     const rights = item.audioUrl
       ? '<small class="catalog-rights">' +
-        esc(item.license || "No licence statement found; check the item page") + (item.rightsReviewStatus === "REVIEW_REQUIRED" ? " · Rights review required; URL availability is not permission" : "") +
+        esc(item.license || "No licence statement found; check the item page") +
+        (item.rightsReviewStatus === "REVIEW_REQUIRED"
+          ? " · Rights review required; URL availability is not permission"
+          : "") +
         ' · <a href="' +
         esc(item.url) +
         '" target="_blank" rel="noopener noreferrer">Item & rights ↗</a></small>'
@@ -119,16 +126,29 @@
     const params = new URLSearchParams({
       q,
       country: preferences.country || "IN",
-      countryName: ({ IN: "India", US: "United States", GB: "United Kingdom", CA: "Canada", AU: "Australia" })[preferences.country] || "",
+      countryName:
+        {
+          IN: "India",
+          US: "United States",
+          GB: "United Kingdom",
+          CA: "Canada",
+          AU: "Australia",
+        }[preferences.country] || "",
       genre: preferences.genre || "",
       limit: "18",
       provider: "all",
     });
     try {
-      const response = await fetch(gateway.replace(/\/$/, "") + "/api/search?" + params, {
-        headers: { Accept: "application/json" },
-      });
-      if (!response.ok) throw new Error("Discovery gateway unavailable (" + response.status + ").");
+      const response = await fetch(
+        gateway.replace(/\/$/, "") + "/api/search?" + params,
+        {
+          headers: { Accept: "application/json" },
+        },
+      );
+      if (!response.ok)
+        throw new Error(
+          "Discovery gateway unavailable (" + response.status + ").",
+        );
       const payload = await response.json();
       if (current !== token) return;
       const found = (payload.tracks || []).map((track) => ({
@@ -143,7 +163,10 @@
         url: track.sourceUrl,
         license: track.license,
         duration: duration(track.duration),
-        source: track.provider === "itunes" ? "Apple/iTunes catalogue" : "Internet Archive · direct open audio",
+        source:
+          track.provider === "itunes"
+            ? "Apple/iTunes catalogue"
+            : "Internet Archive · direct open audio",
         kind: track.provider,
         genre: track.genre,
         verificationStatus: track.verificationStatus,
@@ -151,19 +174,27 @@
         bytesTotal: track.bytesTotal,
       }));
       if (!found.length) {
-        status.textContent = "No matching tracks were found, or the catalogues are temporarily unavailable. Try a broader title or change the genre.";
+        status.textContent =
+          "No matching tracks were found, or the catalogues are temporarily unavailable. Try a broader title or change the genre.";
         return;
       }
       window.PulseCatalogResults = found;
       results.innerHTML = found.map(render).join("");
-      const failed = Object.values(payload.providerStatus || {}).some((value) => value !== "ok");
-      status.textContent = found.length + " results · " +
+      const failed = Object.values(payload.providerStatus || {}).some(
+        (value) => value !== "ok",
+      );
+      status.textContent =
+        found.length +
+        " results · " +
         (failed ? "Some catalogues did not respond. " : "Search completed. ") +
-        "Cache: " + (payload.cache || "MISS") + ". " +
+        "Cache: " +
+        (payload.cache || "MISS") +
+        ". " +
         (payload.licensingNotice || "Review source rights separately.");
     } catch (error) {
       if (current !== token) return;
-      status.textContent = error?.message || "Music discovery is temporarily unavailable.";
+      status.textContent =
+        error?.message || "Music discovery is temporarily unavailable.";
     }
   }
 

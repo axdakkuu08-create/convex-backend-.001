@@ -64,10 +64,16 @@
         limit: String(requested),
         provider: "archive",
       });
-      const response = await fetch(gateway.replace(/\/$/, "") + "/api/search?" + params, {
-        headers: { Accept: "application/json" },
-      });
-      if (!response.ok) throw new Error("Cloud Archive discovery unavailable (" + response.status + ").");
+      const response = await fetch(
+        gateway.replace(/\/$/, "") + "/api/search?" + params,
+        {
+          headers: { Accept: "application/json" },
+        },
+      );
+      if (!response.ok)
+        throw new Error(
+          "Cloud Archive discovery unavailable (" + response.status + ").",
+        );
       const payload = await response.json();
       return (payload.tracks || []).map((track) => ({
         id: track.catalogId || track.id,
