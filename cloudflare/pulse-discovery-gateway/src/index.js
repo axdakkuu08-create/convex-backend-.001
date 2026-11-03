@@ -67,10 +67,11 @@ export async function searchITunes({query,country,genre,limit,fetcher=fetch}) {
     verificationStatus:t.previewUrl?"PREVIEW_ONLY":"UNAVAILABLE"
   }));
 }
-export async function searchArchive({query,genre,limit,fetcher=fetch}) {
+export async function searchArchive({query,genre,countryName,minDurationSeconds,limit,fetcher=fetch}) {
   const term=safeQuery(query), quoted='"'+term.replace(/"/g,"")+'"';
   const clauses=["mediatype:audio","(title:"+quoted+" OR creator:"+quoted+" OR subject:"+quoted+")"];
   if (genre) clauses.push('subject:"'+safeQuery(genre)+'"');
+  if (countryName) clauses.push('subject:"'+safeQuery(countryName)+'"');
   const p=new URLSearchParams({q:clauses.join(" AND "),fl:"identifier,title,creator,date,year,licenseurl,rights",rows:String(Math.min(limit,MAX)),page:"1",output:"json",sort:"downloads desc"});
   const data=await getJson("https://archive.org/advancedsearch.php?"+p,fetcher);
   const docs=Array.isArray(data?.response?.docs)?data.response.docs:[];
@@ -80,9 +81,11 @@ export async function searchArchive({query,genre,limit,fetcher=fetch}) {
       const meta=await getJson("https://archive.org/metadata/"+encodeURIComponent(id),fetcher);
       const file=pickAudioFile(meta.files); if (!file) return null;
       const m=meta.metadata||{};
+      const duration=parseDuration(m.runtime||m.length||file.length||file.duration);
+      if (minDurationSeconds && duration && duration < minDurationSeconds) return null;
       return normalizeTrack({provider:"archive",providerId:id,title:m.title||d.title||id,
         artist:m.creator||m.artist||d.creator||"Internet Archive contributor",album:m.album||"",genre,
-        duration:parseDuration(m.runtime||m.length||file.length||file.duration),
+        duration,
         streamUrl:"https://archive.org/download/"+encodeURIComponent(id)+"/"+encodeURIComponent(file.name),
         sourceUrl:"https://archive.org/details/"+encodeURIComponent(id),
         license:m.licenseurl||m.rights||d.licenseurl||d.rights||"",bytesTotal:file.size,
@@ -91,17 +94,19 @@ export async function searchArchive({query,genre,limit,fetcher=fetch}) {
   }));
   return tracks.filter(Boolean);
 }
-export const cacheKey = ({query,country,genre,limit,provider="all"}) =>
-  "search:v1:"+encodeURIComponent([query.toLowerCase(),country.toUpperCase(),genre.toLowerCase(),limit,provider].join("|")).slice(0,400);
+export const cacheKey = ({query,country,genre,countryName="",minDurationSeconds=0,limit,provider="all"}) =>
+  "search:v1:"+encodeURIComponent([query.toLowerCase(),country.toUpperCase(),genre.toLowerCase(),countryName.toLowerCase(),minDurationSeconds,limit,provider].join("|")).slice(0,400);
 
 export async function handleSearch(request,env,fetcher=fetch) {
   const u=new URL(request.url), query=safeQuery(u.searchParams.get("q"));
   if (query.length<2) return response({error:"Enter at least two characters to search."},400);
   const country=text(u.searchParams.get("country")||"IN").toUpperCase().slice(0,2);
   const genre=safeQuery(u.searchParams.get("genre")||"").slice(0,40);
+  const countryName=safeQuery(u.searchParams.get("countryName")||"").slice(0,40);
+  const minDurationSeconds=Math.max(0,Math.min(Number(u.searchParams.get("minDurationSeconds"))||0,3600));
   const limit=Math.min(Math.max(Number(u.searchParams.get("limit"))||18,1),MAX);
   const provider=["all","archive","itunes"].includes(u.searchParams.get("provider"))?u.searchParams.get("provider"):"all";
-  const key=cacheKey({query,country,genre,limit,provider});
+  const key=cacheKey({query,country,genre,countryName,minDurationSeconds,limit,provider});
   if (env.CATALOG_CACHE) try {
     const cached=await env.CATALOG_CACHE.get(key,"json");
     if (cached) return response({...cached,cache:"HIT"});
@@ -109,7 +114,7 @@ export async function handleSearch(request,env,fetcher=fetch) {
   const names=provider==="all"?["itunes","archive"]:[provider];
   const jobs=await Promise.allSettled(names.map(n=>n==="itunes"
     ?searchITunes({query,country,genre,limit,fetcher})
-    :searchArchive({query,genre,limit,fetcher})));
+    :searchArchive({query,genre,countryName,minDurationSeconds,limit,fetcher})));
   const tracks=dedupeTracks(jobs.flatMap(j=>j.status==="fulfilled"?j.value:[]));
   const providerStatus=Object.fromEntries(names.map((n,i)=>[n,jobs[i].status==="fulfilled"?"ok":"unavailable"]));
   const payload={query,tracks:tracks.slice(0,limit*2),providerStatus,
