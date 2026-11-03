@@ -119,6 +119,7 @@
     const params = new URLSearchParams({
       q,
       country: preferences.country || "IN",
+      countryName: ({ IN: "India", US: "United States", GB: "United Kingdom", CA: "Canada", AU: "Australia" })[preferences.country] || "",
       genre: preferences.genre || "",
       limit: "18",
       provider: "all",
