@@ -54,6 +54,33 @@
       );
     const opts = options || {};
     const requested = Math.min(Math.max(Number(limit) || 24, 1), MAX_RESULTS);
+    const gateway = global.PULSE_CONFIG?.discoveryGatewayUrl;
+    if (gateway) {
+      const params = new URLSearchParams({
+        q: term,
+        genre: opts.genre || "",
+        limit: String(requested),
+        provider: "archive",
+      });
+      const response = await fetch(gateway.replace(/\\/$/, "") + "/api/search?" + params, {
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) throw new Error("Cloud Archive discovery unavailable (" + response.status + ").");
+      const payload = await response.json();
+      return (payload.tracks || []).map((track) => ({
+        id: track.catalogId || track.id,
+        title: track.title,
+        artist: track.artist,
+        year: track.releaseDate || "",
+        durationSeconds: track.duration || 0,
+        fileSize: track.bytesTotal || 0,
+        license: track.license || "",
+        audioUrl: track.streamUrl || "",
+        pageUrl: track.sourceUrl || "",
+        verificationStatus: track.verificationStatus || "VERIFYING",
+        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+      }));
+    }
     const quoted = '"' + term.replace(/"/g, "") + '"';
     const clauses = [
       "mediatype:audio",
