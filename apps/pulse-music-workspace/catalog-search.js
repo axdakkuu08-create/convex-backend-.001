@@ -210,9 +210,6 @@
             verificationStatus: item.verificationStatus || "UNAVAILABLE",
             rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
             bytesTotal: item.bytesTotal || 0,
-            verificationStatus: item.verificationStatus || "UNAVAILABLE",
-            rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
-            bytesTotal: item.bytesTotal || 0,
           },
         }),
       );
@@ -234,6 +231,9 @@
             license: item.license || "",
             source: item.source,
             catalogId: item.catalogId || item.id || "",
+            verificationStatus: item.verificationStatus || "UNAVAILABLE",
+            rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+            bytesTotal: item.bytesTotal || 0,
           },
         }),
       );
