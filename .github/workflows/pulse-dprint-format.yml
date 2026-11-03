@@ -1,0 +1,48 @@
+name: Pulse PR34 temporary formatter
+on:
+  push:
+    branches:
+      - feature/pulse-cloudflare-discovery-gateway
+    paths:
+      - "cloudflare/pulse-discovery-gateway/**"
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-dprint-format.yml"
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/pulse-cloudflare-discovery-gateway
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Format changed Pulse files
+        run: |
+          npx --yes prettier@3.4.2 --write --prose-wrap always --trailing-comma all \
+            cloudflare/pulse-discovery-gateway/src/index.js \
+            cloudflare/pulse-discovery-gateway/tests/gateway.test.js \
+            cloudflare/pulse-discovery-gateway/wrangler.jsonc \
+            cloudflare/pulse-discovery-gateway/package.json \
+            cloudflare/pulse-discovery-gateway/README.md \
+            apps/pulse-music-workspace/config.js \
+            apps/pulse-music-workspace/catalog-search.js \
+            apps/pulse-music-workspace/internet-archive.js \
+            apps/pulse-music-workspace/home-archive-discovery.js \
+            apps/pulse-music-workspace/app.js \
+            apps/pulse-music-workspace/playlist-store.js \
+            apps/pulse-music-workspace/tests/integrations.test.cjs
+      - name: Commit formatter output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cloudflare/pulse-discovery-gateway apps/pulse-music-workspace
+          if git diff --cached --quiet; then
+            echo "All selected files already formatted."
+          else
+            git commit -m "style(pulse): apply dprint-compatible formatting"
+            git push origin HEAD:feature/pulse-cloudflare-discovery-gateway
+          fi
