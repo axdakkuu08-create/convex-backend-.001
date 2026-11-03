@@ -64,7 +64,7 @@
         limit: String(requested),
         provider: "archive",
       });
-      const response = await fetch(gateway.replace(/\\/$/, "") + "/api/search?" + params, {
+      const response = await fetch(gateway.replace(/\/$/, "") + "/api/search?" + params, {
         headers: { Accept: "application/json" },
       });
       if (!response.ok) throw new Error("Cloud Archive discovery unavailable (" + response.status + ").");
