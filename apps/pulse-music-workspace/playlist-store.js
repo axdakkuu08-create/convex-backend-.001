@@ -123,6 +123,9 @@
         artwork: track.artwork || "",
         license: track.license || "",
         source: track.source || "Saved audio",
+        verificationStatus: track.verificationStatus || "UNAVAILABLE",
+        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        bytesTotal: Number(track.bytesTotal) || 0,
       });
     write(playlists);
     const status = $("unifiedSearchStatus");
@@ -146,6 +149,9 @@
         artwork: String(track.artwork || ""),
         license: String(track.license || ""),
         source: String(track.source || "Internet Archive"),
+        verificationStatus: track.verificationStatus || "UNAVAILABLE",
+        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        bytesTotal: Number(track.bytesTotal) || 0,
       }));
     if (!clean || !items.length) return null;
     const playlist = {
@@ -184,6 +190,9 @@
           artwork: track.artwork,
           license: track.license,
           source: track.source,
+          verificationStatus: track.verificationStatus || "UNAVAILABLE",
+          rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+          bytesTotal: Number(track.bytesTotal) || 0,
         },
       }),
     );
@@ -209,6 +218,9 @@
         url: item.pageUrl,
         license: item.license,
         source: "Internet Archive",
+        verificationStatus: item.verificationStatus || "VERIFYING",
+        rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+        bytesTotal: Number(item.fileSize) || 0,
       });
   });
   render();
