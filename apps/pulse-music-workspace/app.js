@@ -697,6 +697,9 @@ $("archiveResults").addEventListener("click", (e) => {
     archivePage: item.pageUrl,
     archiveLicense: item.license,
     source: "Internet Archive",
+    verificationStatus: item.verificationStatus || "VERIFYING",
+    rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+    bytesTotal: Number(item.fileSize) || 0,
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
