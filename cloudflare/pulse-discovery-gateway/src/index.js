@@ -88,7 +88,7 @@ export async function searchArchive({query,genre,countryName,minDurationSeconds,
         duration,
         streamUrl:"https://archive.org/download/"+encodeURIComponent(id)+"/"+encodeURIComponent(file.name),
         sourceUrl:"https://archive.org/details/"+encodeURIComponent(id),
-        license:m.licenseurl||m.rights||d.licenseurl||d.rights||"",bytesTotal:file.size,
+        license:m.licenseurl||m.rights||d.licenseurl||d.rights||"",releaseDate:m.year||m.date||d.year||d.date||"",bytesTotal:file.size,
         verificationStatus:"VERIFYING"});
     } catch { return null; }
   }));
