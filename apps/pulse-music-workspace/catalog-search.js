@@ -53,7 +53,11 @@
         ? '<button class="primary catalog-preview" type="button" data-catalog-index="' +
           index +
           '">' +
-          (item.audioUrl ? "▶ Full track" : "▶ Preview") +
+          (item.verificationStatus === "VERIFIED_FULL"
+            ? "▶ Full track"
+            : item.verificationStatus === "VERIFYING"
+              ? "▶ Check stream"
+              : "▶ Preview") +
           "</button>"
         : '<a class="catalog-open" href="' +
           esc(item.url) +
@@ -61,6 +65,9 @@
     const rights = item.audioUrl
       ? '<small class="catalog-rights">' +
         esc(item.license || "No licence statement found; check the item page") +
+        (item.rightsReviewStatus === "REVIEW_REQUIRED"
+          ? " · Rights review required; URL availability is not permission"
+          : "") +
         ' · <a href="' +
         esc(item.url) +
         '" target="_blank" rel="noopener noreferrer">Item & rights ↗</a></small>'
@@ -111,109 +118,84 @@
     status.textContent =
       "Searching popular catalogue results and full-length open audio…";
     results.innerHTML = "";
-    const country = encodeURIComponent(preferences.country || "IN");
-    const genreTerm = preferences.genre ? " " + preferences.genre : "";
-    const term = encodeURIComponent(q + genreTerm);
-    const jobs = [
-      fetch(
-        "https://itunes.apple.com/search?term=" +
-          term +
-          "&country=" +
-          country +
-          "&entity=song&limit=18&media=music&explicit=No",
+    const gateway = window.PULSE_CONFIG?.discoveryGatewayUrl;
+    if (!gateway) {
+      status.textContent = "Cloud discovery gateway is not configured yet.";
+      return;
+    }
+    const params = new URLSearchParams({
+      q,
+      country: preferences.country || "IN",
+      countryName:
+        {
+          IN: "India",
+          US: "United States",
+          GB: "United Kingdom",
+          CA: "Canada",
+          AU: "Australia",
+        }[preferences.country] || "",
+      genre: preferences.genre || "",
+      limit: "18",
+      provider: "all",
+    });
+    try {
+      const response = await fetch(
+        gateway.replace(/\/$/, "") + "/api/search?" + params,
         {
           headers: { Accept: "application/json" },
         },
-      )
-        .then((response) => {
-          if (!response.ok)
-            throw new Error("Music metadata search unavailable");
-          return response.json();
-        })
-        .then((data) =>
-          (data.results || [])
-            .map((track) => ({
-              title: track.trackName || "Untitled track",
-              artist: track.artistName || "Unknown artist",
-              album: track.collectionName || "",
-              artwork: track.artworkUrl100
-                ? track.artworkUrl100.replace("100x100bb", "300x300bb")
-                : "",
-              preview: track.previewUrl || "",
-              catalogId: track.trackId ? String(track.trackId) : "",
-              releaseDate: String(track.releaseDate || ""),
-              url:
-                track.trackViewUrl ||
-                track.collectionViewUrl ||
-                "https://music.apple.com/",
-              source: "Apple/iTunes catalogue",
-              duration: duration((track.trackTimeMillis || 0) / 1000),
-              kind: "preview",
-              genre: track.primaryGenreName || "",
-            }))
-            .filter(
-              (track) =>
-                !preferences.genre ||
-                track.genre
-                  .toLowerCase()
-                  .includes(preferences.genre.toLowerCase()),
-            )
-            .filter((track, index, all) =>
-              track.catalogId
-                ? all.findIndex(
-                    (item) => item.catalogId === track.catalogId,
-                  ) === index
-                : true,
-            )
-            .sort((a, b) => {
-              const dateA = Date.parse(a.releaseDate || "");
-              const dateB = Date.parse(b.releaseDate || "");
-              const safeA = Number.isFinite(dateA) ? dateA : 0;
-              const safeB = Number.isFinite(dateB) ? dateB : 0;
-              return safeB - safeA || a.title.localeCompare(b.title);
-            }),
-        ),
-      window.PulseArchive.search(q, 24, {
-        genre: preferences.genre,
-        countryName: preferences.country === "IN" ? "India" : "",
-      }).then((items) =>
-        items.map((item) => ({
-          title: item.title,
-          artist: item.artist,
-          album: item.year || "",
-          artwork: "",
-          preview: "",
-          audioUrl: item.audioUrl,
-          url: item.pageUrl,
-          license: item.license,
-          duration: duration(item.durationSeconds),
-          source: "Internet Archive · direct open audio",
-          kind: "archive",
-        })),
-      ),
-    ];
-    const settled = await Promise.allSettled(jobs);
-    if (current !== token) return;
-    const found = settled.flatMap((result) =>
-      result.status === "fulfilled" ? result.value : [],
-    );
-    if (!found.length) {
+      );
+      if (!response.ok)
+        throw new Error(
+          "Discovery gateway unavailable (" + response.status + ").",
+        );
+      const payload = await response.json();
+      if (current !== token) return;
+      const found = (payload.tracks || []).map((track) => ({
+        id: track.id,
+        catalogId: track.catalogId || track.id,
+        title: track.title,
+        artist: track.artist,
+        album: track.album,
+        artwork: track.artwork,
+        preview: track.previewUrl,
+        audioUrl: track.streamUrl,
+        url: track.sourceUrl,
+        license: track.license,
+        duration: duration(track.duration),
+        source:
+          track.provider === "itunes"
+            ? "Apple/iTunes catalogue"
+            : "Internet Archive · direct open audio",
+        kind: track.provider,
+        genre: track.genre,
+        verificationStatus: track.verificationStatus,
+        rightsReviewStatus: track.rightsReviewStatus,
+        bytesTotal: track.bytesTotal,
+      }));
+      if (!found.length) {
+        status.textContent =
+          "No matching tracks were found, or the catalogues are temporarily unavailable. Try a broader title or change the genre.";
+        return;
+      }
+      window.PulseCatalogResults = found;
+      results.innerHTML = found.map(render).join("");
+      const failed = Object.values(payload.providerStatus || {}).some(
+        (value) => value !== "ok",
+      );
       status.textContent =
-        "No matching tracks were found, or the catalogues are temporarily unavailable. Try a broader title or change the genre.";
-      return;
+        found.length +
+        " results · " +
+        (failed ? "Some catalogues did not respond. " : "Search completed. ") +
+        "Cache: " +
+        (payload.cache || "MISS") +
+        ". " +
+        (payload.licensingNotice || "Review source rights separately.");
+    } catch (error) {
+      if (current !== token) return;
+      status.textContent =
+        error?.message || "Music discovery is temporarily unavailable.";
     }
-    window.PulseCatalogResults = found;
-    results.innerHTML = found.map(render).join("");
-    const failed = settled.filter(
-      (result) => result.status === "rejected",
-    ).length;
-    status.textContent =
-      found.length +
-      " results · " +
-      (failed
-        ? "Some catalogues did not respond."
-        : "Search completed across metadata and open-audio catalogues.") +
-      " Commercial previews remain provider-limited; Archive audio is played directly when available.";
   }
 
   form.addEventListener("submit", (event) => {
@@ -257,6 +239,9 @@
             license: item.license || "",
             duration: item.duration || "",
             catalogId: item.catalogId || item.id || "",
+            verificationStatus: item.verificationStatus || "UNAVAILABLE",
+            rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+            bytesTotal: item.bytesTotal || 0,
           },
         }),
       );
@@ -278,6 +263,9 @@
             license: item.license || "",
             source: item.source,
             catalogId: item.catalogId || item.id || "",
+            verificationStatus: item.verificationStatus || "UNAVAILABLE",
+            rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+            bytesTotal: item.bytesTotal || 0,
           },
         }),
       );

@@ -172,15 +172,31 @@ test("Internet Archive UI is included without replacing existing providers or cl
   assert.match(html, /sourceFrame/);
 });
 
-test("regional catalogue search excludes explicit content and sorts invalid dates safely", () => {
+test("Cloudflare catalogue adapters enforce clean iTunes previews and deduplicate normalized tracks", () => {
   const catalog = fs.readFileSync(
     path.join(__dirname, "..", "catalog-search.js"),
     "utf8",
   );
-  assert.match(catalog, /explicit=No/);
-  assert.match(catalog, /catalogId: track\.trackId/);
-  assert.match(catalog, /Number\.isFinite\(dateA\)/);
-  assert.match(catalog, /item\.catalogId === track\.catalogId/);
+  const worker = fs.readFileSync(
+    path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "cloudflare",
+      "pulse-discovery-gateway",
+      "src",
+      "index.js",
+    ),
+    "utf8",
+  );
+  assert.match(catalog, /discoveryGatewayUrl/);
+  assert.match(catalog, /verificationStatus/);
+  assert.match(worker, /explicit:\s*"No"/);
+  assert.match(worker, /dedupeTracks/);
+  assert.match(worker, /PREVIEW_ONLY/);
+  assert.match(worker, /VERIFYING/);
+  assert.match(worker, /REVIEW_REQUIRED/);
 });
 
 test("local playlists deduplicate catalogue IDs and can save generated mixes", () => {

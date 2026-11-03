@@ -697,6 +697,9 @@ $("archiveResults").addEventListener("click", (e) => {
     archivePage: item.pageUrl,
     archiveLicense: item.license,
     source: "Internet Archive",
+    verificationStatus: item.verificationStatus || "VERIFYING",
+    rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+    bytesTotal: Number(item.fileSize) || 0,
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -726,6 +729,9 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
       ? item.url || ""
       : "",
     archiveLicense: item.license || "",
+    verificationStatus: item.verificationStatus || "UNAVAILABLE",
+    rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+    bytesTotal: Number(item.bytesTotal) || 0,
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -738,7 +744,9 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   $("audioStatus").textContent =
     item.source === "Apple/iTunes catalogue"
       ? "Playing the available catalogue preview. Open the provider page for full-track options."
-      : "Playing open-audio catalogue item. Check the source page for rights and licence details.";
+      : "Archive stream status: " +
+        track.verificationStatus +
+        ". Rights review is separate; check the source page and licence.";
   toast("Loading " + track.title);
 });
 

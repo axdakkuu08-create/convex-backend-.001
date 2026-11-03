@@ -78,6 +78,10 @@
                   source: "Internet Archive",
                   catalogId: "archive:" + track.id,
                   duration: duration(track.durationSeconds),
+                  verificationStatus: track.verificationStatus || "VERIFYING",
+                  rightsReviewStatus:
+                    track.rightsReviewStatus || "REVIEW_REQUIRED",
+                  bytesTotal: Number(track.fileSize) || 0,
                 },
               }),
             );
@@ -97,6 +101,10 @@
                   license: track.license || "",
                   source: "Internet Archive",
                   catalogId: "archive:" + track.id,
+                  verificationStatus: track.verificationStatus || "VERIFYING",
+                  rightsReviewStatus:
+                    track.rightsReviewStatus || "REVIEW_REQUIRED",
+                  bytesTotal: Number(track.fileSize) || 0,
                 },
               }),
             );
@@ -200,6 +208,9 @@
           url: item.pageUrl,
           license: item.license || "",
           source: "Internet Archive",
+          verificationStatus: item.verificationStatus || "VERIFYING",
+          rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+          bytesTotal: Number(item.fileSize) || 0,
         })),
       );
       if (!playlist) {
