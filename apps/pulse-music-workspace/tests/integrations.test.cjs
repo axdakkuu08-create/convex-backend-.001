@@ -192,7 +192,7 @@ test("Cloudflare catalogue adapters enforce clean iTunes previews and deduplicat
   );
   assert.match(catalog, /discoveryGatewayUrl/);
   assert.match(catalog, /verificationStatus/);
-  assert.match(worker, /explicit:"No"/);
+  assert.match(worker, /explicit:\s*"No"/);
   assert.match(worker, /dedupeTracks/);
   assert.match(worker, /PREVIEW_ONLY/);
   assert.match(worker, /VERIFYING/);
