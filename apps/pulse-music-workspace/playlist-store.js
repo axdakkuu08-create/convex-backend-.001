@@ -163,6 +163,42 @@
     write([...read(), playlist]);
     return playlist;
   }
+  function createOrUpdateFromTracks(name, tracks) {
+    const clean = String(name || "Internet Archive Mix").trim().slice(0, 60);
+    const items = (Array.isArray(tracks) ? tracks : [])
+      .filter((track) => track && track.src)
+      .slice(0, 24)
+      .map((track) => ({
+        title: String(track.title || "Untitled track"),
+        artist: String(track.artist || "Unknown artist"),
+        src: String(track.src),
+        catalogId: String(track.catalogId || ""),
+        url: String(track.url || ""),
+        artwork: String(track.artwork || ""),
+        license: String(track.license || ""),
+        source: String(track.source || "Internet Archive"),
+        verificationStatus: track.verificationStatus || "VERIFYING",
+        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        bytesTotal: Number(track.bytesTotal) || 0,
+      }));
+    if (!clean || !items.length) return null;
+    const playlists = read();
+    const existing = playlists.find((item) => item.name === clean);
+    const playlist = existing
+      ? { ...existing, tracks: items, updatedAt: Date.now() }
+      : {
+          id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+          name: clean,
+          tracks: items,
+          createdAt: Date.now(),
+        };
+    write(existing
+      ? playlists.map((item) => item.id === existing.id ? playlist : item)
+      : [...playlists, playlist]);
+    render();
+    return playlist;
+  }
+
   function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
     if (!playlist || !Array.isArray(playlist.tracks) || !playlist.tracks.length) {
@@ -210,6 +246,7 @@
     read,
     create,
     createFromTracks,
+    createOrUpdateFromTracks,
     render,
     play: playFromPlaylist,
   };
