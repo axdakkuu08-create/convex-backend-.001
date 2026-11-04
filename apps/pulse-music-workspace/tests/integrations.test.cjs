@@ -319,7 +319,7 @@ test("multi-track playlist preserves saved order and advances to the next track"
   assert.equal(playback.nextIndex(0, 3), 1);
   assert.equal(playback.nextIndex(1, 3), 2);
   assert.equal(playback.nextIndex(2, 3), null);
-  assert.match(newApp, /audio\.onended = .*next\(\)/);
+  assert.match(source, /audio\.onended = .*next\(\)/);
 });
 
 test("playlist play action starts the full saved queue rather than prompting for a track", () => {
