@@ -8,3 +8,11 @@
 @media(max-width:700px){.pulse-charts{margin:17px 14px 24px;padding:16px;border-radius:20px}.charts-heading{align-items:flex-start}.charts-live-dot{margin-top:3px}.chart-track{grid-template-columns:20px 43px minmax(0,1fr);gap:8px;padding:8px 5px}.chart-cover{width:43px;height:43px;border-radius:10px}.chart-metric{grid-column:3;grid-row:2;text-align:left;margin-top:-5px}.chart-actions{grid-column:3;grid-row:1;justify-self:end}.chart-actions button,.chart-actions a{min-height:29px;padding:0 8px}.charts-source-row{align-items:flex-start;flex-wrap:wrap}.charts-footer-links{align-items:flex-start;flex-direction:column;gap:7px}}
 @media(prefers-reduced-motion:reduce){.chart-track{transition:none}.chart-track:hover{transform:none}}
 main > .pulse-charts{display:block!important}
+
+/* Extend the same glass language to the Archive shelf and floating player. */
+.home-archive-shelf{border-color:rgba(192,132,252,.18);background:radial-gradient(ellipse at 8% 0%,rgba(139,92,246,.16),transparent 42%),linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.025));box-shadow:0 14px 42px rgba(0,0,0,.24),0 0 26px rgba(139,92,246,.07);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%)}
+.home-archive-mix{border-color:rgba(192,132,252,.35);background:linear-gradient(115deg,rgba(139,92,246,.32),rgba(217,70,239,.22));box-shadow:0 0 20px rgba(139,92,246,.13)}
+.home-archive-result{padding:12px;border:1px solid rgba(255,255,255,.075);border-radius:15px;background:rgba(255,255,255,.025)}
+.home-archive-actions button{border-color:rgba(192,132,252,.2);background:rgba(139,92,246,.1)}
+.player{border:1px solid rgba(255,255,255,.14);background:rgba(11,10,18,.78);box-shadow:0 14px 46px rgba(0,0,0,.42),0 0 28px rgba(139,92,246,.08);backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%)}
+.player #play,.player .play{border:0;background:linear-gradient(135deg,#8b5cf6,#d946ef);box-shadow:0 0 24px rgba(139,92,246,.28)}
