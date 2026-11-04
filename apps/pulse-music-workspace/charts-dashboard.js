@@ -20,13 +20,16 @@
   $("appleChartLink").href="https://music.apple.com/"+code+"/";
  }
  async function loadApple(){
-  const code=country();status(world,"Loading the official Apple Music chart…");
+  const code=country();status(world,"Loading the latest verified Apple Music chart snapshot…");
   try{
-   const url="/api/apple-charts?country="+encodeURIComponent(code);
-   const response=await fetch(url,{headers:{Accept:"application/json"}});
-   if(!response.ok)throw new Error("Apple chart feed returned HTTP "+response.status);
-   const payload=await response.json();renderApple(payload.feed?.results||[],code);
-  }catch(error){status(world,"Live chart data could not be loaded in this browser. Open the official chart source instead. "+(error?.message||""),true);$("appleChartMeta").textContent="Official Apple Music public chart feed"}
+   if(code!=="in")throw new Error("The current source snapshot is for India. Use the official chart link for other countries.");
+   const response=await fetch("/apple-charts-in.json",{headers:{Accept:"application/json"}});
+   if(!response.ok)throw new Error("Apple chart snapshot unavailable (HTTP "+response.status+").");
+   const payload=await response.json();renderApple(payload.results||[],code);
+   const updated=new Date(payload.updated);
+   $("appleChartMeta").textContent="Apple public chart snapshot · India · updated "+updated.toLocaleString("en-IN",{timeZone:"Asia/Kolkata"});
+   $("appleChartLink").href="https://music.apple.com/in/new";
+  }catch(error){status(world,error?.message||"Apple chart data unavailable.",true);$("appleChartMeta").textContent="Official Apple Music chart source"}
  }
  async function archiveDocs(period){
   const params=new URLSearchParams();params.set("q",period==="week"?"mediatype:audio AND subject:music AND week:[1 TO *]":"mediatype:audio AND subject:music AND downloads:[1 TO *]");
