@@ -19,10 +19,15 @@ main > .pulse-charts{display:block!important}
 
 /* Mobile chart visibility override: charts live outside .mobile-home in the shared main column. */
 @media(max-width:700px){
- main > section.pulse-charts{display:block!important;width:auto;max-width:none;min-width:0;margin:18px 14px 24px;padding:16px;box-sizing:border-box}
+ /* Match and exceed the mobile-home stylesheet's !important hide selector. */
+ main > section.pulse-charts:not(.mobile-home):not(.sourcehub){display:block!important;width:auto;max-width:none;min-width:0;margin:18px 14px 24px;padding:16px;box-sizing:border-box}
  .charts-source-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
  .charts-source-actions button{min-height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(139,92,246,.16);color:#fff;font-size:10px}
  .charts-source-actions button:disabled{opacity:.6}
+ .chart-track{grid-template-columns:20px 43px minmax(0,1fr);grid-auto-rows:auto;align-items:center}
+ .chart-copy{grid-column:3;grid-row:1;min-width:0}
+ .chart-metric{grid-column:3;grid-row:2;justify-self:start;margin:0}
+ .chart-actions{grid-column:3;grid-row:3;justify-self:start;display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
 }
 .charts-source-actions{display:flex;align-items:center;gap:12px}
 .charts-source-actions button{min-height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(139,92,246,.12);color:#fff;font-size:10px;cursor:pointer}
