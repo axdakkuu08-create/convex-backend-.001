@@ -22,7 +22,7 @@
  async function loadApple(){
   const code=country();status(world,"Loading the official Apple Music chart…");
   try{
-   const url="https://rss.applemarketingtools.com/api/v2/"+encodeURIComponent(code)+"/music/most-played/25/songs.json";
+   const url="/api/apple-charts?country="+encodeURIComponent(code);
    const response=await fetch(url,{headers:{Accept:"application/json"}});
    if(!response.ok)throw new Error("Apple chart feed returned HTTP "+response.status);
    const payload=await response.json();renderApple(payload.feed?.results||[],code);
