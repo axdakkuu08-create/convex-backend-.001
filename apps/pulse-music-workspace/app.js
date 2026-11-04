@@ -1,65 +1,4 @@
-const tracks = [
-  {
-    id: 1,
-    title: "Quiet Signals",
-    artist: "Pulse Sessions",
-    mood: "Focus",
-    time: "5:42",
-    cover: "violet",
-    symbol: "✳",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-  },
-  {
-    id: 2,
-    title: "Blue Hour",
-    artist: "Northbound",
-    mood: "Ambient",
-    time: "6:18",
-    cover: "blue",
-    symbol: "◌",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-  },
-  {
-    id: 3,
-    title: "Little By Little",
-    artist: "Sunday Club",
-    mood: "Energy",
-    time: "4:36",
-    cover: "orange",
-    symbol: "ϟ",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-  },
-  {
-    id: 4,
-    title: "Soft Geometry",
-    artist: "Mira Vale",
-    mood: "Focus",
-    time: "5:09",
-    cover: "green",
-    symbol: "◈",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-  },
-  {
-    id: 5,
-    title: "Afterimage",
-    artist: "Low Season",
-    mood: "Night",
-    time: "4:58",
-    cover: "pink",
-    symbol: "☾",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-  },
-  {
-    id: 6,
-    title: "Open Water",
-    artist: "Still Forms",
-    mood: "Ambient",
-    time: "6:01",
-    cover: "blue",
-    symbol: "≈",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-  },
-];
+const tracks = [];
 const $ = (id) => document.getElementById(id),
   audio = $("audio");
 let index = 0,
@@ -120,11 +59,11 @@ function render() {
     .map(
       (t, i) =>
         '<div class="row ' +
-        (tracks[index].id === t.id ? "playing" : "") +
+        (tracks[index] && tracks[index].id === t.id ? "playing" : "") +
         '" data-id="' +
         t.id +
         '"><div class="num"><button class="rowplay" aria-label="Play">' +
-        (tracks[index].id === t.id && playing
+        (tracks[index] && tracks[index].id === t.id && playing
           ? "Ⅱ"
           : String(i + 1).padStart(2, "0")) +
         '</button></div><div class="info"><div class="cover ' +
@@ -144,7 +83,7 @@ function render() {
               t.source === "Apple/iTunes catalogue"
                 ? "30-SEC PREVIEW"
                 : String(t.source).includes("Internet Archive")
-                  ? "INTERNET ARCHIVE · AUDIO"
+                  ? "OPEN AUDIO"
                   : t.source,
             ) +
             "</small>"
@@ -275,17 +214,35 @@ function loadMusicEmbed(raw) {
   }
 }
 function setTrack(i, autoplay = false) {
+  if (!tracks.length) {
+    index = 0;
+    audio.removeAttribute("src");
+    audio.load();
+    $("nowTitle").textContent = "Choose a song";
+    $("nowArtist").textContent = "Search or recognise a song";
+    $("cover").className = "cover violet";
+    $("cover").style.backgroundImage = "";
+    $("cover").textContent = "♫";
+    $("audioStatus").textContent = "Ready when you are · search for a single";
+    $("duration").textContent = "0:00";
+    $("time").textContent = "0:00";
+    $("progress").value = 0;
+    $("like").disabled = true;
+    render();
+    return;
+  }
+  $("like").disabled = false;
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
   audio.src = t.src;
   audio.load();
   $("audioStatus").textContent = t.archivePage
-    ? "Internet Archive audio · verify item rights before reuse. Open the item page for details."
+    ? "Open-audio source · rights review required; availability is not permission."
     : t.localFile
       ? "Playing a file selected from this device."
       : t.customUrl
         ? "Using your direct audio link."
-        : "Demo preview · internet connection required.";
+        : "Ready to play.";
   $("nowTitle").textContent = t.title;
   $("nowArtist").textContent = t.artist;
   $("cover").className = "cover " + t.cover;
@@ -703,7 +660,7 @@ $("archiveResults").addEventListener("click", (e) => {
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
-  toast("Playing archive audio · next track stays in sequence");
+  toast("Playing selected single · next track stays in sequence");
 });
 
 window.addEventListener("pulse:play-catalog-track", (event) => {
@@ -744,7 +701,7 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   $("audioStatus").textContent =
     item.source === "Apple/iTunes catalogue"
       ? "Playing the available catalogue preview. Open the provider page for full-track options."
-      : "Archive stream status: " +
+      : "Open-audio status: " +
         track.verificationStatus +
         ". Rights review is separate; check the source page and licence.";
   toast("Loading " + track.title);

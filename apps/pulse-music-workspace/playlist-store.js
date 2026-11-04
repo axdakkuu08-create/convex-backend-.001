@@ -9,7 +9,7 @@
   function read() {
     try {
       const value = JSON.parse(localStorage.getItem(KEY) || "[]");
-      return Array.isArray(value) ? value : [];
+      return Array.isArray(value) ? value.map((item) => ({ ...item, name: /internet archive/i.test(String(item.name || "")) ? "Singles Mix" : item.name })) : [];
     } catch (_) {
       return [];
     }
@@ -134,7 +134,7 @@
         (duplicate ? "Already saved in " : "Added to ") + target.name + ".";
   }
   function createFromTracks(name, tracks) {
-    const clean = String(name || "Archive Mix")
+    const clean = String(name || "Singles Mix")
       .trim()
       .slice(0, 60);
     const items = (Array.isArray(tracks) ? tracks : [])
@@ -148,7 +148,7 @@
         url: String(track.url || ""),
         artwork: String(track.artwork || ""),
         license: String(track.license || ""),
-        source: String(track.source || "Internet Archive"),
+        source: String(track.source || "Open audio catalogue"),
         verificationStatus: track.verificationStatus || "UNAVAILABLE",
         rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
         bytesTotal: Number(track.bytesTotal) || 0,
@@ -164,7 +164,7 @@
     return playlist;
   }
   function upsertFromTracks(name, tracks) {
-    const clean = String(name || "Internet Archive Mix").trim().slice(0, 60);
+    const clean = String(name || "Singles Mix").trim().slice(0, 60);
     const items = (Array.isArray(tracks) ? tracks : []).filter((track) => track && track.src).slice(0, 24).map((track) => ({
       title: String(track.title || "Untitled track"), artist: String(track.artist || "Unknown artist"),
       src: String(track.src), catalogId: String(track.catalogId || ""), url: String(track.url || ""),
@@ -238,7 +238,7 @@
         src: item.audioUrl,
         url: item.pageUrl,
         license: item.license,
-        source: "Internet Archive",
+        source: "Open audio catalogue",
         verificationStatus: item.verificationStatus || "VERIFYING",
         rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
         bytesTotal: Number(item.fileSize) || 0,
