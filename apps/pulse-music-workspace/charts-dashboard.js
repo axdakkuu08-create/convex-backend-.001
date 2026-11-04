@@ -29,7 +29,7 @@
   }catch(error){status(world,"Live chart data could not be loaded in this browser. Open the official chart source instead. "+(error?.message||""),true);$("appleChartMeta").textContent="Official Apple Music public chart feed"}
  }
  async function archiveDocs(period){
-  const params=new URLSearchParams();params.set("q",period==="week"?"mediatype:audio AND week:[1 TO *]":"mediatype:audio AND downloads:[1 TO *]");
+  const params=new URLSearchParams();params.set("q",period==="week"?"mediatype:audio AND subject:music AND week:[1 TO *]":"mediatype:audio AND subject:music AND downloads:[1 TO *]");
   ["identifier","title","creator","year","downloads","week","month"].forEach(f=>params.append("fl[]",f));
   params.set("rows","18");params.set("page","1");params.set("output","json");params.append("sort[]",period==="week"?"week desc":"downloads desc");
   const response=await fetch("https://archive.org/advancedsearch.php?"+params.toString(),{headers:{Accept:"application/json"}});
