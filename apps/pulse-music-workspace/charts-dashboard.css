@@ -16,3 +16,14 @@ main > .pulse-charts{display:block!important}
 .home-archive-actions button{border-color:rgba(192,132,252,.2);background:rgba(139,92,246,.1)}
 .player{border:1px solid rgba(255,255,255,.14);background:rgba(11,10,18,.78);box-shadow:0 14px 46px rgba(0,0,0,.42),0 0 28px rgba(139,92,246,.08);backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%)}
 .player #play,.player .play{border:0;background:linear-gradient(135deg,#8b5cf6,#d946ef);box-shadow:0 0 24px rgba(139,92,246,.28)}
+
+/* Mobile chart visibility override: charts live outside .mobile-home in the shared main column. */
+@media(max-width:700px){
+ main > section.pulse-charts{display:block!important;width:auto;max-width:none;min-width:0;margin:18px 14px 24px;padding:16px;box-sizing:border-box}
+ .charts-source-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+ .charts-source-actions button{min-height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(139,92,246,.16);color:#fff;font-size:10px}
+ .charts-source-actions button:disabled{opacity:.6}
+}
+.charts-source-actions{display:flex;align-items:center;gap:12px}
+.charts-source-actions button{min-height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(139,92,246,.12);color:#fff;font-size:10px;cursor:pointer}
+.charts-source-actions button:disabled{opacity:.6;cursor:wait}
