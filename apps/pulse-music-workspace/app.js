@@ -260,10 +260,7 @@ async function play() {
     await audio.play();
     playing = true;
     $("audioStatus").textContent = tracks[index].archivePage
-      ? "Playing · " +
-        tracks[index].title +
-        " · Rights: " +
-        (tracks[index].archiveLicense || "check the Archive item page")
+      ? "Playing · " + tracks[index].title + " · rights status: " + (tracks[index].verificationStatus || "VERIFYING")
       : "Playing · " + tracks[index].title;
     $("play").textContent = "Ⅱ";
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
@@ -593,7 +590,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
   const results = $("archiveResults");
   const query = $("archiveQuery").value.trim();
   status.textContent =
-    "Searching Internet Archive and checking for playable audio files…";
+    "Searching open audio and checking available files…";
   results.innerHTML = "";
   try {
     archiveItems = await window.PulseArchive.search(query, 24);
@@ -605,7 +602,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
     }
     status.textContent =
       archiveItems.length +
-      " playable archive item(s) found. Check each item's rights before reuse.";
+      " playable audio item(s) found. Check each item's rights before reuse.";
     results.innerHTML = archiveItems
       .map(
         (item, i) =>
