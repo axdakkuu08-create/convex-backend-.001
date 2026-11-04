@@ -245,3 +245,84 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
   assert.match(html, /id="queue"/);
   assert.match(html, /id="queuePanel"/);
 });
+
+
+const playlistPlaybackSource = fs.readFileSync(
+  path.join(__dirname, "..", "playlist-playback.js"),
+  "utf8",
+);
+const playlistPlaybackEvents = [];
+class PlaylistPlaybackCustomEvent {
+  constructor(type, options) {
+    this.type = type;
+    this.detail = options?.detail;
+  }
+}
+const playlistPlaybackSandbox = {
+  window: {
+    dispatchEvent(event) {
+      playlistPlaybackEvents.push(event);
+    },
+  },
+  CustomEvent: PlaylistPlaybackCustomEvent,
+};
+vm.runInNewContext(playlistPlaybackSource, playlistPlaybackSandbox);
+
+test("playlist queue rejects empty and non-playable playlists", () => {
+  const playback = playlistPlaybackSandbox.window.PulsePlaylistPlayback;
+  assert.equal(playback.start({ name: "Empty", tracks: [] }), false);
+  assert.equal(
+    playback.start({
+      name: "Unsupported",
+      tracks: [{ title: "Page link", src: "javascript:alert(1)" }],
+    }),
+    false,
+  );
+  assert.equal(playlistPlaybackEvents.length, 0);
+  assert.equal(playback.nextIndex(0, 0), null);
+});
+
+test("one-track playlist starts once and stops at the end unless repeat is enabled", () => {
+  const playback = playlistPlaybackSandbox.window.PulsePlaylistPlayback;
+  assert.equal(
+    playback.start({
+      name: "Single",
+      tracks: [{ title: "Only track", src: "https://audio.example/one.mp3" }],
+    }),
+    true,
+  );
+  const event = playlistPlaybackEvents.at(-1);
+  assert.equal(event.type, "pulse:play-playlist");
+  assert.equal(event.detail.tracks.length, 1);
+  assert.equal(playback.nextIndex(0, 1), null);
+  assert.equal(playback.nextIndex(0, 1, { repeat: true }), 0);
+});
+
+test("multi-track playlist preserves saved order and advances to the next track", () => {
+  const playback = playlistPlaybackSandbox.window.PulsePlaylistPlayback;
+  assert.equal(
+    playback.start({
+      name: "Ordered",
+      tracks: [
+        { title: "First", src: "https://audio.example/1.mp3" },
+        { title: "Second", src: "https://audio.example/2.mp3" },
+        { title: "Third", src: "https://audio.example/3.mp3" },
+      ],
+    }),
+    true,
+  );
+  const queue = playlistPlaybackEvents.at(-1).detail.tracks;
+  assert.deepEqual(
+    Array.from(queue, (track) => track.title),
+    ["First", "Second", "Third"],
+  );
+  assert.equal(playback.nextIndex(0, 3), 1);
+  assert.equal(playback.nextIndex(1, 3), 2);
+  assert.equal(playback.nextIndex(2, 3), null);
+  assert.match(source, /audio\.onended = .*next\(\)/);
+});
+
+test("playlist play action starts the full saved queue rather than prompting for a track", () => {
+  assert.match(newStore, /PulsePlaylistPlayback\?\.start\?\.\(playlist\)/);
+  assert.doesNotMatch(newStore, /Choose a song number to play/);
+});

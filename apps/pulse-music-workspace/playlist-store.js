@@ -163,39 +163,57 @@
     write([...read(), playlist]);
     return playlist;
   }
+  function createOrUpdateFromTracks(name, tracks) {
+    const clean = String(name || "Internet Archive Mix").trim().slice(0, 60);
+    const items = (Array.isArray(tracks) ? tracks : [])
+      .filter((track) => track && track.src)
+      .slice(0, 24)
+      .map((track) => ({
+        title: String(track.title || "Untitled track"),
+        artist: String(track.artist || "Unknown artist"),
+        src: String(track.src),
+        catalogId: String(track.catalogId || ""),
+        url: String(track.url || ""),
+        artwork: String(track.artwork || ""),
+        license: String(track.license || ""),
+        source: String(track.source || "Internet Archive"),
+        verificationStatus: track.verificationStatus || "VERIFYING",
+        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        bytesTotal: Number(track.bytesTotal) || 0,
+      }));
+    if (!clean || !items.length) return null;
+    const playlists = read();
+    const existing = playlists.find((item) => item.name === clean);
+    const playlist = existing
+      ? { ...existing, tracks: items, updatedAt: Date.now() }
+      : {
+          id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+          name: clean,
+          tracks: items,
+          createdAt: Date.now(),
+        };
+    write(existing
+      ? playlists.map((item) => item.id === existing.id ? playlist : item)
+      : [...playlists, playlist]);
+    render();
+    return playlist;
+  }
+
   function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
-    if (!playlist || !playlist.tracks.length) {
+    if (!playlist || !Array.isArray(playlist.tracks) || !playlist.tracks.length) {
       alert("This playlist is empty. Add songs from search results.");
       return;
     }
-    const choices = playlist.tracks
-      .map(
-        (track, index) => index + 1 + ". " + track.title + " — " + track.artist,
-      )
-      .join("\n");
-    const answer = prompt(
-      "Choose a song number to play from " + playlist.name + ":\n" + choices,
-    );
-    const index = Number(answer) - 1;
-    const track = playlist.tracks[index];
-    if (!track) return;
-    window.dispatchEvent(
-      new CustomEvent("pulse:play-catalog-track", {
-        detail: {
-          title: track.title,
-          artist: track.artist,
-          src: track.src,
-          url: track.url,
-          artwork: track.artwork,
-          license: track.license,
-          source: track.source,
-          verificationStatus: track.verificationStatus || "UNAVAILABLE",
-          rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
-          bytesTotal: Number(track.bytesTotal) || 0,
-        },
-      }),
-    );
+    const started = window.PulsePlaylistPlayback?.start?.(playlist);
+    if (!started) {
+      alert("This playlist has no playable tracks yet.");
+      return;
+    }
+    const status = $("unifiedSearchStatus");
+    if (status)
+      status.textContent =
+        'Playing all tracks in "' + playlist.name + '" in saved order.';
   }
 
   createButton.onclick = () => {
@@ -228,6 +246,7 @@
     read,
     create,
     createFromTracks,
+    createOrUpdateFromTracks,
     render,
     play: playFromPlaylist,
   };
