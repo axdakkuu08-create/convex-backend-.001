@@ -11,6 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="home-refresh.css" />
+    <link rel="stylesheet" href="charts-dashboard.css" />
   </head>
   <body>
     <div class="layout">
@@ -116,6 +117,35 @@
               reuse.
             </p>
             <div id="homeArchiveResults" class="home-archive-results"></div>
+          </section>
+          <section class="pulse-charts glass-panel" id="pulseCharts" aria-labelledby="pulseChartsHeading">
+            <div class="charts-heading">
+              <div><p class="charts-kicker">LIVE RANKINGS · SOURCE-LINKED</p><h2 id="pulseChartsHeading">Charts &amp; discoveries</h2><p class="charts-subtitle">Real chart rankings alongside Internet Archive listening trends.</p></div>
+              <span class="charts-live-dot">LIVE DATA</span>
+            </div>
+            <div class="charts-tabs" role="tablist" aria-label="Chart categories">
+              <button class="charts-tab active" type="button" data-chart-tab="world" role="tab" aria-selected="true">World charts</button>
+              <button class="charts-tab" type="button" data-chart-tab="archive" role="tab" aria-selected="false">Archive popularity</button>
+            </div>
+            <section class="charts-pane" id="worldChartPane" aria-label="Real-world music charts">
+              <div class="charts-source-row">
+                <div><strong>Apple Music · Top Songs</strong><small id="appleChartMeta">Country chart · loading…</small></div>
+                <a href="https://music.apple.com/in/new" target="_blank" rel="noopener noreferrer" id="appleChartLink">Open chart ↗</a>
+              </div>
+              <div class="charts-list" id="appleChartList" aria-live="polite"><p class="charts-loading">Loading the official Apple Music chart…</p></div>
+              <div class="charts-footer-links"><a href="https://www.billboard.com/charts/hot-100/" target="_blank" rel="noopener noreferrer">Billboard Hot 100 ↗</a><span>Rankings are supplied by chart publishers; Pulse does not invent positions or play counts.</span></div>
+            </section>
+            <section class="charts-pane" id="archiveChartPane" aria-label="Internet Archive popularity rankings" hidden>
+              <div class="charts-source-row">
+                <div><strong>Internet Archive · Audio</strong><small id="archiveChartMeta">Ranked by actual Archive download counts</small></div>
+                <div class="charts-tabs charts-tabs-small" role="tablist" aria-label="Archive ranking period">
+                  <button class="charts-tab active" type="button" data-archive-period="downloads" aria-pressed="true">All time</button>
+                  <button class="charts-tab" type="button" data-archive-period="week" aria-pressed="false">This week</button>
+                </div>
+              </div>
+              <div class="charts-list" id="archiveChartList" aria-live="polite"><p class="charts-loading">Loading Archive popularity rankings…</p></div>
+              <p class="charts-rights-note">Rankings use download metrics returned by Internet Archive. Audio availability does not establish reuse rights; recordings remain marked for review.</p>
+            </section>
           </section>
           <section
             class="home-library-section"
@@ -549,5 +579,6 @@
     <script src="home-refresh.js"></script>
     <script src="playlist-store.js"></script>
     <script src="home-archive-discovery.js"></script>
+    <script src="charts-dashboard.js"></script>
   </body>
 </html>
