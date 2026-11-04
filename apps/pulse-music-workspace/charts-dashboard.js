@@ -1,7 +1,7 @@
 /* Source-attributed music charts: Apple's public RSS feed and Internet Archive metrics. */
 (() => {
  const $=id=>document.getElementById(id), world=$("appleChartList"), archive=$("archiveChartList");
- if(!world||!archive)return;
+ if(!world)return;
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const prefs=()=>{try{return JSON.parse(localStorage.getItem("pulse.prefs")||"{}")}catch(_){return{}}};
  const country=()=>String(prefs().country||"IN").toLowerCase().slice(0,2);

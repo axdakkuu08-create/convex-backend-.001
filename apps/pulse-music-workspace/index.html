@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="home-refresh.css" />
     <link rel="stylesheet" href="charts-dashboard.css" />
+    <link rel="stylesheet" href="pulse-glass-polish.css" />
   </head>
   <body>
     <div class="layout">
@@ -80,7 +81,7 @@
             <button class="genre-chip" data-home-mood="Energy">Energy</button>
           </div>
           <section
-            class="home-archive-shelf"
+            class="home-archive-shelf" hidden
             id="homeArchiveShelf"
             aria-labelledby="homeArchiveHeading"
           >
@@ -167,7 +168,7 @@
             <h2>Speed dial</h2>
             <button id="homeShuffle" aria-label="Shuffle music">⤨</button>
           </div>
-          <div class="speed-list">
+          <div class="speed-list" hidden>
             <button class="speed-track" data-home-track="3">
               <span class="speed-cover cover-orange">ϟ</span
               ><span class="speed-copy"
@@ -199,12 +200,12 @@
         </section>
           <section class="pulse-charts glass-panel" id="pulseCharts" aria-labelledby="pulseChartsHeading">
             <div class="charts-heading">
-              <div><p class="charts-kicker">LIVE RANKINGS · SOURCE-LINKED</p><h2 id="pulseChartsHeading">Charts &amp; discoveries</h2><p class="charts-subtitle">Real chart rankings alongside Internet Archive listening trends.</p></div>
+              <div><p class="charts-kicker">LIVE RANKINGS · SOURCE-LINKED</p><h2 id="pulseChartsHeading">Top Singles</h2><p class="charts-subtitle">Genuine chart rankings, refreshed from the selected country.</p></div>
               <span class="charts-live-dot">AUTO-REFRESH · 15 MIN</span>
             </div>
             <div class="charts-tabs" role="tablist" aria-label="Chart categories">
               <button class="charts-tab active" type="button" data-chart-tab="world" role="tab" aria-selected="true">World charts</button>
-              <button class="charts-tab" type="button" data-chart-tab="archive" role="tab" aria-selected="false">Archive popularity</button>
+              
             </div>
             <section class="charts-pane" id="worldChartPane" aria-label="Real-world music charts">
               <div class="charts-source-row">
@@ -214,23 +215,13 @@
               <div class="charts-list" id="appleChartList" aria-live="polite"><p class="charts-loading">Loading the official Apple Music chart…</p></div>
               <div class="charts-footer-links"><a href="https://www.billboard.com/charts/hot-100/" target="_blank" rel="noopener noreferrer">Billboard Hot 100 ↗</a><span>Rankings are supplied by chart publishers; Pulse does not invent positions or play counts.</span></div>
             </section>
-            <section class="charts-pane" id="archiveChartPane" aria-label="Internet Archive popularity rankings" hidden>
-              <div class="charts-source-row">
-                <div><strong>Internet Archive · Audio</strong><small id="archiveChartMeta">Ranked by actual Archive download counts</small></div>
-                <div class="charts-tabs charts-tabs-small" role="tablist" aria-label="Archive ranking period">
-                  <button class="charts-tab active" type="button" data-archive-period="downloads" aria-pressed="true">All time</button>
-                  <button class="charts-tab" type="button" data-archive-period="week" aria-pressed="false">This week</button>
-                </div>
-              </div>
-              <div class="charts-list" id="archiveChartList" aria-live="polite"><p class="charts-loading">Loading Archive popularity rankings…</p></div>
-              <p class="charts-rights-note">Rankings use download metrics returned by Internet Archive. Audio availability does not establish reuse rights; recordings remain marked for review.</p>
-            </section>
+            
           </section>
         <header>
           <button id="menu" class="mobile">☰</button>
           <div>Workspace <i>/</i> <b id="crumb">Discover</b></div>
-          <label class="search"
-            >⌕ <input id="search" placeholder="Search tracks, moods…" /><kbd
+          <label class="search" hidden
+            >⌕ <input id="search" placeholder="Search songs…" /><kbd
               >/</kbd
             ></label
           >
@@ -330,7 +321,7 @@
             </p>
             <form id="unifiedSearchForm" class="source-form">
               <label class="source-input-label" for="unifiedQuery"
-                >Song, artist or album</label
+                >Song or artist</label
               >
               <div class="source-input-row">
                 <input
@@ -339,7 +330,8 @@
                   placeholder="Search a genuine song or artist…"
                   autocomplete="off"
                   required
-                /><button class="primary" type="submit">Search music</button>
+                /><button class="primary" type="submit">Search songs</button>
+                <button class="recognize-trigger" id="songRecognize" type="button" aria-label="Recognise a song using your microphone">⌁ Recognise</button>
               </div>
               <div class="music-preferences">
                 <label for="musicCountry"
@@ -375,12 +367,13 @@
               Search music metadata and open-audio catalogues in one place.
             </p>
             <div id="unifiedSearchResults" class="unified-search-results"></div>
+            <section class="recognition-panel" aria-labelledby="recognitionHeading"><div class="recognition-heading"><span class="recognition-orb">⌁</span><div><small>LISTEN &amp; IDENTIFY</small><h3 id="recognitionHeading">Recognise a song</h3><p>Use your microphone to identify music playing nearby.</p></div></div><p id="recognitionStatus" class="recognition-status" role="status" aria-live="polite">Microphone recognition needs a configured recognition service.</p><div id="recognitionResult" class="recognition-result" hidden></div></section>
           </div>
-          <div class="archive-search-panel">
+          <div class="archive-search-panel" hidden>
             <div class="sectionhead">
               <div>
                 <small>OPEN AUDIO CATALOG</small>
-                <h3>Internet Archive audio</h3>
+                <h3>Open audio catalogue</h3>
               </div>
               <span class="source-badge">PUBLIC SEARCH</span>
             </div>
@@ -401,7 +394,7 @@
                   autocomplete="off"
                   required
                 />
-                <button class="primary" type="submit">Search archive</button>
+                <button class="primary" type="submit">Search audio</button>
               </div>
             </form>
             <p
@@ -580,5 +573,6 @@
     <script src="playlist-store.js"></script>
     <script src="home-archive-discovery.js"></script>
     <script src="charts-dashboard.js"></script>
+    <script src="song-recognition.js"></script>
   </body>
 </html>
