@@ -7,8 +7,10 @@
  const country=()=>String(prefs().country||"IN").toLowerCase().slice(0,2);
  const duration=v=>{const n=Number(v||0);return n>0?Math.floor(n/60)+":"+String(Math.floor(n%60)).padStart(2,"0"):""};
  const status=(node,msg,error=false)=>{node.innerHTML='<p class="'+(error?"charts-error":"charts-loading")+'">'+esc(msg)+"</p>"};
+ const formatTime=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?"time unavailable":d.toLocaleString("en-IN",{timeZone:"Asia/Kolkata",dateStyle:"medium",timeStyle:"short"})};
+ let lastAppleRefreshAt=0,appleBusy=false;
  function renderApple(items,code){
-  if(!items.length){status(world,"The official feed returned no entries for this storefront.",true);return}
+  if(!items.length)throw new Error("The official feed returned no chart entries.");
   world.replaceChildren();
   items.forEach((song,i)=>{
    const row=document.createElement("article");row.className="chart-track";
@@ -16,20 +18,37 @@
    row.innerHTML='<span class="chart-rank">'+(i+1)+'</span><img class="chart-cover" loading="lazy" src="'+esc(art)+'" alt=""><div class="chart-copy"><strong>'+esc(song.name||"Untitled")+'</strong><small>'+esc(song.artistName||"Unknown artist")+'</small></div><div class="chart-actions"><a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">Apple Music ↗</a></div>';
    world.append(row);
   });
-  $("appleChartMeta").textContent="Apple public chart feed · storefront "+code.toUpperCase()+" · "+items.length+" ranked songs";
-  $("appleChartLink").href="https://music.apple.com/"+code+"/";
+  $("appleChartLink").href="https://music.apple.com/"+code+"/new";
  }
  async function loadApple(){
-  const code=country();status(world,"Loading the latest verified Apple Music chart snapshot…");
+  if(appleBusy)return;
+  appleBusy=true;
+  const code=country(),refresh=$("appleChartRefresh");
+  if(refresh){refresh.disabled=true;refresh.textContent="Refreshing…"}
+  status(world,"Refreshing the official Apple Music chart…");
   try{
-   if(code!=="in")throw new Error("The current source snapshot is for India. Use the official chart link for other countries.");
-   const response=await fetch("/apple-charts-in.json",{headers:{Accept:"application/json"}});
-   if(!response.ok)throw new Error("Apple chart snapshot unavailable (HTTP "+response.status+").");
-   const payload=await response.json();renderApple(payload.results||[],code);
-   const updated=new Date(payload.updated);
-   $("appleChartMeta").textContent="Apple public chart snapshot · India · updated "+updated.toLocaleString("en-IN",{timeZone:"Asia/Kolkata"});
-   $("appleChartLink").href="https://music.apple.com/in/new";
-  }catch(error){status(world,error?.message||"Apple chart data unavailable.",true);$("appleChartMeta").textContent="Official Apple Music chart source"}
+   const response=await fetch("/api/apple-charts?country="+encodeURIComponent(code),{headers:{Accept:"application/json"},cache:"no-store"});
+   if(!response.ok)throw new Error("Chart service returned HTTP "+response.status+".");
+   const payload=await response.json();
+   if(!Array.isArray(payload.results))throw new Error("The chart provider returned an unexpected response.");
+   renderApple(payload.results,code);
+   const stamp=payload.refreshedAt||payload.updatedAt;
+   $("appleChartMeta").textContent="Apple official chart · "+code.toUpperCase()+" · refreshed "+formatTime(stamp);
+   $("appleChartLink").href="https://music.apple.com/"+code+"/new";
+   lastAppleRefreshAt=Date.now();
+  }catch(error){
+   let recovered=false;
+   if(code==="in"){
+    try{
+     const backup=await fetch("/apple-charts-in.json",{cache:"no-store"});
+     if(backup.ok){const payload=await backup.json();renderApple(payload.results||[],code);$("appleChartMeta").textContent="Saved India chart · source snapshot "+formatTime(payload.updated)+" · live refresh unavailable";recovered=true;}
+    }catch(_){}
+   }
+   if(!recovered){status(world,(error?.message||"Apple chart data unavailable.")+" Use the official chart link to view current rankings.",true);$("appleChartMeta").textContent="Live chart refresh unavailable";}
+  }finally{
+   appleBusy=false;
+   if(refresh){refresh.disabled=false;refresh.textContent="Refresh ↻"}
+  }
  }
  async function archiveDocs(period){
   const params=new URLSearchParams();params.set("q",period==="week"?"mediatype:audio AND subject:music AND week:[1 TO *]":"mediatype:audio AND subject:music AND downloads:[1 TO *]");
@@ -84,6 +103,9 @@
   document.querySelectorAll("[data-archive-period]").forEach(tab=>{const active=tab===button;tab.classList.toggle("active",active);tab.setAttribute("aria-pressed",String(active))});
   void loadArchive(button.dataset.archivePeriod);
  }));
+ $("appleChartRefresh")?.addEventListener("click",()=>void loadApple());
  void loadApple();
+ window.setInterval(()=>{if(document.visibilityState==="visible")void loadApple()},15*60*1000);
+ document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-lastAppleRefreshAt>15*60*1000)void loadApple()});
  window.addEventListener("pulse:preferences-changed",()=>void loadApple());
 })();
