@@ -1,0 +1,68 @@
+{
+  "source": "Apple public Marketing Tools RSS",
+  "chart": "Top Songs",
+  "country": "in",
+  "updated": "2026-11-04T18:33:37Z",
+  "results": [
+    {
+      "name": "Ashke",
+      "artistName": "Karan Aujla & MXRCI",
+      "url": "https://music.apple.com/in/album/ashke/6814002539?i=6814002647",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f7/6d/78/f76d78c5-cc9c-f2d6-8603-ba690eaa5c7d/5064089826918_cover.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "Veezha Veera (From \"OM Chapter 1: Udhiram - The Blood Wood\") [Tamil]",
+      "artistName": "Sai Abhyankkar, Tippu & Arun Srinivasan",
+      "url": "https://music.apple.com/in/album/veezha-veera-from-om-chapter-1-udhiram-the-blood-wood-tamil/6824473544?i=6824473553",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/eb/e9/4a/ebe94a2a-129f-1f5e-bc00-91662a49620f/1200220338696.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "Tu Mil Jaaye (From \"KING\")",
+      "artistName": "Sachin-Jigar, Arijit Singh, Ed Sheeran, Madhubanti Bagchi & Kumaar",
+      "url": "https://music.apple.com/in/album/tu-mil-jaaye-from-king/6829145292?i=6829145293",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/cc/bf/37/ccbf3767-04e6-4a7f-ba93-f7377df30506/8903431225320_cover.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "Straight Up",
+      "artistName": "Karan Aujla & MXRCI",
+      "url": "https://music.apple.com/in/album/straight-up/6814002539?i=6814002652",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f7/6d/78/f76d78c5-cc9c-f2d6-8603-ba690eaa5c7d/5064089826918_cover.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "One Name",
+      "artistName": "Anirudh Ravichander & Super Subu",
+      "url": "https://music.apple.com/in/album/one-name/6817733404?i=6817733637",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/47/61/88/476188e2-5cd5-2320-8f0b-f9cd978560fd/885288695823.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "One Sun One Moon",
+      "artistName": "Anirudh Ravichander, Super Subu, M.S Krsna & HEISENBERG",
+      "url": "https://music.apple.com/in/album/one-sun-one-moon/6817733404?i=6817733410",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/47/61/88/476188e2-5cd5-2320-8f0b-f9cd978560fd/885288695823.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "Antidote",
+      "artistName": "Karan Aujla",
+      "url": "https://music.apple.com/in/album/antidote/1753101056?i=1753101077",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/c2/ce/a0/c2cea088-dbde-43db-346f-e536058fdcfb/5063483978438_cover.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "Gehra Hua",
+      "artistName": "Shashwat Sachdev, Arijit Singh, Irshad Kamil & Armaan Khan",
+      "url": "https://music.apple.com/in/album/gehra-hua/1858961207?i=1858961217",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/10/4d/4e/104d4e1d-49f1-b96d-2bb1-c7c9f94845fa/ticket.tgbrrfvz.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "On Top",
+      "artistName": "Karan Aujla",
+      "url": "https://music.apple.com/in/album/on-top/1658012466?i=1658012467",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/ca/87/d4/ca87d416-2021-0eb1-f36a-fe01998c738d/5059950896060_cover.jpg/100x100bb.jpg"
+    },
+    {
+      "name": "Bindaas",
+      "artistName": "Deepthi Suresh, Anirudh Ravichander & Super Subu",
+      "url": "https://music.apple.com/in/album/bindaas/6817733404?i=6817733628",
+      "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/47/61/88/476188e2-5cd5-2320-8f0b-f9cd978560fd/885288695823.jpg/100x100bb.jpg"
+    }
+  ]
+}

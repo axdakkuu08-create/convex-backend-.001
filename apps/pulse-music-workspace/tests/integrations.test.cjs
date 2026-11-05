@@ -219,7 +219,7 @@ test("home Archive discovery creates a multi-search local mix with rights links"
     "utf8",
   );
   assert.match(discovery, /Promise\.allSettled/);
-  assert.match(discovery, /createFromTracks/);
+  assert.match(discovery, /upsertFromTracks/);
   assert.match(discovery, /check each item's rights/i);
   assert.match(html, /homeArchiveForm/);
   assert.match(html, /homeArchiveMix/);
@@ -244,4 +244,23 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
   assert.match(app, /queueClear/);
   assert.match(html, /id="queue"/);
   assert.match(html, /id="queuePanel"/);
+});
+
+test("saved playlist playback queues every playable song in saved order", () => {
+  const playlists = fs.readFileSync(
+    path.join(__dirname, "..", "playlist-store.js"),
+    "utf8",
+  );
+  const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+  assert.match(playlists, /pulse:play-playlist/);
+  assert.match(playlists, /tracks\s*\.filter/);
+  assert.match(app, /pulse:play-playlist/);
+  assert.match(app, /tracks\.splice\(0, tracks\.length, \.\.\.queue\)/);
+  assert.match(app, /audio\.onended/);
+});
+
+test("empty player and queue actions do not dereference a missing current track", () => {
+  const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+  assert.match(app, /if \(!tracks\.length \|\| !tracks\[index\]\)/);
+  assert.match(app, /if \(!tracks\.length\) \{/);
 });

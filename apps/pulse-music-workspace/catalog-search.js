@@ -83,10 +83,14 @@
       esc(item.title) +
       "</strong><small>" +
       esc(item.artist) +
-      (item.album ? " · " + esc(item.album) : "") +
+      "" +
       (item.duration ? " · " + esc(item.duration) : "") +
       '</small><small class="catalog-source">' +
-      esc(item.source) +
+      esc(
+        String(item.source || "").includes("Internet Archive")
+          ? "Open audio catalogue"
+          : item.source,
+      ) +
       "</small>" +
       rights +
       "</div>" +
@@ -166,7 +170,7 @@
         source:
           track.provider === "itunes"
             ? "Apple/iTunes catalogue"
-            : "Internet Archive · direct open audio",
+            : "Open audio catalogue",
         kind: track.provider,
         genre: track.genre,
         verificationStatus: track.verificationStatus,

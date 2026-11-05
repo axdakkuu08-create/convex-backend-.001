@@ -1,65 +1,4 @@
-const tracks = [
-  {
-    id: 1,
-    title: "Quiet Signals",
-    artist: "Pulse Sessions",
-    mood: "Focus",
-    time: "5:42",
-    cover: "violet",
-    symbol: "✳",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-  },
-  {
-    id: 2,
-    title: "Blue Hour",
-    artist: "Northbound",
-    mood: "Ambient",
-    time: "6:18",
-    cover: "blue",
-    symbol: "◌",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-  },
-  {
-    id: 3,
-    title: "Little By Little",
-    artist: "Sunday Club",
-    mood: "Energy",
-    time: "4:36",
-    cover: "orange",
-    symbol: "ϟ",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-  },
-  {
-    id: 4,
-    title: "Soft Geometry",
-    artist: "Mira Vale",
-    mood: "Focus",
-    time: "5:09",
-    cover: "green",
-    symbol: "◈",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-  },
-  {
-    id: 5,
-    title: "Afterimage",
-    artist: "Low Season",
-    mood: "Night",
-    time: "4:58",
-    cover: "pink",
-    symbol: "☾",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-  },
-  {
-    id: 6,
-    title: "Open Water",
-    artist: "Still Forms",
-    mood: "Ambient",
-    time: "6:01",
-    cover: "blue",
-    symbol: "≈",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-  },
-];
+const tracks = [];
 const $ = (id) => document.getElementById(id),
   audio = $("audio");
 let index = 0,
@@ -120,11 +59,11 @@ function render() {
     .map(
       (t, i) =>
         '<div class="row ' +
-        (tracks[index].id === t.id ? "playing" : "") +
+        (tracks[index] && tracks[index].id === t.id ? "playing" : "") +
         '" data-id="' +
         t.id +
         '"><div class="num"><button class="rowplay" aria-label="Play">' +
-        (tracks[index].id === t.id && playing
+        (tracks[index] && tracks[index].id === t.id && playing
           ? "Ⅱ"
           : String(i + 1).padStart(2, "0")) +
         '</button></div><div class="info"><div class="cover ' +
@@ -144,7 +83,7 @@ function render() {
               t.source === "Apple/iTunes catalogue"
                 ? "30-SEC PREVIEW"
                 : String(t.source).includes("Internet Archive")
-                  ? "INTERNET ARCHIVE · AUDIO"
+                  ? "OPEN AUDIO"
                   : t.source,
             ) +
             "</small>"
@@ -275,17 +214,35 @@ function loadMusicEmbed(raw) {
   }
 }
 function setTrack(i, autoplay = false) {
+  if (!tracks.length) {
+    index = 0;
+    audio.removeAttribute("src");
+    audio.load();
+    $("nowTitle").textContent = "Choose a song";
+    $("nowArtist").textContent = "Search or recognise a song";
+    $("cover").className = "cover violet";
+    $("cover").style.backgroundImage = "";
+    $("cover").textContent = "♫";
+    $("audioStatus").textContent = "Ready when you are · search for a single";
+    $("duration").textContent = "0:00";
+    $("time").textContent = "0:00";
+    $("progress").value = 0;
+    $("like").disabled = true;
+    render();
+    return;
+  }
+  $("like").disabled = false;
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
   audio.src = t.src;
   audio.load();
   $("audioStatus").textContent = t.archivePage
-    ? "Internet Archive audio · verify item rights before reuse. Open the item page for details."
+    ? "Open-audio source · rights review required; availability is not permission."
     : t.localFile
       ? "Playing a file selected from this device."
       : t.customUrl
         ? "Using your direct audio link."
-        : "Demo preview · internet connection required.";
+        : "Ready to play.";
   $("nowTitle").textContent = t.title;
   $("nowArtist").textContent = t.artist;
   $("cover").className = "cover " + t.cover;
@@ -299,14 +256,21 @@ function setTrack(i, autoplay = false) {
   if (autoplay) play();
 }
 async function play() {
+  if (!tracks.length || !tracks[index]) {
+    playing = false;
+    $("play").textContent = "▶";
+    $("audioStatus").textContent =
+      "Choose a song from search or your playlists.";
+    return;
+  }
   try {
     await audio.play();
     playing = true;
     $("audioStatus").textContent = tracks[index].archivePage
       ? "Playing · " +
         tracks[index].title +
-        " · Rights: " +
-        (tracks[index].archiveLicense || "check the Archive item page")
+        " · rights status: " +
+        (tracks[index].verificationStatus || "VERIFYING")
       : "Playing · " + tracks[index].title;
     $("play").textContent = "Ⅱ";
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
@@ -334,6 +298,10 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
+  if (!tracks.length) {
+    pause();
+    return;
+  }
   let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
   if (n >= tracks.length && !repeatOn) {
     pause();
@@ -343,6 +311,7 @@ function next() {
   setTrack(n, true);
 }
 function like(id) {
+  if (!tracks[index] || id == null) return;
   liked.has(id) ? liked.delete(id) : liked.add(id);
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
@@ -468,7 +437,7 @@ $("allMoods").onclick = () => {
   query = "";
   $("search").value = "";
   render();
-  toast("Showing all demo tracks");
+  toast("Showing all singles");
 };
 $("newPlaylist").onclick = () => {
   let n = prompt("Name your playlist");
@@ -635,8 +604,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
   const status = $("archiveStatus");
   const results = $("archiveResults");
   const query = $("archiveQuery").value.trim();
-  status.textContent =
-    "Searching Internet Archive and checking for playable audio files…";
+  status.textContent = "Searching open audio and checking available files…";
   results.innerHTML = "";
   try {
     archiveItems = await window.PulseArchive.search(query, 24);
@@ -648,7 +616,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
     }
     status.textContent =
       archiveItems.length +
-      " playable archive item(s) found. Check each item's rights before reuse.";
+      " playable audio item(s) found. Check each item's rights before reuse.";
     results.innerHTML = archiveItems
       .map(
         (item, i) =>
@@ -703,7 +671,7 @@ $("archiveResults").addEventListener("click", (e) => {
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
-  toast("Playing archive audio · next track stays in sequence");
+  toast("Playing selected single · next track stays in sequence");
 });
 
 window.addEventListener("pulse:play-catalog-track", (event) => {
@@ -744,10 +712,48 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   $("audioStatus").textContent =
     item.source === "Apple/iTunes catalogue"
       ? "Playing the available catalogue preview. Open the provider page for full-track options."
-      : "Archive stream status: " +
+      : "Open-audio status: " +
         track.verificationStatus +
         ". Rights review is separate; check the source page and licence.";
   toast("Loading " + track.title);
+});
+
+window.addEventListener("pulse:play-playlist", (event) => {
+  const detail = event.detail || {};
+  const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
+  const queue = incoming
+    .filter((item) => item && /^https?:\/\//i.test(String(item.src || "")))
+    .map((item, queueIndex) => ({
+      id: Date.now() + queueIndex,
+      catalogId: String(item.catalogId || ""),
+      source: String(item.source || "Saved audio"),
+      title: String(item.title || "Untitled track"),
+      artist: String(item.artist || "Unknown artist"),
+      mood: "Playlist",
+      time: "—",
+      cover: "violet",
+      symbol: "♫",
+      src: String(item.src),
+      customUrl: true,
+      artwork: String(item.artwork || ""),
+      sourcePage: String(item.url || ""),
+      archivePage: String(item.source || "").includes("Internet Archive")
+        ? String(item.url || "")
+        : "",
+      archiveLicense: String(item.license || ""),
+      verificationStatus: item.verificationStatus || "UNAVAILABLE",
+      rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+      bytesTotal: Number(item.bytesTotal) || 0,
+    }));
+  if (!queue.length) {
+    toast("This playlist has no playable songs.");
+    return;
+  }
+  tracks.splice(0, tracks.length, ...queue);
+  index = 0;
+  setTrack(0, true);
+  renderQueuePanel();
+  toast("Playing playlist · " + String(detail.name || "Singles Mix"));
 });
 
 setTrack(0);
