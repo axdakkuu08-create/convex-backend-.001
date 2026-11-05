@@ -1,0 +1,29 @@
+name: Pulse Workspace Tests
+
+on:
+  pull_request:
+    paths:
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-workspace-tests.yml"
+  push:
+    branches:
+      - feat/pulse-glass-charts-archive-mix
+    paths:
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-workspace-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pulse-workspace-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Pulse integration tests
+        run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs
