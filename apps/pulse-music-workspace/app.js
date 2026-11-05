@@ -259,7 +259,8 @@ async function play() {
   if (!tracks.length || !tracks[index]) {
     playing = false;
     $("play").textContent = "▶";
-    $("audioStatus").textContent = "Choose a song from search or your playlists.";
+    $("audioStatus").textContent =
+      "Choose a song from search or your playlists.";
     return;
   }
   try {
