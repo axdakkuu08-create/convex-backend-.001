@@ -1,8 +1,0 @@
-{
-  "name": "pulse-cloudflare-discovery-gateway",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "test": "node --test tests/*.test.js"
-  }
-}

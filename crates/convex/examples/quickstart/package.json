@@ -1,7 +1,0 @@
-{
-  "name": "convex-rust-quickstart",
-  "private": true,
-  "dependencies": {
-    "convex": "^1.34.1"
-  }
-}

@@ -1,0 +1,43 @@
+name: Temporary Pulse dprint formatter
+
+on:
+  push:
+    branches:
+      - feat/pulse-glass-charts-archive-mix
+    paths:
+      - .github/workflows/pulse-dprint-autofmt.yml
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the feature branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: true
+          ref: feat/pulse-glass-charts-archive-mix
+
+      - name: Install repository-pinned dprint
+        run: |
+          VERSION="$(node -p "require('./scripts/package.json').devDependencies.dprint")"
+          curl -fsSL https://dprint.dev/install.sh | sh -s "$VERSION"
+          echo "$HOME/.dprint/bin" >> "$GITHUB_PATH"
+
+      - name: Format with the repository configuration
+        run: dprint fmt
+
+      - name: Commit formatting changes to this feature branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          if git diff --cached --quiet; then
+            echo "No formatting changes were produced."
+          else
+            git commit -m "style(pulse): apply pinned dprint formatting"
+            git push origin HEAD:refs/heads/feat/pulse-glass-charts-archive-mix
+          fi
