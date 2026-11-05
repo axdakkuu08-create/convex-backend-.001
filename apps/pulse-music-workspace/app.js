@@ -256,6 +256,12 @@ function setTrack(i, autoplay = false) {
   if (autoplay) play();
 }
 async function play() {
+  if (!tracks.length || !tracks[index]) {
+    playing = false;
+    $("play").textContent = "▶";
+    $("audioStatus").textContent = "Choose a song from search or your playlists.";
+    return;
+  }
   try {
     await audio.play();
     playing = true;
@@ -291,6 +297,10 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
+  if (!tracks.length) {
+    pause();
+    return;
+  }
   let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
   if (n >= tracks.length && !repeatOn) {
     pause();
@@ -300,6 +310,7 @@ function next() {
   setTrack(n, true);
 }
 function like(id) {
+  if (!tracks[index] || id == null) return;
   liked.has(id) ? liked.delete(id) : liked.add(id);
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
@@ -425,7 +436,7 @@ $("allMoods").onclick = () => {
   query = "";
   $("search").value = "";
   render();
-  toast("Showing all demo tracks");
+  toast("Showing all singles");
 };
 $("newPlaylist").onclick = () => {
   let n = prompt("Name your playlist");
@@ -704,6 +715,44 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
         track.verificationStatus +
         ". Rights review is separate; check the source page and licence.";
   toast("Loading " + track.title);
+});
+
+window.addEventListener("pulse:play-playlist", (event) => {
+  const detail = event.detail || {};
+  const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
+  const queue = incoming
+    .filter((item) => item && /^https?:\/\//i.test(String(item.src || "")))
+    .map((item, queueIndex) => ({
+      id: Date.now() + queueIndex,
+      catalogId: String(item.catalogId || ""),
+      source: String(item.source || "Saved audio"),
+      title: String(item.title || "Untitled track"),
+      artist: String(item.artist || "Unknown artist"),
+      mood: "Playlist",
+      time: "—",
+      cover: "violet",
+      symbol: "♫",
+      src: String(item.src),
+      customUrl: true,
+      artwork: String(item.artwork || ""),
+      sourcePage: String(item.url || ""),
+      archivePage: String(item.source || "").includes("Internet Archive")
+        ? String(item.url || "")
+        : "",
+      archiveLicense: String(item.license || ""),
+      verificationStatus: item.verificationStatus || "UNAVAILABLE",
+      rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+      bytesTotal: Number(item.bytesTotal) || 0,
+    }));
+  if (!queue.length) {
+    toast("This playlist has no playable songs.");
+    return;
+  }
+  tracks.splice(0, tracks.length, ...queue);
+  index = 0;
+  setTrack(0, true);
+  renderQueuePanel();
+  toast("Playing playlist · " + String(detail.name || "Singles Mix"));
 });
 
 setTrack(0);

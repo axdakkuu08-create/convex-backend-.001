@@ -215,31 +215,28 @@
       alert("This playlist is empty. Add songs from search results.");
       return;
     }
-    const choices = playlist.tracks
-      .map(
-        (track, index) => index + 1 + ". " + track.title + " — " + track.artist,
-      )
-      .join("\n");
-    const answer = prompt(
-      "Choose a song number to play from " + playlist.name + ":\n" + choices,
-    );
-    const index = Number(answer) - 1;
-    const track = playlist.tracks[index];
-    if (!track) return;
+    const queue = playlist.tracks
+      .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+      .map((track) => ({
+        title: String(track.title || "Untitled track"),
+        artist: String(track.artist || "Unknown artist"),
+        src: String(track.src),
+        url: String(track.url || ""),
+        artwork: String(track.artwork || ""),
+        license: String(track.license || ""),
+        source: String(track.source || "Saved audio"),
+        catalogId: String(track.catalogId || ""),
+        verificationStatus: track.verificationStatus || "UNAVAILABLE",
+        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        bytesTotal: Number(track.bytesTotal) || 0,
+      }));
+    if (!queue.length) {
+      alert("This playlist has no browser-playable songs yet.");
+      return;
+    }
     window.dispatchEvent(
-      new CustomEvent("pulse:play-catalog-track", {
-        detail: {
-          title: track.title,
-          artist: track.artist,
-          src: track.src,
-          url: track.url,
-          artwork: track.artwork,
-          license: track.license,
-          source: track.source,
-          verificationStatus: track.verificationStatus || "UNAVAILABLE",
-          rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
-          bytesTotal: Number(track.bytesTotal) || 0,
-        },
+      new CustomEvent("pulse:play-playlist", {
+        detail: { name: playlist.name, tracks: queue },
       }),
     );
   }
