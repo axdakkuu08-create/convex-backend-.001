@@ -219,7 +219,7 @@ test("home Archive discovery creates a multi-search local mix with rights links"
     "utf8",
   );
   assert.match(discovery, /Promise\.allSettled/);
-  assert.match(discovery, /createFromTracks/);
+  assert.match(discovery, /upsertFromTracks/);
   assert.match(discovery, /check each item's rights/i);
   assert.match(html, /homeArchiveForm/);
   assert.match(html, /homeArchiveMix/);
