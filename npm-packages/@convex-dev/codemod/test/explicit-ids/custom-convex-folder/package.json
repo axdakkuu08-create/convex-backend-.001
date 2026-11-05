@@ -1,0 +1,14 @@
+{
+  "name": "codemod-test-custom-convex-folder",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": ""
+  },
+  "dependencies": {
+    "convex": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

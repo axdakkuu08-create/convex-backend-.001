@@ -23,8 +23,7 @@ jobs:
 
       - name: Install repository-pinned dprint
         run: |
-          VERSION="$(node -p "require('./scripts/package.json').devDependencies.dprint")"
-          curl -fsSL https://dprint.dev/install.sh | sh -s "$VERSION"
+          curl -fsSL https://dprint.dev/install.sh | sh -s 0.57.0
           echo "$HOME/.dprint/bin" >> "$GITHUB_PATH"
 
       - name: Format with the repository configuration

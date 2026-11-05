@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#101114" />
+    <title>Pulse — Music Workspace</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="home-refresh.css" />
+    <link rel="stylesheet" href="charts-dashboard.css" />
+    <link rel="stylesheet" href="pulse-glass-polish.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#"
+          >▥ <b>pulse<span>.</span></b></a
+        ><small>WORKSPACE</small
+        ><button class="nav active" data-view="discover">◈　Discover</button
+        ><button class="nav" data-view="library">▤　Your library</button
+        ><button class="nav" data-view="recent">◷　Recently played</button>
+        <hr />
+        <small
+          >YOUR COLLECTION
+          <button id="newPlaylist" class="plus">+</button></small
+        >
+        <div id="playlists">
+          <button class="playlist" data-mood="Focus">●　Focus mode</button
+          ><button class="playlist" data-mood="Night">●　Late night</button
+          ><button class="playlist" data-mood="Energy">●　Good energy</button>
+        </div>
+        <div
+          id="savedPlaylists"
+          class="saved-playlists"
+          aria-label="Your local playlists"
+        ></div>
+        <div class="cloud-account" aria-label="Cloud account">
+          <small>ACCOUNT / CLOUD</small>
+          <p id="cloudStatus" role="status" aria-live="polite">
+            Cloud sync is optional.
+          </p>
+          <button id="cloudSignIn" class="nav" type="button">
+            Sign in to sync
+          </button>
+          <button id="cloudSignOut" class="nav" type="button" hidden>
+            Sign out
+          </button>
+          <button id="cloudNewPlaylist" class="nav" type="button" hidden>
+            ＋ Cloud playlist
+          </button>
+          <div id="cloudPlaylists" class="cloud-playlists"></div>
+        </div>
+        <div class="sidefoot">●　Local demo workspace <b>READY</b></div>
+      </aside>
+      <main>
+        <section class="mobile-home" id="homeFront" aria-label="Music home">
+          <div class="mobile-home-top">
+            <div>
+              <p class="home-greeting">YOUR MUSIC, YOUR MOMENT</p>
+              <h1>Home</h1>
+            </div>
+            <button
+              class="profile-button"
+              id="homeProfile"
+              aria-label="Account and cloud sync"
+            >
+              ●
+            </button>
+          </div>
+          <div class="genre-chips" aria-label="Browse by mood">
+            <button class="genre-chip selected" data-home-mood="">All</button>
+            <button class="genre-chip" data-home-mood="Focus">Focus</button>
+            <button class="genre-chip" data-home-mood="Ambient">
+              Feel good
+            </button>
+            <button class="genre-chip" data-home-mood="Night">Romance</button>
+            <button class="genre-chip" data-home-mood="Energy">Energy</button>
+          </div>
+          <section
+            class="home-archive-shelf" hidden
+            id="homeArchiveShelf"
+            aria-labelledby="homeArchiveHeading"
+          >
+            <div class="home-section-heading">
+              <div>
+                <p class="home-archive-kicker">OPEN AUDIO DISCOVERY</p>
+                <h2 id="homeArchiveHeading">Internet Archive finds</h2>
+              </div>
+              <button
+                id="homeArchiveMix"
+                class="home-archive-mix"
+                type="button"
+              >
+                Make a mix
+              </button>
+            </div>
+            <form id="homeArchiveForm" class="home-archive-form">
+              <input
+                id="homeArchiveQuery"
+                type="search"
+                minlength="2"
+                placeholder="Search recordings, artists or moods"
+                aria-label="Search Internet Archive recordings"
+              />
+              <button class="primary" type="submit">Discover</button>
+            </form>
+            <p
+              id="homeArchiveStatus"
+              class="home-archive-status"
+              role="status"
+              aria-live="polite"
+            >
+              Find playable recordings and check each item's rights before
+              reuse.
+            </p>
+            <div id="homeArchiveResults" class="home-archive-results"></div>
+          </section>
+          <section
+            class="home-library-section"
+            aria-labelledby="homePlaylistsHeading"
+          >
+            <div class="home-section-heading">
+              <h2 id="homePlaylistsHeading">Playlists</h2>
+            </div>
+            <div
+              class="home-grid"
+              id="homePlaylistsGrid"
+              aria-live="polite"
+            ></div>
+          </section>
+          
+          <section
+            class="home-library-section"
+            aria-labelledby="homeSongsHeading"
+          >
+            <div class="home-section-heading">
+              <h2 id="homeSongsHeading">Top picks</h2>
+            </div>
+            <div class="home-grid" id="homeSongsGrid" aria-live="polite"></div>
+          </section>
+          <dialog
+            class="home-detail-dialog"
+            id="homeTrackDetails"
+            aria-labelledby="homeDetailTitle"
+          >
+            <div id="homeDetailContent"></div>
+            <button
+              type="button"
+              class="home-detail-close"
+              id="homeDetailClose"
+            >
+              Close
+            </button>
+          </dialog>
+          <div class="home-section-heading speed-heading">
+            <h2>Speed dial</h2>
+            <button id="homeShuffle" aria-label="Shuffle music">⤨</button>
+          </div>
+          <div class="speed-list" hidden>
+            <button class="speed-track" data-home-track="3">
+              <span class="speed-cover cover-orange">ϟ</span
+              ><span class="speed-copy"
+                ><b>Little By Little</b><small>Sunday Club</small></span
+              ><span class="speed-play">▶</span>
+            </button>
+            <button class="speed-track" data-home-track="5">
+              <span class="speed-cover cover-pink">☾</span
+              ><span class="speed-copy"
+                ><b>Afterimage</b><small>Low Season</small></span
+              ><span class="speed-play">▶</span>
+            </button>
+            <button class="speed-track" data-home-track="4">
+              <span class="speed-cover cover-green">◈</span
+              ><span class="speed-copy"
+                ><b>Soft Geometry</b><small>Mira Vale</small></span
+              ><span class="speed-play">▶</span>
+            </button>
+            <button class="speed-track" data-home-track="6">
+              <span class="speed-cover cover-blue">≈</span
+              ><span class="speed-copy"
+                ><b>Open Water</b><small>Still Forms</small></span
+              ><span class="speed-play">▶</span>
+            </button>
+          </div>
+          <p class="home-source-hint">
+            Discover more music with Search, or connect a source below.
+          </p>
+        </section>
+          <section class="pulse-charts glass-panel" id="pulseCharts" aria-labelledby="pulseChartsHeading">
+            <div class="charts-heading">
+              <div><p class="charts-kicker">LIVE RANKINGS · SOURCE-LINKED</p><h2 id="pulseChartsHeading">Top Singles</h2><p class="charts-subtitle">Genuine chart rankings, refreshed from the selected country.</p></div>
+              <span class="charts-live-dot">AUTO-REFRESH · 15 MIN</span>
+            </div>
+            <div class="charts-tabs" role="tablist" aria-label="Chart categories">
+              <button class="charts-tab active" type="button" data-chart-tab="world" role="tab" aria-selected="true">World charts</button>
+              
+            </div>
+            <section class="charts-pane" id="worldChartPane" aria-label="Real-world music charts">
+              <div class="charts-source-row">
+                <div><strong>Apple Music · Top Songs</strong><small id="appleChartMeta">Country chart · loading…</small></div>
+                <div class="charts-source-actions"><button type="button" id="appleChartRefresh" aria-label="Refresh Apple Music chart">Refresh ↻</button><a href="https://music.apple.com/in/new" target="_blank" rel="noopener noreferrer" id="appleChartLink">Open chart ↗</a></div>
+              </div>
+              <div class="charts-list" id="appleChartList" aria-live="polite"><p class="charts-loading">Loading the official Apple Music chart…</p></div>
+              <div class="charts-footer-links"><a href="https://www.billboard.com/charts/hot-100/" target="_blank" rel="noopener noreferrer">Billboard Hot 100 ↗</a><span>Rankings are supplied by chart publishers; Pulse does not invent positions or play counts.</span></div>
+            </section>
+            
+          </section>
+        <header>
+          <button id="menu" class="mobile">☰</button>
+          <div>Workspace <i>/</i> <b id="crumb">Discover</b></div>
+          <label class="search" hidden
+            >⌕ <input id="search" placeholder="Search songs…" /><kbd
+              >/</kbd
+            ></label
+          >
+          <div class="avatar">P</div>
+        </header>
+        <section class="intro">
+          <div>
+            <small class="eyebrow">— YOUR SOUND, ORGANIZED</small>
+            <h1 id="heading">Find your <span>next favorite.</span></h1>
+            <p>A quieter space for the music you love.</p>
+          </div>
+          <button id="shuffleAll" class="secondary">⤨ Shuffle play</button>
+        </section>
+        <section class="hero">
+          <div>
+            <small>● EDITOR'S PICK / 01</small>
+            <h2>Make room<br />for <em>focus.</em></h2>
+            <p>
+              Minimal distractions. A little rhythm.<br />Get into your flow,
+              one track at a time.
+            </p>
+            <button id="heroPlay" class="primary">▶　Play mix　↗</button>
+          </div>
+          <div class="orb"><span>p.</span></div>
+          <label class="heroNo">01 — 03</label>
+        </section>
+        <section class="sourcehub" id="sourceHub">
+          <div class="sectionhead">
+            <div>
+              <small>LISTEN YOUR WAY</small>
+              <h2>Connect a music source</h2>
+            </div>
+            <span class="source-badge">3 WEB PLAYERS</span>
+          </div>
+          <p class="source-copy">
+            Paste a Spotify, YouTube, or SoundCloud link. Playback opens in the
+            official embedded player—sign-in, ads, availability, and account
+            limits are controlled by each service.
+          </p>
+          <form id="sourceForm" class="source-form">
+            <label class="source-input-label" for="sourceUrl">Music link</label>
+            <div class="source-input-row">
+              <input
+                id="sourceUrl"
+                type="url"
+                inputmode="url"
+                placeholder="Paste a Spotify, YouTube or SoundCloud URL"
+                autocomplete="url"
+                required
+              /><button class="primary" type="submit">Load player ↗</button>
+            </div>
+          </form>
+          <div
+            id="sourceError"
+            class="source-error"
+            role="status"
+            aria-live="polite"
+          ></div>
+          <div id="embedWrap" class="embed-wrap" hidden>
+            <div class="embed-head">
+              <span id="embedTitle">Music player</span
+              ><button id="closeEmbed" class="textbutton" type="button">
+                Close ×
+              </button>
+            </div>
+            <iframe
+              id="sourceFrame"
+              title="Embedded music player"
+              loading="lazy"
+              allow="
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                fullscreen;
+                picture-in-picture;
+              "
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+            <p class="embed-note">
+              If playback is unavailable, open the link in its official app or
+              website. Some tracks require sign-in or may not be embeddable.
+            </p>
+          </div>
+          <div class="unified-search-panel">
+            <div class="sectionhead">
+              <div>
+                <small>UNIFIED DISCOVERY</small>
+                <h3>Search all music</h3>
+              </div>
+              <span class="source-badge">LIVE CATALOGUES</span>
+            </div>
+            <p class="source-copy">
+              Search genuine songs and artists. Preview and full-track availability are labelled honestly.
+            </p>
+            <form id="unifiedSearchForm" class="source-form">
+              <label class="source-input-label" for="unifiedQuery"
+                >Song or artist</label
+              >
+              <div class="source-input-row">
+                <input
+                  id="unifiedQuery"
+                  type="search"
+                  placeholder="Search a genuine song or artist…"
+                  autocomplete="off"
+                  required
+                /><button class="primary" type="submit">Search songs</button>
+                <button class="recognize-trigger" id="songRecognize" type="button" aria-label="Recognise a song using your microphone">⌁ Recognise</button>
+              </div>
+              <div class="music-preferences">
+                <label for="musicCountry"
+                  >Country<select id="musicCountry">
+                    <option value="IN">India</option>
+                    <option value="US">United States</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="CA">Canada</option>
+                    <option value="AU">Australia</option>
+                  </select></label
+                ><label for="musicGenre"
+                  >Genre<select id="musicGenre">
+                    <option value="">All genres</option>
+                    <option>Pop</option>
+                    <option>Rock</option>
+                    <option>Hip-Hop</option>
+                    <option>Electronic</option>
+                    <option>Classical</option>
+                    <option>Jazz</option>
+                    <option>Ambient</option>
+                    <option>Instrumental</option>
+                    <option>Indie</option>
+                  </select></label
+                >
+              </div>
+            </form>
+            <p
+              id="unifiedSearchStatus"
+              class="unified-search-status"
+              role="status"
+              aria-live="polite"
+            >
+              Search music metadata and open-audio catalogues in one place.
+            </p>
+            <div id="unifiedSearchResults" class="unified-search-results"></div>
+            <section class="recognition-panel" aria-labelledby="recognitionHeading"><div class="recognition-heading"><span class="recognition-orb">⌁</span><div><small>LISTEN &amp; IDENTIFY</small><h3 id="recognitionHeading">Recognise a song</h3><p>Use your microphone to identify music playing nearby.</p></div></div><p id="recognitionStatus" class="recognition-status" role="status" aria-live="polite">Microphone recognition needs a configured recognition service.</p><div id="recognitionResult" class="recognition-result" hidden></div></section>
+          </div>
+          <div class="archive-search-panel" hidden>
+            <div class="sectionhead">
+              <div>
+                <small>OPEN AUDIO CATALOG</small>
+                <h3>Open audio catalogue</h3>
+              </div>
+              <span class="source-badge">PUBLIC SEARCH</span>
+            </div>
+            <p class="source-copy">
+              Search archive items with playable audio files. Availability and
+              reuse rights vary by item; check the item page and its stated
+              licence before reusing or sharing.
+            </p>
+            <form id="archiveSearchForm" class="source-form">
+              <label class="source-input-label" for="archiveQuery"
+                >Song, artist, or recording</label
+              >
+              <div class="source-input-row">
+                <input
+                  id="archiveQuery"
+                  type="search"
+                  placeholder="Try a title or artist"
+                  autocomplete="off"
+                  required
+                />
+                <button class="primary" type="submit">Search audio</button>
+              </div>
+            </form>
+            <p
+              id="archiveStatus"
+              class="audio-status"
+              role="status"
+              aria-live="polite"
+            >
+              Search public audio records. Results appear here.
+            </p>
+            <div id="archiveResults" class="archive-results"></div>
+          </div>
+          <div class="source-shortcuts">
+            <a
+              href="https://open.spotify.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Spotify ↗</a
+            ><a
+              href="https://music.youtube.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >YouTube Music ↗</a
+            ><a
+              href="https://soundcloud.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >SoundCloud ↗</a
+            >
+          </div>
+        </section>
+        <section>
+          <div class="sectionhead">
+            <div>
+              <small>CURATED FOR YOU</small>
+              <h2>Pick a mood</h2>
+            </div>
+            <button id="allMoods" class="textbutton">View all ↗</button>
+          </div>
+          <div class="moods">
+            <button data-mood="Focus" class="mood violet">
+              <b>◉</b><strong>Deep focus</strong
+              ><span>Low-key · 12 tracks</span></button
+            ><button data-mood="Ambient" class="mood blue">
+              <b>✳</b><strong>Ambient drift</strong
+              ><span>Atmospheric · 9 tracks</span></button
+            ><button data-mood="Energy" class="mood orange">
+              <b>ϟ</b><strong>Good energy</strong
+              ><span>Upbeat · 16 tracks</span></button
+            ><button data-mood="Night" class="mood green">
+              <b>☾</b><strong>After hours</strong
+              ><span>Slow burn · 11 tracks</span>
+            </button>
+          </div>
+        </section>
+        <section class="tracks">
+          <div class="sectionhead">
+            <div>
+              <small>YOUR ROTATION</small>
+              <h2 id="trackHeading">Made for the moment</h2>
+            </div>
+            <div class="playback-tools">
+              <span id="count">06 TRACKS</span
+              ><button
+                id="addFileButton"
+                title="Play audio from this phone"
+                aria-label="Add audio file"
+              >
+                ＋ File</button
+              ><button
+                id="addUrlButton"
+                title="Add a direct audio file URL"
+                aria-label="Add audio link"
+              >
+                ↗ Link</button
+              ><input
+                id="audioFileInput"
+                type="file"
+                accept="audio/*,.mp3,.m4a,.ogg,.wav,.flac"
+                hidden
+              />
+            </div>
+          </div>
+          <div class="table">
+            <div class="thead">
+              <span>#</span><span>TRACK</span><span>MOOD</span><span>TIME</span
+              ><span></span>
+            </div>
+            <div id="rows"></div>
+            <div id="empty" hidden>No tracks found. Try another search.</div>
+          </div>
+          <p
+            id="audioStatus"
+            class="audio-status"
+            role="status"
+            aria-live="polite"
+          >
+            Tip: add an audio file from your phone or a direct audio file link.
+          </p>
+        </section>
+        <footer>
+          <span>Designed for your listening flow.</span
+          ><span>Pulse · Preview build 0.1</span>
+        </footer>
+      </main>
+    </div>
+    <section class="player">
+      <div class="now">
+        <div id="cover" class="cover violet">✳</div>
+        <div>
+          <b id="nowTitle">Quiet Signals</b
+          ><small id="nowArtist">Pulse Sessions</small>
+        </div>
+        <button id="like" class="like">♡</button>
+      </div>
+      <div class="controls">
+        <div>
+          <button id="shuffle">⤨</button><button id="prev">|◀</button
+          ><button id="play" class="play">▶</button><button id="next">▶|</button
+          ><button id="repeat">↻</button
+          ><button
+            id="queue"
+            aria-label="Open playback queue"
+            title="Playback queue"
+          >
+            ☷
+          </button>
+        </div>
+        <div class="timeline">
+          <span id="time">0:00</span
+          ><input id="progress" type="range" min="0" max="100" value="0" /><span
+            id="duration"
+            >5:42</span
+          >
+        </div>
+      </div>
+      <div class="volume">
+        ◖
+        <input
+          id="volume"
+          type="range"
+          min="0"
+          max="1"
+          step=".01"
+          value=".75"
+        />
+      </div>
+      <audio id="audio" preload="metadata"></audio>
+    </section>
+    <section
+      id="queuePanel"
+      class="queue-panel"
+      aria-label="Playback queue"
+      hidden
+    >
+      <div class="queue-panel-heading">
+        <strong>Playback queue</strong>
+        <button id="queueClose" type="button" aria-label="Close queue">
+          ×
+        </button>
+      </div>
+      <ol id="queueItems" class="queue-items"></ol>
+      <div class="queue-panel-actions">
+        <button id="queuePrev" type="button">Previous</button>
+        <button id="queueNext" type="button">Next</button>
+        <button id="queueClear" type="button">Clear queue</button>
+      </div>
+    </section>
+    <div id="toast" role="status"></div>
+    <script src="config.js"></script>
+    <script src="internet-archive.js"></script>
+    <script src="catalog-search.js"></script>
+    <script src="app.js"></script>
+    <script type="module" src="cloud-sync.js"></script>
+    <script src="home-refresh.js"></script>
+    <script src="playlist-store.js"></script>
+    <script src="home-archive-discovery.js"></script>
+    <script src="charts-dashboard.js"></script>
+    <script src="song-recognition.js"></script>
+  </body>
+</html>

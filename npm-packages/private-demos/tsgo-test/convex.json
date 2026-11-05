@@ -1,0 +1,4 @@
+{
+  "typescriptCompiler": "tsgo",
+  "$schema": "node_modules/convex/schemas/convex.schema.json"
+}

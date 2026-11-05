@@ -1,0 +1,14 @@
+{
+  "name": "test-data",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc -p convex/tsconfig.json",
+    "dev": "convex dev"
+  },
+  "dependencies": {
+    "convex": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.0.3"
+  }
+}

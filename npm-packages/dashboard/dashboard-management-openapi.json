@@ -1,0 +1,7454 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "big_brain",
+    "description": "",
+    "license": {
+      "name": "LicenseRef-Convex",
+      "identifier": "LicenseRef-Convex"
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/profile_emails/list": {
+      "get": {
+        "operationId": "list_profile_emails",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberEmailResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile_emails/create": {
+      "post": {
+        "operationId": "create_profile_email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileEmailArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/profile_emails/delete": {
+      "post": {
+        "operationId": "delete_profile_email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileEmailArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/member_data": {
+      "get": {
+        "operationId": "get_member_data",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberDataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/preferences": {
+      "get": {
+        "operationId": "get_preferences",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "operationId": "get_profile",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile_emails/resend_verification": {
+      "post": {
+        "operationId": "resend_verification_email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileEmailArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/profile_emails/update_primary": {
+      "post": {
+        "operationId": "update_primary_profile_email",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileEmailArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/update_profile_name": {
+      "put": {
+        "operationId": "update_profile_name",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileNameArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/profile_emails/verify/{code}": {
+      "post": {
+        "operationId": "verify_profile_email",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/profile/mfa": {
+      "get": {
+        "operationId": "get_mfa_status",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delete_account": {
+      "post": {
+        "operationId": "delete_account",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/set_preference": {
+      "put": {
+        "operationId": "set_preference",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPreferenceArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/optins": {
+      "get": {
+        "operationId": "dashboard_get_opt_ins",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOptInsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "dashboard_accept_opt_ins",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/OptIn"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "operationId": "get_teams_for_member",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_team",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/remove_member": {
+      "post": {
+        "operationId": "remove_member_from_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveMemberArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_entitlements": {
+      "get": {
+        "operationId": "get_team_entitlements",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamEntitlementsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}": {
+      "post": {
+        "operationId": "update_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTeamArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/delete": {
+      "post": {
+        "operationId": "delete_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/apply_referral_code": {
+      "post": {
+        "operationId": "apply_referral_code",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyReferralCodeArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/validate_referral_code": {
+      "get": {
+        "operationId": "validate_referral_code",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateReferralCodeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/referral_state": {
+      "get": {
+        "operationId": "get_referral_state_for_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralState"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/projects": {
+      "get": {
+        "operationId": "get_projects_for_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Cursor for pagination",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of projects to return (defaults to 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Search query to filter projects by name or slug (case-insensitive)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/projects/{project_slug}": {
+      "get": {
+        "operationId": "get_project_by_slug",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TeamId"
+            }
+          },
+          {
+            "name": "project_slug",
+            "in": "path",
+            "description": "Project slug",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ProjectSlug"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/usage/team_usage_state": {
+      "get": {
+        "operationId": "get_team_usage_state",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamUsageStateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/unpause": {
+      "post": {
+        "operationId": "unpause_deployments",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_audit_log_events": {
+      "get": {
+        "operationId": "get_audit_log_events",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "style": "form"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "style": "form"
+          },
+          {
+            "name": "memberId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/MemberId"
+            },
+            "style": "form"
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/AuditLogAction"
+            },
+            "style": "form"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            },
+            "style": "form"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}": {
+      "get": {
+        "operationId": "get_project",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_project",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delete_project/{project_id}": {
+      "post": {
+        "operationId": "dashboard_delete_project",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delete_projects": {
+      "post": {
+        "operationId": "dashboard_delete_projects",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteProjectsArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/create_project": {
+      "post": {
+        "operationId": "create_project_and_provision_deployment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateProjectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/transfer": {
+      "post": {
+        "operationId": "transfer_project",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferProjectArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/local_deployments/{deployment_name}/auth": {
+      "get": {
+        "operationId": "get_local_deployment_auth_dashboard",
+        "parameters": [
+          {
+            "name": "deployment_name",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalDeploymentAuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_project_roles": {
+      "get": {
+        "operationId": "get_project_roles_for_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectMemberRoleResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/update_project_roles": {
+      "post": {
+        "operationId": "update_project_roles",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectRolesArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/list_my_custom_roles": {
+      "get": {
+        "tags": [
+          "Custom Roles",
+          "alpha"
+        ],
+        "operationId": "list my custom roles",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMyCustomRolesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_id}/request_cloud_backup": {
+      "post": {
+        "operationId": "request_cloud_backup",
+        "parameters": [
+          {
+            "name": "deployment_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestCloudBackupArgs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudBackupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_id}/restore_from_cloud_backup": {
+      "post": {
+        "operationId": "restore_from_cloud_backup",
+        "parameters": [
+          {
+            "name": "deployment_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestoreFromCloudBackupArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_id}/list_cloud_backups": {
+      "get": {
+        "operationId": "list_cloud_backups_by_deployment",
+        "parameters": [
+          {
+            "name": "deployment_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CloudBackupResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cloud_backups/{cloud_backup_id}/delete": {
+      "post": {
+        "operationId": "delete_cloud_backup",
+        "parameters": [
+          {
+            "name": "cloud_backup_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/cloud_backups/{cloud_backup_id}": {
+      "get": {
+        "operationId": "get_cloud_backup",
+        "parameters": [
+          {
+            "name": "cloud_backup_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudBackupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cloud_backups/{cloud_backup_id}/cancel": {
+      "post": {
+        "operationId": "cancel_cloud_backup",
+        "parameters": [
+          {
+            "name": "cloud_backup_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "default": null
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_id}/get_periodic_backup_config": {
+      "get": {
+        "operationId": "get_periodic_backup_config",
+        "parameters": [
+          {
+            "name": "deployment_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PeriodicBackupConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_id}/configure_periodic_backup": {
+      "post": {
+        "operationId": "configure_periodic_backup",
+        "parameters": [
+          {
+            "name": "deployment_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigurePeriodicBackupArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PeriodicBackupConfig"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_id}/disable_periodic_backup": {
+      "post": {
+        "operationId": "disable_periodic_backup",
+        "parameters": [
+          {
+            "name": "deployment_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/discord/accounts": {
+      "get": {
+        "operationId": "get_discord_accounts",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscordAccountsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/discord/login_url": {
+      "get": {
+        "operationId": "get_discord_login_url",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscordLoginUrlResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/discord/authorize": {
+      "post": {
+        "operationId": "authorize_discord_account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeDiscordAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/discord/unlink": {
+      "post": {
+        "operationId": "unlink_discord_account",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlinkDiscordAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/delete_access_token": {
+      "post": {
+        "operationId": "delete_access_token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccessTokenArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/app_access_tokens": {
+      "get": {
+        "operationId": "get_team_app_access_tokens",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppAccessTokenResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/app_access_tokens": {
+      "get": {
+        "operationId": "get_project_app_access_tokens",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppAccessTokenResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authorize": {
+      "post": {
+        "summary": "DEPRECATED: Replaced by the platform's `/create_personal_access_token`\nendpoint.",
+        "operationId": "authorize_device",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorizeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authorize_app": {
+      "post": {
+        "operationId": "authorize_app",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizeAppArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorizeCodeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invites/{code}/accept": {
+      "post": {
+        "operationId": "accept_invitation",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/cancel_orb_subscription": {
+      "post": {
+        "operationId": "cancel_orb_subscription",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/change_subscription_plan": {
+      "post": {
+        "operationId": "change_subscription_plan",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeSubscriptionPlanArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/create_subscription": {
+      "post": {
+        "operationId": "create_subscription",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSubscriptionArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_discounted_plan/{plan_id}/{promo_code}": {
+      "get": {
+        "operationId": "get_discounted_plan",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          },
+          {
+            "name": "plan_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          },
+          {
+            "name": "promo_code",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscountedPlanResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_orb_subscription": {
+      "get": {
+        "operationId": "get_orb_subscription",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "$ref": "#/components/schemas/OrbSubscriptionResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/list_active_plans": {
+      "get": {
+        "operationId": "list_active_plans",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlansResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/list_invoices": {
+      "get": {
+        "operationId": "list_invoices",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoicesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/has_failed_payment": {
+      "get": {
+        "operationId": "has_failed_payment",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HasFailedPaymentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/unschedule_cancel_orb_subscription": {
+      "post": {
+        "operationId": "unschedule_cancel_orb_subscription",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/update_billing_address": {
+      "put": {
+        "operationId": "update_billing_address",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBillingAddressArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/update_billing_contact": {
+      "put": {
+        "operationId": "update_billing_contact",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBillingContactArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/update_payment_method": {
+      "put": {
+        "operationId": "update_payment_method",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePaymentMethodArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/create_setup_intent": {
+      "post": {
+        "operationId": "create_setup_intent",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupIntentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/set_spending_limit": {
+      "post": {
+        "operationId": "set_spending_limit",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSpendingLimitArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_current_spend": {
+      "get": {
+        "operationId": "get_current_spend",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCurrentSpendResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_spending_limits": {
+      "get": {
+        "operationId": "get_spending_limits",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSpendingLimitsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/list_credits": {
+      "get": {
+        "summary": "List a team's USD prepaid credits in Orb's drawdown order.",
+        "description": "Balances are dollar amounts; included usage in custom pricing units has\nseparate ledgers. Every credit is returned in one response, so\n`pagination.hasMore` is always false. The envelope is shaped for paging so\nthat adding it later is a backwards-compatible change.",
+        "operationId": "list_credits",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCreditsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/usage/query": {
+      "get": {
+        "operationId": "query_usage_databricks",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          },
+          {
+            "name": "queryId",
+            "in": "query",
+            "description": "Uuid of a databricks query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "name": "projectId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ProjectId"
+            },
+            "style": "form"
+          },
+          {
+            "name": "deploymentName",
+            "in": "query",
+            "description": "Required for insights queries; ignored otherwise.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/CloudDeploymentName"
+            },
+            "style": "form"
+          },
+          {
+            "name": "componentPath",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "name": "udfId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "name": "tableName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/usage/current_billing_period": {
+      "get": {
+        "operationId": "get_team_current_billing_period",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamCurrentBillingPeriodResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_slug}/usage/get_token_info": {
+      "get": {
+        "operationId": "get_token_info",
+        "parameters": [
+          {
+            "name": "team_slug",
+            "in": "path",
+            "description": "",
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTokenInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/oauth_apps": {
+      "get": {
+        "operationId": "list_oauth_apps_for_team",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OauthAppResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/oauth_apps/check": {
+      "post": {
+        "operationId": "check_oauth_app",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckOauthAppArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthAppResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/oauth_apps/register": {
+      "post": {
+        "operationId": "register_oauth_app",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterOauthAppArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthAppResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/oauth_apps/{client_id}/update": {
+      "post": {
+        "operationId": "update_oauth_app",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TeamId"
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "path",
+            "description": "The client ID of the OAuth app to update",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOauthAppArgs"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthAppResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/oauth_apps/{client_id}/delete": {
+      "post": {
+        "operationId": "delete_oauth_app",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TeamId"
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "path",
+            "description": "The client ID of the OAuth app to delete",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/oauth_apps/{client_id}/regenerate_secret": {
+      "post": {
+        "operationId": "regenerate_oauth_client_secret",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TeamId"
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "path",
+            "description": "The client ID of the OAuth app to regenerate the secret for",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workos/delete_environment": {
+      "post": {
+        "description": "Delete a WorkOS environment. This removes the environment from both WorkOS and the Convex database.",
+        "operationId": "delete_workos_environment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteWorkOSEnvironmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteWorkOSEnvironmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workos/disconnect_workos_team": {
+      "post": {
+        "description": "Disconnect a WorkOS team from a Convex team. This is a destructive action that will prevent new WorkOS environments from being provisioned, though existing environments will continue to work.",
+        "operationId": "disconnect_workos_team",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisconnectWorkOSTeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisconnectWorkOSTeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workos/available_workos_team_emails": {
+      "get": {
+        "description": "Get candidate email addresses to be WorkOS admins.",
+        "operationId": "get_available_workos_team_emails",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailableWorkOSTeamEmailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_name}/workos_environment": {
+      "get": {
+        "operationId": "get_deployment_workos_environment",
+        "parameters": [
+          {
+            "name": "deployment_name",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentWorkOSEnvironmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_name}/has_associated_workos_team": {
+      "get": {
+        "description": "Check if a deployment has an associated WorkOS team",
+        "operationId": "get_has_associated_workos_team",
+        "parameters": [
+          {
+            "name": "deployment_name",
+            "in": "path",
+            "description": "Deployment name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HasAssociatedWorkOSTeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workos/get_or_provision_workos_environment": {
+      "post": {
+        "description": "Get or provision a WorkOS environment for a deployment",
+        "operationId": "get_or_provision_workos_environment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetOrProvisionEnvironmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionEnvironmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/workos_integration": {
+      "get": {
+        "operationId": "get_team_workos_integration",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOSTeamIntegrationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/deployments/{deployment_name}/workos_environment_health": {
+      "get": {
+        "description": "Check if the WorkOS environment associated with this deployment is still accessible",
+        "operationId": "get_workos_environment_health",
+        "parameters": [
+          {
+            "name": "deployment_name",
+            "in": "path",
+            "description": "Deployment name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOSEnvironmentHealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/workos_invitation_eligible_emails": {
+      "get": {
+        "description": "Get emails eligible for WorkOS team invitation (all verified emails except those that are admin of a different WorkOS team)",
+        "operationId": "get_workos_invitation_eligible_emails",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Convex team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationEligibleEmailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/workos_team_health": {
+      "get": {
+        "description": "Check if the WorkOS team associated with this Convex team is still accessible",
+        "operationId": "get_workos_team_health",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Convex team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOSTeamHealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workos/invite_team_member": {
+      "post": {
+        "description": "Invite a member to the WorkOS team associated with a Convex team",
+        "operationId": "invite_workos_team_member",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteWorkOSTeamMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteWorkOSTeamMemberResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workos/provision_associated_workos_team": {
+      "post": {
+        "description": "Provision a WorkOS team for a Convex team",
+        "operationId": "provision_associated_workos_team",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionWorkOSTeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionWorkOSTeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/workos_environments": {
+      "get": {
+        "description": "List all WorkOS environments for a project",
+        "operationId": "get_project_workos_environments",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProjectEnvironmentsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new WorkOS environment for a project",
+        "operationId": "provision_project_workos_environment",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionProjectEnvironmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionProjectEnvironmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{project_id}/workos_environments/{client_id}": {
+      "get": {
+        "description": "Get a specific WorkOS environment for a project including credentials. This action is audited.",
+        "operationId": "get_project_workos_environment",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProjectEnvironmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workos/delete_project_environment": {
+      "post": {
+        "description": "Delete a WorkOS environment from a project",
+        "operationId": "delete_project_environment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteProjectEnvironmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteProjectEnvironmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workos/check_project_environment_health": {
+      "post": {
+        "description": "Check the health of a project WorkOS environment. Returns HTTP error on failure.",
+        "operationId": "check_project_environment_health",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckProjectEnvironmentHealthRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkOSEnvironmentHealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/enable_sso": {
+      "post": {
+        "operationId": "enable_sso",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnableSSORequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SSOOrganizationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/get_sso": {
+      "get": {
+        "operationId": "get_sso",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SSOOrganizationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/disable_sso": {
+      "post": {
+        "operationId": "disable_sso",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/update_sso": {
+      "post": {
+        "operationId": "update_sso",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSSORequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/generate_sso_configuration_link": {
+      "post": {
+        "operationId": "generate_sso_configuration_link",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateSSOConfigurationLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateSSOConfigurationLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/domains": {
+      "get": {
+        "operationId": "list_team_domains",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTeamDomainsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/domains/{domain_id}": {
+      "delete": {
+        "operationId": "delete_team_domain",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TeamId"
+            }
+          },
+          {
+            "name": "domain_id",
+            "in": "path",
+            "description": "WorkOS organization domain ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/domains/portal_link": {
+      "post": {
+        "operationId": "generate_domain_portal_link",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDomainPortalLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/directory_sync": {
+      "get": {
+        "operationId": "get_directory_sync",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectorySyncResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/directory_sync/portal_link": {
+      "post": {
+        "operationId": "generate_directory_sync_configuration_link",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateDirectorySyncConfigurationLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/directory_sync/enable": {
+      "post": {
+        "operationId": "enable_directory_sync",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectorySyncResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/directory_sync/disable": {
+      "post": {
+        "operationId": "disable_directory_sync",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/directory_sync/groups": {
+      "get": {
+        "operationId": "list_directory_sync_groups",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Cursor for pagination",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max results per page (default: 100, max: 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDirectorySyncGroupsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/directory_sync/staged_members": {
+      "get": {
+        "operationId": "list_staged_directory_members",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Cursor for pagination",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Max results per page (default: 100, max: 100)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListStagedDirectoryMembersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams/{team_id}/directory_sync/mappings/{workos_group_id}": {
+      "put": {
+        "operationId": "put_group_role_mapping",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TeamId"
+            }
+          },
+          {
+            "name": "workos_group_id",
+            "in": "path",
+            "description": "WorkOS group ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGroupRoleMappingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_group_role_mapping",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "description": "Team ID",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TeamId"
+            }
+          },
+          {
+            "name": "workos_group_id",
+            "in": "path",
+            "description": "WorkOS group ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/member/directory_sync_offers": {
+      "get": {
+        "operationId": "list_directory_sync_offers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectorySyncOffersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/member/directory_sync/join": {
+      "post": {
+        "operationId": "join_directory_synced_team",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinDirectorySyncedTeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinDirectorySyncedTeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vercel/potential_teams": {
+      "get": {
+        "operationId": "list_potential_vercel_teams_dashboard",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PotentialVercelTeam"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vercel/potential_teams/{proposed_team_id}/join": {
+      "post": {
+        "operationId": "join_vercel_team_dashboard",
+        "parameters": [
+          {
+            "name": "proposed_team_id",
+            "in": "path",
+            "description": "The Convex team to join",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccessTokenId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "line2": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "postal_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "AdminKey": {
+        "type": "string",
+        "description": "Encrypted admin key"
+      },
+      "AppAccessTokenResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "appName",
+          "appClientId",
+          "creationTime"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/AccessTokenId",
+            "description": "Stable identifier for this access token."
+          },
+          "name": {
+            "$ref": "#/components/schemas/DeviceName"
+          },
+          "appName": {
+            "$ref": "#/components/schemas/AppName"
+          },
+          "appClientId": {
+            "type": "string"
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastUsedTime": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "AppName": {
+        "type": "string"
+      },
+      "ApplyReferralCodeArgs": {
+        "type": "object",
+        "required": [
+          "referralCode"
+        ],
+        "properties": {
+          "referralCode": {
+            "$ref": "#/components/schemas/ReferralCode"
+          }
+        }
+      },
+      "AuditLogAction": {
+        "type": "string",
+        "enum": [
+          "joinTeam",
+          "createTeam",
+          "updateTeam",
+          "deleteTeam",
+          "createProject",
+          "transferProject",
+          "receiveProject",
+          "updateProject",
+          "deleteProject",
+          "createProjectEnvironmentVariable",
+          "updateProjectEnvironmentVariable",
+          "deleteProjectEnvironmentVariable",
+          "createDeployment",
+          "deleteDeployment",
+          "inviteMember",
+          "cancelMemberInvitation",
+          "removeMember",
+          "updateMemberRole",
+          "updateMemberProjectRole",
+          "updatePaymentMethod",
+          "updateBillingContact",
+          "updateBillingAddress",
+          "createSubscription",
+          "resumeSubscription",
+          "cancelSubscription",
+          "changeSubscriptionPlan",
+          "createTeamAccessToken",
+          "updateTeamAccessToken",
+          "deleteTeamAccessToken",
+          "viewTeamAccessToken",
+          "createProjectAccessToken",
+          "updateProjectAccessToken",
+          "deleteProjectAccessToken",
+          "viewProjectAccessToken",
+          "createDeploymentAccessToken",
+          "updateDeploymentAccessToken",
+          "deleteDeploymentAccessToken",
+          "viewDeploymentAccessToken",
+          "createPersonalAccessTokenWithSsoAccess",
+          "createTeamDomain",
+          "deleteTeamDomain",
+          "createCustomDomain",
+          "deleteCustomDomain",
+          "startManualCloudBackup",
+          "restoreFromCloudBackup",
+          "configurePeriodicBackup",
+          "disablePeriodicBackup",
+          "deleteCloudBackup",
+          "disableTeamExceedingSpendingLimits",
+          "setSpendingLimit",
+          "applyReferralCode",
+          "createOAuthApplication",
+          "updateOAuthApplication",
+          "deleteOAuthApplication",
+          "verifyOAuthApplication",
+          "generateOAuthClientSecret",
+          "createWorkosTeam",
+          "createWorkosEnvironment",
+          "deleteWorkosEnvironment",
+          "retrieveWorkosEnvironmentCredentials",
+          "disconnectWorkosTeam",
+          "inviteWorkosTeamMember",
+          "createProjectWorkosEnvironment",
+          "deleteProjectWorkosEnvironment",
+          "retrieveProjectWorkosEnvironmentCredentials",
+          "enableSSO",
+          "disableSSO",
+          "updateSSO",
+          "loginWithSSO",
+          "enableDirectorySync",
+          "disableDirectorySync",
+          "updateDirectorySyncGroupMapping",
+          "deleteDirectorySyncGroupMapping",
+          "transferDeployment",
+          "receiveDeployment",
+          "updateDeployment",
+          "createCustomRole",
+          "updateCustomRole",
+          "deleteCustomRole"
+        ]
+      },
+      "AuditLogActor": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "system"
+            ]
+          },
+          {
+            "type": "object",
+            "required": [
+              "member"
+            ],
+            "properties": {
+              "member": {
+                "type": "object",
+                "required": [
+                  "member_id"
+                ],
+                "properties": {
+                  "member_id": {
+                    "$ref": "#/components/schemas/MemberId"
+                  },
+                  "token_id": {
+                    "oneOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "$ref": "#/components/schemas/AccessTokenId"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "serviceAccount"
+            ],
+            "properties": {
+              "serviceAccount": {
+                "type": "object",
+                "required": [
+                  "member_id",
+                  "token_id"
+                ],
+                "properties": {
+                  "member_id": {
+                    "$ref": "#/components/schemas/MemberId"
+                  },
+                  "token_id": {
+                    "$ref": "#/components/schemas/AccessTokenId"
+                  },
+                  "client_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "team"
+            ],
+            "properties": {
+              "team": {
+                "type": "object",
+                "required": [
+                  "team_id",
+                  "token_id"
+                ],
+                "properties": {
+                  "team_id": {
+                    "$ref": "#/components/schemas/TeamId"
+                  },
+                  "token_id": {
+                    "$ref": "#/components/schemas/AccessTokenId"
+                  },
+                  "client_id": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "app"
+            ],
+            "properties": {
+              "app": {
+                "type": "object",
+                "required": [
+                  "client_id"
+                ],
+                "properties": {
+                  "client_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "description": "Represents the `ValidatedActor` equivalent for audit logs. This identifies\nwho executed an AuditLogEvent"
+      },
+      "AuditLogEventResponse": {
+        "type": "object",
+        "required": [
+          "teamId",
+          "actor",
+          "action",
+          "createTime",
+          "metadata"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/AuditLogActor"
+          },
+          "action": {
+            "$ref": "#/components/schemas/AuditLogAction"
+          },
+          "createTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Value"
+          },
+          "clientIp": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "clientUserAgent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "AuditLogResponse": {
+        "type": "object",
+        "description": "Struct that contains the result of a query to the audit_logs table. The\n`events` field contains all of the `AuditLog` values and the `cursor` field\ndenotes where to resume the query if more results are needed.",
+        "required": [
+          "events"
+        ],
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditLogEventResponse"
+            }
+          },
+          "cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "AuthorizeAppArgs": {
+        "type": "object",
+        "required": [
+          "authnToken",
+          "mode",
+          "clientId",
+          "redirectUri"
+        ],
+        "properties": {
+          "authnToken": {
+            "type": "string",
+            "description": "Authentication token is expected to be the access token from WorkOS"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/AuthorizeAppMode"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "projectId": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectId"
+              }
+            ]
+          },
+          "teamId": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TeamId"
+              }
+            ]
+          },
+          "redirectUri": {
+            "type": "string"
+          },
+          "codeChallenge": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthorizeAppMode": {
+        "type": "string",
+        "enum": [
+          "AuthorizationCode"
+        ]
+      },
+      "AuthorizeArgs": {
+        "type": "object",
+        "required": [
+          "authnToken"
+        ],
+        "properties": {
+          "authnToken": {
+            "type": "string",
+            "description": "Authentication token is expected to be the access token from WorkOS"
+          },
+          "deviceName": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DeviceName"
+              }
+            ]
+          },
+          "anonymousId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthorizeCodeResponse": {
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "A code that the application can use to retrieve the token"
+          }
+        }
+      },
+      "AuthorizeDiscordAccountRequest": {
+        "type": "object",
+        "required": [
+          "authorizationCode",
+          "csrfToken"
+        ],
+        "properties": {
+          "authorizationCode": {
+            "type": "string"
+          },
+          "csrfToken": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthorizeResponse": {
+        "type": "object",
+        "required": [
+          "accessToken"
+        ],
+        "properties": {
+          "accessToken": {
+            "$ref": "#/components/schemas/SerializedAccessToken",
+            "description": "a serialized access token that the CLI will send back up"
+          }
+        }
+      },
+      "AvailableWorkOSTeamEmailsResponse": {
+        "type": "object",
+        "required": [
+          "availableEmails",
+          "usedEmails"
+        ],
+        "properties": {
+          "availableEmails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usedEmails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BillingContactResponse": {
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangeSubscriptionPlanArgs": {
+        "type": "object",
+        "required": [
+          "newPlanId"
+        ],
+        "properties": {
+          "newPlanId": {
+            "type": "string"
+          },
+          "promoCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The promo code the user entered. Redeemed if it's an Orb coupon; a\npromo plan's code is already reflected in `new_plan_id`."
+          }
+        },
+        "additionalProperties": false
+      },
+      "CheckOauthAppArgs": {
+        "type": "object",
+        "required": [
+          "clientId",
+          "redirectUri"
+        ],
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "redirectUri": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CheckProjectEnvironmentHealthRequest": {
+        "type": "object",
+        "required": [
+          "projectId",
+          "clientId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Project ID",
+            "minimum": 0
+          },
+          "clientId": {
+            "type": "string",
+            "description": "WorkOS client ID"
+          }
+        }
+      },
+      "CloudBackupId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "CloudBackupResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "sourceDeploymentId",
+          "sourceDeploymentName",
+          "expirationTime",
+          "state",
+          "requestedTime",
+          "includeStorage"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CloudBackupId"
+          },
+          "sourceDeploymentId": {
+            "$ref": "#/components/schemas/DeploymentId"
+          },
+          "sourceDeploymentName": {
+            "$ref": "#/components/schemas/CloudDeploymentName"
+          },
+          "expirationTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "state": {
+            "type": "string"
+          },
+          "snapshotId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "requestedTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "includeStorage": {
+            "type": "boolean"
+          },
+          "completedTime": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "CloudDeploymentName": {
+        "type": "string",
+        "description": "Example instance names:\n\ntall-sheep-123\n\ntest-tall-sheep-123  # Prefix of test for internal testing"
+      },
+      "ConfigurePeriodicBackupArgs": {
+        "type": "object",
+        "required": [
+          "cronspec"
+        ],
+        "properties": {
+          "cronspec": {
+            "type": "string"
+          },
+          "expirationDeltaSecs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "includeStorage": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "CreateProjectArgs": {
+        "type": "object",
+        "required": [
+          "team",
+          "projectName"
+        ],
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamSlug"
+          },
+          "projectName": {
+            "$ref": "#/components/schemas/ProjectName"
+          },
+          "deploymentType": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DeploymentType"
+              }
+            ]
+          },
+          "deploymentClass": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "region": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RegionName"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateProjectResponse": {
+        "type": "object",
+        "required": [
+          "projectSlug",
+          "projectId",
+          "teamSlug",
+          "teamId",
+          "projectsRemaining"
+        ],
+        "properties": {
+          "projectSlug": {
+            "$ref": "#/components/schemas/ProjectSlug"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "teamSlug": {
+            "$ref": "#/components/schemas/TeamSlug"
+          },
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "deploymentName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "prodUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "projectsRemaining": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "deploymentsRemaining": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          }
+        }
+      },
+      "CreateSubscriptionArgs": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "planId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "planId": {
+            "type": "string"
+          },
+          "billingAddress": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Address"
+              }
+            ]
+          },
+          "disableThresholdCents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "warningThresholdCents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "promoCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The promo code the user entered. Redeemed if it's an Orb coupon; a\npromo plan's code is already reflected in `plan_id`."
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateTeamArgs": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/ProposedTeamName"
+          }
+        }
+      },
+      "CreditResponse": {
+        "type": "object",
+        "description": "A block of prepaid credit held by a team, applied to invoices before the\npayment method is charged.",
+        "required": [
+          "id",
+          "balance",
+          "initialBalance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The Orb-assigned identifier for the credit block."
+          },
+          "itemName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "What the credit was granted for, from the plan allocation behind it\n(e.g. \"Business Plan Minimum\"). `None` for credit granted by hand."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The note left when the credit was granted. `None` for credit that comes\nfrom a plan allocation, which Orb doesn't annotate."
+          },
+          "balance": {
+            "type": "number",
+            "format": "double",
+            "description": "The credit remaining in the block, in dollars."
+          },
+          "initialBalance": {
+            "type": "number",
+            "format": "double",
+            "description": "The credit the block was granted with, in dollars. Subtracting\n`balance` gives the amount consumed so far."
+          },
+          "expiryDate": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "When the block's remaining balance expires, in milliseconds since the\nepoch. `None` if it doesn't expire."
+          }
+        }
+      },
+      "CustomRoleId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "CustomRoleResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "teamId",
+          "name",
+          "statements",
+          "createTime"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CustomRoleId"
+          },
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleStatement"
+            }
+          },
+          "creator": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MemberId"
+              }
+            ]
+          },
+          "createTime": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DeleteAccessTokenArgs": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/DeviceName"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeleteProjectEnvironmentRequest": {
+        "type": "object",
+        "required": [
+          "projectId",
+          "clientId"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Project ID for the environment to delete",
+            "minimum": 0
+          },
+          "clientId": {
+            "type": "string",
+            "description": "WorkOS client ID of the environment to delete"
+          }
+        }
+      },
+      "DeleteProjectEnvironmentResponse": {
+        "type": "object",
+        "description": "Response for deleting a project environment - matches\nDeleteWorkOSEnvironmentResponse",
+        "required": [
+          "workosEnvironmentId",
+          "workosEnvironmentName",
+          "workosTeamId"
+        ],
+        "properties": {
+          "workosEnvironmentId": {
+            "type": "string"
+          },
+          "workosEnvironmentName": {
+            "type": "string"
+          },
+          "workosTeamId": {
+            "type": "string"
+          }
+        }
+      },
+      "DeleteProjectsArgs": {
+        "type": "object",
+        "required": [
+          "projectIds"
+        ],
+        "properties": {
+          "projectIds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectId"
+            }
+          }
+        }
+      },
+      "DeleteWorkOSEnvironmentRequest": {
+        "type": "object",
+        "required": [
+          "deploymentName"
+        ],
+        "properties": {
+          "deploymentName": {
+            "type": "string",
+            "description": "Deployment name for the environment to delete"
+          }
+        }
+      },
+      "DeleteWorkOSEnvironmentResponse": {
+        "type": "object",
+        "required": [
+          "workosEnvironmentId",
+          "workosEnvironmentName",
+          "workosTeamId"
+        ],
+        "properties": {
+          "workosEnvironmentId": {
+            "type": "string"
+          },
+          "workosEnvironmentName": {
+            "type": "string"
+          },
+          "workosTeamId": {
+            "type": "string"
+          }
+        }
+      },
+      "DeploymentId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "DeploymentReference": {
+        "type": "string",
+        "description": "An identifier that uniquely identifies this deployment within the project."
+      },
+      "DeploymentType": {
+        "type": "string",
+        "enum": [
+          "dev",
+          "prod",
+          "preview",
+          "custom"
+        ]
+      },
+      "DeploymentWorkOSEnvironmentInfo": {
+        "type": "object",
+        "required": [
+          "deploymentName",
+          "workosEnvironmentId",
+          "workosEnvironmentName",
+          "workosClientId",
+          "workosApiKey",
+          "workosTeamId",
+          "isProduction"
+        ],
+        "properties": {
+          "deploymentName": {
+            "type": "string"
+          },
+          "workosEnvironmentId": {
+            "type": "string"
+          },
+          "workosEnvironmentName": {
+            "type": "string"
+          },
+          "workosClientId": {
+            "type": "string"
+          },
+          "workosApiKey": {
+            "type": "string"
+          },
+          "workosTeamId": {
+            "type": "string"
+          },
+          "isProduction": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DeploymentWorkOSEnvironmentResponse": {
+        "type": "object",
+        "required": [
+          "teamId"
+        ],
+        "properties": {
+          "environment": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DeploymentWorkOSEnvironmentInfo",
+                "description": "WorkOS environment info if it exists for this deployment"
+              }
+            ]
+          },
+          "workosTeam": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/WorkOSAssociatedTeam",
+                "description": "Team info if the team has WorkOS configured"
+              }
+            ]
+          },
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          }
+        }
+      },
+      "DeviceName": {
+        "type": "string"
+      },
+      "DirectoryGroupResponse": {
+        "type": "object",
+        "required": [
+          "workosGroupId",
+          "name",
+          "idpId"
+        ],
+        "properties": {
+          "workosGroupId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "idpId": {
+            "type": "string"
+          },
+          "mapping": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/GroupRoleMappingResponse"
+              }
+            ]
+          }
+        }
+      },
+      "DirectoryResponse": {
+        "type": "object",
+        "description": "The one directory a team may connect, as WorkOS reports it.",
+        "required": [
+          "id",
+          "state",
+          "linked"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "like \"directory_01ECAZ4NV9QMV47GW873HDCX74\"."
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": "string"
+          },
+          "linked": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The identity provider behind the directory, e.g. \"okta scim v2.0\"."
+          }
+        }
+      },
+      "DirectorySyncOffer": {
+        "type": "object",
+        "required": [
+          "teamId",
+          "teamName",
+          "email"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "teamName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "description": "The verified email of the caller that matched the roster row."
+          }
+        }
+      },
+      "DirectorySyncOffersResponse": {
+        "type": "object",
+        "required": [
+          "offers"
+        ],
+        "properties": {
+          "offers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DirectorySyncOffer"
+            }
+          }
+        }
+      },
+      "DirectorySyncResponse": {
+        "type": "object",
+        "required": [
+          "enabled",
+          "mirrored"
+        ],
+        "properties": {
+          "directory": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DirectoryResponse"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the team has turned directory management on. A directory can\nbe connected and mirrored without it; until this is set nothing from\nthe directory reaches team members."
+          },
+          "mirrored": {
+            "type": "boolean",
+            "description": "Whether Convex holds a mirror of the directory yet. WorkOS delivers the\nroster asynchronously after the directory is linked, so a directory can\nreport itself linked while this is still false, and until it flips the\ngroups and staged rosters have nothing to show."
+          }
+        }
+      },
+      "DirectoryUserState": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive",
+          "suspended"
+        ]
+      },
+      "DisconnectWorkOSTeamRequest": {
+        "type": "object",
+        "required": [
+          "teamId"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId",
+            "description": "Convex team ID to disconnect from WorkOS"
+          }
+        }
+      },
+      "DisconnectWorkOSTeamResponse": {
+        "type": "object",
+        "required": [
+          "workosTeamId",
+          "workosTeamName"
+        ],
+        "properties": {
+          "workosTeamId": {
+            "type": "string"
+          },
+          "workosTeamName": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscordAccount": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "details": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DiscordAccountDetails"
+              }
+            ]
+          }
+        }
+      },
+      "DiscordAccountDetails": {
+        "type": "object",
+        "required": [
+          "username",
+          "discriminator"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "discriminator": {
+            "type": "string"
+          },
+          "global_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "avatar": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "DiscordAccountsResponse": {
+        "type": "object",
+        "required": [
+          "accounts"
+        ],
+        "properties": {
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscordAccount"
+            }
+          }
+        }
+      },
+      "DiscordId": {
+        "type": "string"
+      },
+      "DiscordLoginUrlResponse": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscountedPlanResponse": {
+        "type": "object",
+        "required": [
+          "planId",
+          "percentOff",
+          "requiresPaymentMethod"
+        ],
+        "properties": {
+          "planId": {
+            "type": "string"
+          },
+          "percentOff": {
+            "type": "number",
+            "format": "double"
+          },
+          "durationInMonths": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "requiresPaymentMethod": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EnableSSORequest": {
+        "type": "object"
+      },
+      "GenerateDirectorySyncConfigurationLinkResponse": {
+        "type": "object",
+        "required": [
+          "link"
+        ],
+        "properties": {
+          "link": {
+            "type": "string"
+          }
+        }
+      },
+      "GenerateDomainPortalLinkResponse": {
+        "type": "object",
+        "required": [
+          "link"
+        ],
+        "properties": {
+          "link": {
+            "type": "string"
+          }
+        }
+      },
+      "GenerateSSOConfigurationLinkRequest": {
+        "type": "object",
+        "required": [
+          "intent"
+        ],
+        "properties": {
+          "intent": {
+            "$ref": "#/components/schemas/SSOPortalIntent"
+          }
+        }
+      },
+      "GenerateSSOConfigurationLinkResponse": {
+        "type": "object",
+        "required": [
+          "link"
+        ],
+        "properties": {
+          "link": {
+            "type": "string"
+          }
+        }
+      },
+      "GetCurrentSpendResponse": {
+        "type": "object",
+        "required": [
+          "totalCents"
+        ],
+        "properties": {
+          "totalCents": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        }
+      },
+      "GetOptInsResponse": {
+        "type": "object",
+        "required": [
+          "optInsToAccept"
+        ],
+        "properties": {
+          "optInsToAccept": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptInToAccept"
+            }
+          }
+        }
+      },
+      "GetOrProvisionEnvironmentRequest": {
+        "type": "object",
+        "required": [
+          "deploymentName"
+        ],
+        "properties": {
+          "deploymentName": {
+            "type": "string"
+          },
+          "environmentName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isProduction": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "GetProjectEnvironmentResponse": {
+        "type": "object",
+        "description": "Response for getting a project WorkOS environment with credentials - matches\nProvisionProjectEnvironmentResponse pattern with workos_ prefix",
+        "required": [
+          "workosEnvironmentId",
+          "workosEnvironmentName",
+          "workosClientId",
+          "workosApiKey",
+          "userEnvironmentName",
+          "isProduction"
+        ],
+        "properties": {
+          "workosEnvironmentId": {
+            "type": "string"
+          },
+          "workosEnvironmentName": {
+            "type": "string"
+          },
+          "workosClientId": {
+            "type": "string"
+          },
+          "workosApiKey": {
+            "type": "string"
+          },
+          "userEnvironmentName": {
+            "type": "string",
+            "description": "The user-provided environment name (e.g., \"staging\", \"development\")"
+          },
+          "isProduction": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GetProjectEnvironmentsResponse": {
+        "type": "object",
+        "required": [
+          "environments"
+        ],
+        "properties": {
+          "environments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectEnvironmentSummary"
+            }
+          }
+        }
+      },
+      "GetSpendingLimitsResponse": {
+        "type": "object",
+        "properties": {
+          "disableThresholdCents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "warningThresholdCents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "state": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SpendingLimitsState"
+              }
+            ]
+          }
+        }
+      },
+      "GetTokenInfoResponse": {
+        "type": "object",
+        "required": [
+          "tokensUsed",
+          "tokensQuota",
+          "centitokensUsed",
+          "centitokensQuota",
+          "isTeamDisabled",
+          "isPaidPlan",
+          "planType"
+        ],
+        "properties": {
+          "tokensUsed": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "tokensQuota": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "centitokensUsed": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "centitokensQuota": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "isTeamDisabled": {
+            "type": "boolean"
+          },
+          "isPaidPlan": {
+            "type": "boolean"
+          },
+          "planType": {
+            "type": "string"
+          }
+        }
+      },
+      "GroupRoleMappingResponse": {
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "customRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamMemberCustomRole"
+            }
+          }
+        }
+      },
+      "HasAssociatedWorkOSTeamResponse": {
+        "type": "object",
+        "required": [
+          "hasAssociatedWorkosTeam",
+          "teamId"
+        ],
+        "properties": {
+          "hasAssociatedWorkosTeam": {
+            "type": "boolean"
+          },
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "adminEmail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Email address used to provision the WorkOS account. This field should\nalways be present if has_associated_workos_team is true."
+          },
+          "adminName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Name of Convex team member who created the WorkOS account.\nThis field is optional even when has_associated_workos_team is true."
+          },
+          "adminConvexEmail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Email of Convex team member who created the WorkOS account.\nThis field should always be present when has_associated_workos_team is\ntrue."
+          }
+        }
+      },
+      "HasFailedPaymentResponse": {
+        "type": "object",
+        "required": [
+          "hasFailedPayment"
+        ],
+        "properties": {
+          "hasFailedPayment": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InvitationEligibleEmailsResponse": {
+        "type": "object",
+        "required": [
+          "eligibleEmails"
+        ],
+        "properties": {
+          "eligibleEmails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "adminEmail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The admin email used to create this team's WorkOS account (always\neligible for re-invitation)"
+          }
+        }
+      },
+      "InviteWorkOSTeamMemberRequest": {
+        "type": "object",
+        "required": [
+          "teamId",
+          "email"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId",
+            "description": "Convex team ID that has an associated WorkOS team"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address to invite to the WorkOS team,\nmust be a verified email address associated with the user's account"
+          }
+        }
+      },
+      "InviteWorkOSTeamMemberResponse": {
+        "type": "object",
+        "required": [
+          "email",
+          "roleSlug"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "roleSlug": {
+            "type": "string"
+          }
+        }
+      },
+      "InvoiceResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "invoiceDate",
+          "invoiceNumber",
+          "currency",
+          "amountDue",
+          "total",
+          "status",
+          "hasFailedPayment"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "invoiceDate": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "invoiceNumber": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "amountDue": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "hostedInvoiceUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "hasFailedPayment": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InvoicesResponse": {
+        "type": "object",
+        "required": [
+          "invoices"
+        ],
+        "properties": {
+          "invoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceResponse"
+            }
+          }
+        }
+      },
+      "IsDefaultDeployment": {
+        "type": "boolean",
+        "description": "Indicates whether the deployment is the default prod deployment for the\nproject, or the default cloud dev deployment for the member in the project."
+      },
+      "JoinDirectorySyncedTeamRequest": {
+        "type": "object",
+        "required": [
+          "proposedTeamId"
+        ],
+        "properties": {
+          "proposedTeamId": {
+            "$ref": "#/components/schemas/TeamId"
+          }
+        }
+      },
+      "JoinDirectorySyncedTeamResponse": {
+        "type": "object",
+        "required": [
+          "teamId",
+          "teamSlug"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "teamSlug": {
+            "type": "string"
+          }
+        }
+      },
+      "ListDirectorySyncGroupsResponse": {
+        "type": "object",
+        "required": [
+          "groups",
+          "pagination"
+        ],
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DirectoryGroupResponse"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        }
+      },
+      "ListMyCustomRolesResponse": {
+        "type": "object",
+        "required": [
+          "role",
+          "customRoles"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role",
+            "description": "The team member's built-in role. When `custom`, `customRoles` lists\nthe role definitions whose statements determine what the member can\ndo; for `admin`/`developer` it is empty."
+          },
+          "customRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomRoleResponse"
+            }
+          }
+        }
+      },
+      "ListStagedDirectoryMembersResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StagedDirectoryMemberResponse"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        }
+      },
+      "ListTeamDomainsResponse": {
+        "type": "object",
+        "required": [
+          "domains"
+        ],
+        "properties": {
+          "domains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SSOOrganizationDomain"
+            }
+          }
+        }
+      },
+      "LocalDeploymentAuthResponse": {
+        "type": "object",
+        "required": [
+          "adminKey",
+          "deploymentUrl"
+        ],
+        "properties": {
+          "adminKey": {
+            "$ref": "#/components/schemas/AdminKey"
+          },
+          "deploymentUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "ManagedBy": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "vercel"
+            ]
+          },
+          {
+            "type": "object",
+            "required": [
+              "oauthApp"
+            ],
+            "properties": {
+              "oauthApp": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "MemberDataResponse": {
+        "type": "object",
+        "required": [
+          "teams",
+          "projects",
+          "deployments",
+          "optInsToAccept",
+          "preferences"
+        ],
+        "properties": {
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamResponse"
+            }
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectDetails"
+            }
+          },
+          "deployments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformDeploymentResponse"
+            }
+          },
+          "optInsToAccept": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptInToAccept"
+            }
+          },
+          "preferences": {
+            "$ref": "#/components/schemas/MemberPreferences"
+          }
+        }
+      },
+      "MemberEmailId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "MemberEmailResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "isVerified",
+          "isPrimary",
+          "creationTime"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/MemberEmailId"
+          },
+          "email": {
+            "type": "string"
+          },
+          "isVerified": {
+            "type": "boolean"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "creationTime": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MemberId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "MemberPreferences": {
+        "type": "object",
+        "description": "The preferences a member has set, keyed by preference name. A preference\nthe member has never set is absent, and the client falls back to its own\ndefault.",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/PreferenceValue"
+        },
+        "propertyNames": {
+          "type": "string",
+          "description": "A dashboard preference a member can set. The variant name is what lands in\nthe `member_preferences.name` column, so renaming one orphans the rows\nmembers have already written.",
+          "enum": [
+            "new_data_filters_opened",
+            "new_data_filters_optout"
+          ]
+        }
+      },
+      "MemberResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/MemberId"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "MfaStatusResponse": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OauthAppResponse": {
+        "type": "object",
+        "required": [
+          "clientId",
+          "appName",
+          "redirectUris",
+          "verified",
+          "createTime",
+          "authorizedTeamCount",
+          "unverifiedTeamLimit"
+        ],
+        "properties": {
+          "clientId": {
+            "type": "string"
+          },
+          "appName": {
+            "$ref": "#/components/schemas/AppName"
+          },
+          "redirectUris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "clientSecret": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "authorizedTeamCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The number of distinct teams that have authorized this app."
+          },
+          "unverifiedTeamLimit": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The maximum number of teams that may authorize this app while it is\nunverified."
+          }
+        }
+      },
+      "OptIn": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "tos"
+            ],
+            "properties": {
+              "tos": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "OptInToAccept": {
+        "type": "object",
+        "required": [
+          "optIn",
+          "message"
+        ],
+        "properties": {
+          "optIn": {
+            "$ref": "#/components/schemas/OptIn"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "OrbSubscriptionResponse": {
+        "type": "object",
+        "required": [
+          "plan",
+          "status",
+          "nextBillingPeriodStart"
+        ],
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/PlanResponse"
+          },
+          "billingContact": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BillingContactResponse"
+              }
+            ]
+          },
+          "billingAddress": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Address"
+              }
+            ]
+          },
+          "paymentMethod": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentMethodResponse"
+              }
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64"
+          },
+          "nextBillingPeriodStart": {
+            "type": "string"
+          },
+          "invoicingThreshold": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The subscription's invoicing threshold in USD (e.g. \"10.00\"). When\nuninvoiced usage crosses this amount mid-cycle, an invoice is issued\nimmediately, so a customer can receive multiple invoices in one billing\nperiod. `None` if no threshold is configured on the subscription."
+          },
+          "accountBalance": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The customer's account balance in their billing currency, as a decimal\nstring (e.g. \"25.00\"). This is a credit that is automatically applied to\nfuture invoices. Only populated for actors that can view billing\ndetails."
+          }
+        }
+      },
+      "PaginatedCreditsResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreditResponse"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        }
+      },
+      "PaginatedProjectsResponse": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectDetails"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetadata"
+          }
+        }
+      },
+      "PaginationMetadata": {
+        "type": "object",
+        "required": [
+          "hasMore"
+        ],
+        "properties": {
+          "hasMore": {
+            "type": "boolean"
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "PaymentMethodResponse": {
+        "type": "object",
+        "required": [
+          "kind",
+          "display"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          }
+        }
+      },
+      "PeriodicBackupConfig": {
+        "type": "object",
+        "required": [
+          "sourceDeploymentId",
+          "cronspec",
+          "expirationDeltaSecs",
+          "nextRun",
+          "includeStorage"
+        ],
+        "properties": {
+          "sourceDeploymentId": {
+            "$ref": "#/components/schemas/DeploymentId"
+          },
+          "cronspec": {
+            "type": "string"
+          },
+          "expirationDeltaSecs": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "nextRun": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "includeStorage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PlanResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "seatPrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double"
+          },
+          "planType": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "PlansResponse": {
+        "type": "object",
+        "required": [
+          "plans"
+        ],
+        "properties": {
+          "plans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanResponse"
+            }
+          }
+        }
+      },
+      "PlatformDeploymentResponse": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "createTime",
+              "deploymentType",
+              "projectId",
+              "region",
+              "isDefault",
+              "reference",
+              "deploymentUrl",
+              "class",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/DeploymentId"
+              },
+              "name": {
+                "type": "string",
+                "description": "The readable identifier for this deployment, something like\nplayful-otter-123."
+              },
+              "createTime": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Timestamp in milliseconds when this deployment was created."
+              },
+              "lastDeployTime": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Timestamp in milliseconds of the last deploy to this deployment, if\nany."
+              },
+              "deploymentType": {
+                "$ref": "#/components/schemas/DeploymentType",
+                "description": "The type of this deployment."
+              },
+              "projectId": {
+                "$ref": "#/components/schemas/ProjectId",
+                "description": "The project this deployment belongs to."
+              },
+              "creator": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MemberId",
+                    "description": "The member who created this deployment."
+                  }
+                ]
+              },
+              "previewIdentifier": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PreviewDeploymentIdentifier",
+                    "description": "Preview deployment identifier, if this is a preview deployment."
+                  }
+                ]
+              },
+              "region": {
+                "$ref": "#/components/schemas/RegionName",
+                "description": "The region where this deployment is hosted."
+              },
+              "isDefault": {
+                "$ref": "#/components/schemas/IsDefaultDeployment",
+                "description": "For prod deployments, whether they are the default prod deployment\nof the project. For dev deployments, whether they are the default\ndev deployment for the member that created it.\nFor other deployments, set to false."
+              },
+              "reference": {
+                "$ref": "#/components/schemas/DeploymentReference",
+                "description": "An identifier that uniquely identifies this deployment within the\nproject."
+              },
+              "dashboardEditConfirmation": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Controls whether the dashboard requires a confirmation before\nallowing edits during a browser session for this deployment.\nIf not set, defaults to true for prod deployments and false\nfor dev and preview deployments."
+              },
+              "deploymentUrl": {
+                "type": "string",
+                "description": "The full backend URL for this deployment (e.g. \"https://joyful-capybara-123.convex.cloud\" or \"https://calm-cow-456.eu-west-1.convex.cloud\"). This is always a `.convex.cloud` URL, even when the deployment is using custom domains. To get the canonical URL, use [`/get_canonical_urls`](https://docs.convex.dev/deployment-api/get-canonical-urls)."
+              },
+              "expiresAt": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Timestamp in milliseconds when this deployment will be\ndeleted. Preview deployments have this set by default unless\noverridden."
+              },
+              "class": {
+                "type": "string",
+                "description": "The deployment class for this deployment."
+              },
+              "sendLogsToClient": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether to send function logs to the client. If `null`, the\ndeployment-type default is used (true for dev/preview, false for\nprod)."
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "cloud"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "createTime",
+              "deploymentType",
+              "projectId",
+              "creator",
+              "port",
+              "deviceName",
+              "isActive",
+              "kind"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The readable identifier for this deployment."
+              },
+              "createTime": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Timestamp in milliseconds when this deployment was created."
+              },
+              "deploymentType": {
+                "$ref": "#/components/schemas/DeploymentType",
+                "description": "Whether this is a \"dev\" development deployment or \"prod\" production\ndeployment. Note that this will always be \"dev\" for local\ndeployments."
+              },
+              "projectId": {
+                "$ref": "#/components/schemas/ProjectId",
+                "description": "The project this deployment belongs to."
+              },
+              "creator": {
+                "$ref": "#/components/schemas/MemberId",
+                "description": "The member who created this deployment."
+              },
+              "previewIdentifier": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PreviewDeploymentIdentifier",
+                    "description": "Preview deployment identifier. Note that this will always be None\nfor local deployments."
+                  }
+                ]
+              },
+              "port": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The port where this local deployment is running.",
+                "minimum": 0
+              },
+              "deviceName": {
+                "$ref": "#/components/schemas/DeviceName",
+                "description": "The device name where this local deployment is running."
+              },
+              "isActive": {
+                "type": "boolean",
+                "description": "Whether this local deployment is currently active."
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "local"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PotentialVercelTeam": {
+        "type": "object",
+        "required": [
+          "teamId",
+          "teamName",
+          "teamSlug",
+          "planId",
+          "planName"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "teamName": {
+            "$ref": "#/components/schemas/TeamName"
+          },
+          "teamSlug": {
+            "$ref": "#/components/schemas/TeamSlug"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "planName": {
+            "type": "string"
+          },
+          "pricingNotice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable description of billing impact when joining this team.\n`None` for free plans. Clients should show this verbatim so CLI and\ndashboard stay in sync on pricing copy."
+          }
+        }
+      },
+      "PreferenceName": {
+        "type": "string",
+        "description": "A dashboard preference a member can set. The variant name is what lands in\nthe `member_preferences.name` column, so renaming one orphans the rows\nmembers have already written.",
+        "enum": [
+          "new_data_filters_opened",
+          "new_data_filters_optout"
+        ]
+      },
+      "PreferenceValue": {
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "description": "The value of a preference. Serializes as a bare JSON scalar, matching how\nit is stored."
+      },
+      "PreferencesResponse": {
+        "type": "object",
+        "required": [
+          "preferences"
+        ],
+        "properties": {
+          "preferences": {
+            "$ref": "#/components/schemas/MemberPreferences"
+          }
+        }
+      },
+      "PreviewDeploymentIdentifier": {
+        "type": "string"
+      },
+      "ProfileEmailArgs": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "ProjectDetails": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "teamId",
+          "createTime"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/ProjectName"
+          },
+          "slug": {
+            "$ref": "#/components/schemas/ProjectSlug"
+          },
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "createTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "prodDeploymentName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "devDeploymentName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ProjectEnvironmentSummary": {
+        "type": "object",
+        "description": "Summary of a project WorkOS environment for list responses - slimmer than\nfull environment details, uses workos_ prefix for consistency with\ndeployment",
+        "required": [
+          "workosEnvironmentId",
+          "workosEnvironmentName",
+          "workosClientId",
+          "userEnvironmentName",
+          "isProduction"
+        ],
+        "properties": {
+          "workosEnvironmentId": {
+            "type": "string"
+          },
+          "workosEnvironmentName": {
+            "type": "string"
+          },
+          "workosClientId": {
+            "type": "string"
+          },
+          "userEnvironmentName": {
+            "type": "string",
+            "description": "The user-provided environment name (e.g., \"staging\", \"development\")"
+          },
+          "isProduction": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProjectId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "ProjectMemberRoleResponse": {
+        "type": "object",
+        "required": [
+          "projectId",
+          "memberId",
+          "teamId",
+          "role",
+          "lastUpdated"
+        ],
+        "properties": {
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "memberId": {
+            "$ref": "#/components/schemas/MemberId"
+          },
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "role": {
+            "$ref": "#/components/schemas/ProjectRole"
+          },
+          "lastUpdated": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProjectName": {
+        "type": "string"
+      },
+      "ProjectRole": {
+        "type": "string",
+        "enum": [
+          "admin"
+        ]
+      },
+      "ProjectRoleUpdateArg": {
+        "type": "object",
+        "required": [
+          "memberId",
+          "projectId"
+        ],
+        "properties": {
+          "memberId": {
+            "$ref": "#/components/schemas/MemberId"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "role": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectRole"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectSlug": {
+        "type": "string"
+      },
+      "ProjectsResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PaginatedProjectsResponse"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectDetails"
+            }
+          }
+        ]
+      },
+      "ProposedTeamName": {
+        "type": "string"
+      },
+      "ProvisionEnvironmentResponse": {
+        "type": "object",
+        "required": [
+          "environmentId",
+          "environmentName",
+          "clientId",
+          "apiKey",
+          "newlyProvisioned"
+        ],
+        "properties": {
+          "environmentId": {
+            "type": "string"
+          },
+          "environmentName": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "apiKey": {
+            "type": "string"
+          },
+          "newlyProvisioned": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProvisionProjectEnvironmentRequest": {
+        "type": "object",
+        "required": [
+          "environmentName"
+        ],
+        "properties": {
+          "environmentName": {
+            "type": "string"
+          },
+          "isProduction": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "ProvisionProjectEnvironmentResponse": {
+        "type": "object",
+        "description": "Response for provisioning a project WorkOS environment - matches\nProvisionEnvironmentResponse pattern with workos_ prefix for consistency",
+        "required": [
+          "workosEnvironmentId",
+          "workosEnvironmentName",
+          "workosClientId",
+          "workosApiKey",
+          "newlyProvisioned",
+          "userEnvironmentName"
+        ],
+        "properties": {
+          "workosEnvironmentId": {
+            "type": "string"
+          },
+          "workosEnvironmentName": {
+            "type": "string"
+          },
+          "workosClientId": {
+            "type": "string"
+          },
+          "workosApiKey": {
+            "type": "string"
+          },
+          "newlyProvisioned": {
+            "type": "boolean"
+          },
+          "userEnvironmentName": {
+            "type": "string",
+            "description": "The user-provided environment name (e.g., \"staging\", \"development\")"
+          }
+        }
+      },
+      "ProvisionWorkOSTeamRequest": {
+        "type": "object",
+        "required": [
+          "teamId",
+          "email"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId",
+            "description": "Convex team ID, no WorkOS team exists at this point"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address to use for the WorkOS team admin,\nmust be a verified email address associated with the user's account"
+          }
+        }
+      },
+      "ProvisionWorkOSTeamResponse": {
+        "type": "object",
+        "required": [
+          "workosTeamId",
+          "workosTeamName",
+          "adminEmail"
+        ],
+        "properties": {
+          "workosTeamId": {
+            "type": "string"
+          },
+          "workosTeamName": {
+            "type": "string"
+          },
+          "adminEmail": {
+            "type": "string"
+          }
+        }
+      },
+      "ReferralCode": {
+        "type": "string"
+      },
+      "ReferralState": {
+        "type": "object",
+        "required": [
+          "referrals"
+        ],
+        "properties": {
+          "referrals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamName"
+            }
+          },
+          "referredBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TeamName"
+              }
+            ]
+          }
+        }
+      },
+      "RegionName": {
+        "type": "string",
+        "enum": [
+          "aws-us-east-1",
+          "aws-eu-west-1",
+          "aws-ca-central-1",
+          "aws-ap-southeast-2"
+        ]
+      },
+      "RegisterOauthAppArgs": {
+        "type": "object",
+        "required": [
+          "appName",
+          "redirectUris"
+        ],
+        "properties": {
+          "appName": {
+            "$ref": "#/components/schemas/AppName"
+          },
+          "redirectUris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RemoveMemberArgs": {
+        "type": "object",
+        "required": [
+          "memberId"
+        ],
+        "properties": {
+          "memberId": {
+            "$ref": "#/components/schemas/MemberId"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestCloudBackupArgs": {
+        "type": "object",
+        "required": [
+          "includeStorage"
+        ],
+        "properties": {
+          "includeStorage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RestoreFromCloudBackupArgs": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CloudBackupId"
+          }
+        }
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "admin",
+          "developer",
+          "custom"
+        ]
+      },
+      "RoleStatement": {
+        "type": "object",
+        "description": "A single permission rule within a custom role.",
+        "required": [
+          "effect",
+          "actions",
+          "resource"
+        ],
+        "properties": {
+          "effect": {
+            "$ref": "#/components/schemas/RoleStatementEffect"
+          },
+          "actions": {
+            "$ref": "#/components/schemas/RoleStatementActions"
+          },
+          "resource": {
+            "type": "string",
+            "description": "Resource path like `project:*`, `project:slug=my-app`, or\n`project:*:deployment:type=prod`.",
+            "example": "project:*"
+          }
+        }
+      },
+      "RoleStatementAction": {
+        "type": "string",
+        "description": "An action that can be allowed or denied by a custom role statement.",
+        "enum": [
+          "team:update",
+          "team:delete",
+          "project:create",
+          "project:transfer",
+          "project:receive",
+          "project:update",
+          "project:delete",
+          "project:view",
+          "project:updateMemberRole",
+          "defaultEnvironmentVariable:create",
+          "defaultEnvironmentVariable:update",
+          "defaultEnvironmentVariable:delete",
+          "defaultEnvironmentVariable:view",
+          "deployment:create",
+          "deployment:transfer",
+          "deployment:receive",
+          "deployment:updateReference",
+          "deployment:updateDashboardEditConfirmation",
+          "deployment:updateExpiresAt",
+          "deployment:updateSendLogsToClient",
+          "deployment:updateClass",
+          "deployment:updateIsDefault",
+          "deployment:updateType",
+          "deployment:delete",
+          "deployment:view",
+          "deployment:integrations:view",
+          "deployment:integrations:write",
+          "deployment:customDomain:create",
+          "deployment:customDomain:delete",
+          "deployment:customDomain:view",
+          "member:invite",
+          "member:cancelInvitation",
+          "member:remove",
+          "member:updateRole",
+          "member:view",
+          "billing:paymentMethod:update",
+          "billing:contact:update",
+          "billing:address:update",
+          "billing:subscription:changePlan",
+          "billing:spendingLimit:update",
+          "billing:view",
+          "billing:invoices:view",
+          "team:auditLog:view",
+          "team:domain:create",
+          "team:domain:delete",
+          "team:domain:view",
+          "team:token:create",
+          "team:token:update",
+          "team:token:delete",
+          "team:token:view",
+          "project:token:create",
+          "project:token:update",
+          "project:token:delete",
+          "project:token:view",
+          "deployment:token:create",
+          "deployment:token:update",
+          "deployment:token:delete",
+          "deployment:token:view",
+          "oauthApplication:create",
+          "oauthApplication:update",
+          "oauthApplication:delete",
+          "oauthApplication:view",
+          "oauthApplication:generateClientSecret",
+          "team:usage:view",
+          "deployment:insights:view",
+          "deployment:backups:create",
+          "deployment:backups:import",
+          "deployment:backups:configurePeriodic",
+          "deployment:backups:disablePeriodic",
+          "deployment:backups:delete",
+          "deployment:backups:view",
+          "sso:enable",
+          "sso:disable",
+          "sso:update",
+          "sso:view",
+          "directorySync:enable",
+          "directorySync:disable",
+          "directorySync:updateGroupMapping",
+          "directorySync:deleteGroupMapping",
+          "directorySync:view",
+          "customRole:view",
+          "integration:view",
+          "integration:create",
+          "integration:update",
+          "integration:delete",
+          "deployment:deploy",
+          "deployment:env:view",
+          "deployment:env:write",
+          "deployment:pause",
+          "deployment:unpause",
+          "deployment:logs:view",
+          "deployment:metrics:view",
+          "deployment:data:view",
+          "deployment:data:write",
+          "deployment:backups:download",
+          "deployment:functions:actAsUser",
+          "deployment:functions:runInternalQueries",
+          "deployment:functions:runInternalMutations",
+          "deployment:functions:runInternalActions",
+          "deployment:functions:runTestQuery",
+          "deployment:auditLog:view",
+          "deployment:usageLimits:view",
+          "deployment:usageLimits:write",
+          "deployment:usage:view",
+          "deployment:aiGateway:use"
+        ]
+      },
+      "RoleStatementActions": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RoleStatementWildcardAction"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleStatementAction"
+            }
+          }
+        ]
+      },
+      "RoleStatementEffect": {
+        "type": "string",
+        "description": "Whether a rule grants or revokes access.",
+        "enum": [
+          "allow",
+          "deny"
+        ]
+      },
+      "RoleStatementWildcardAction": {
+        "type": "string",
+        "enum": [
+          "*"
+        ]
+      },
+      "SSOConnectionResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "connectionType",
+          "state",
+          "active"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "connectionType": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SSODomainState": {
+        "type": "string",
+        "enum": [
+          "verified",
+          "pending",
+          "failed",
+          "legacyVerified"
+        ]
+      },
+      "SSOOrganizationDomain": {
+        "type": "object",
+        "required": [
+          "id",
+          "domain",
+          "state"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SSODomainState"
+          }
+        }
+      },
+      "SSOOrganizationResponse": {
+        "type": "object",
+        "required": [
+          "domains",
+          "requireSsoLogin",
+          "connections"
+        ],
+        "properties": {
+          "createTime": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "When the team's identity config was first created. Absent for a team\nthat has never touched SSO, domains or directory sync."
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SSOOrganizationDomain"
+            }
+          },
+          "requireSsoLogin": {
+            "type": "boolean"
+          },
+          "connections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SSOConnectionResponse"
+            },
+            "description": "SSO connections configured in WorkOS for this organization."
+          }
+        }
+      },
+      "SSOPortalIntent": {
+        "type": "string",
+        "enum": [
+          "sso",
+          "domainVerification",
+          "certificateRenewal"
+        ]
+      },
+      "SerializedAccessToken": {
+        "type": "string",
+        "description": "ConvexAccessToken is our own internal notion of authorization.\nIt is versioned.\n\nV1 - uses an WorkOS access token for authorization.\n\nSerialization is done by SerializedAccessToken::new\nThe ConvexAccessToken is serialized (json) and base64\nencoded for obfuscation before sending it to the client\n\nDeserialization is done by SerializedAccessToken::decode\nThis reverses the process and returns a ConvexAccessToken which\ncan be match'd by the extractor.\n\n`SerializedAccessToken` is intentionally the only struct that is\nleft public.\n\nThe json is externally tagged. Expect it to look like\n{\"v1\": \"workostoken\"}"
+      },
+      "SetGroupRoleMappingRequest": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Role",
+                "description": "Built-in role. Mutually exclusive with `customRoles`."
+              }
+            ]
+          },
+          "customRoles": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/CustomRoleId"
+            },
+            "description": "Custom role IDs. If provided, must be non-empty. Mutually exclusive with\n`role`."
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetPreferenceArgs": {
+        "type": "object",
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/PreferenceName"
+          },
+          "value": {
+            "$ref": "#/components/schemas/PreferenceValue",
+            "description": "Must be of the type the preference accepts, otherwise the request is\nrejected with `InvalidPreferenceValue`."
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetSpendingLimitArgs": {
+        "type": "object",
+        "properties": {
+          "disableThresholdCents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          },
+          "warningThresholdCents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetupIntentResponse": {
+        "type": "object",
+        "required": [
+          "clientSecret"
+        ],
+        "properties": {
+          "clientSecret": {
+            "type": "string"
+          }
+        }
+      },
+      "SpendingLimitsState": {
+        "type": "string",
+        "enum": [
+          "Running",
+          "Disabled",
+          "Warning"
+        ]
+      },
+      "StagedDirectoryGroupResponse": {
+        "type": "object",
+        "required": [
+          "workosGroupId",
+          "name"
+        ],
+        "properties": {
+          "workosGroupId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "StagedDirectoryMemberResponse": {
+        "type": "object",
+        "properties": {
+          "member": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/StagedMemberResponse"
+              }
+            ]
+          },
+          "directoryUser": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/StagedDirectoryUserResponse"
+              }
+            ]
+          }
+        }
+      },
+      "StagedDirectoryUserResponse": {
+        "type": "object",
+        "required": [
+          "directoryUserId",
+          "email",
+          "state",
+          "groups"
+        ],
+        "properties": {
+          "directoryUserId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/DirectoryUserState"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StagedDirectoryGroupResponse"
+            }
+          },
+          "role": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ]
+          },
+          "customRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamMemberCustomRole"
+            }
+          }
+        }
+      },
+      "StagedMemberResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "role"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/MemberId"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "customRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamMemberCustomRole"
+            }
+          }
+        }
+      },
+      "TeamCurrentBillingPeriodResponse": {
+        "type": "object",
+        "required": [
+          "start",
+          "end"
+        ],
+        "properties": {
+          "start": {
+            "type": "string"
+          },
+          "end": {
+            "type": "string"
+          }
+        }
+      },
+      "TeamEntitlementsResponse": {
+        "type": "object",
+        "required": [
+          "maxTeamMembers",
+          "teamMaxFunctionCalls",
+          "teamMaxActionCompute",
+          "teamMaxDatabaseStorage",
+          "teamMaxDatabaseBandwidth",
+          "teamMaxFileStorage",
+          "teamMaxFileBandwidth",
+          "logStreamingEnabled",
+          "streamingExportEnabled",
+          "teamMaxVectorStorage",
+          "teamMaxVectorBandwidth",
+          "customDomainsEnabled",
+          "maxCustomDomains",
+          "periodicBackupsEnabled",
+          "maxCloudBackups",
+          "maxChefTokens",
+          "ssoEnabled",
+          "directorySyncEnabled",
+          "auditLogRetentionDays",
+          "maxDeployments",
+          "managementApiEnabled",
+          "previewDeploymentRetentionDays",
+          "deploymentClassSelectionEnabled",
+          "teamMaxSearchQueries",
+          "customRolesEnabled",
+          "customAuditLogsInLogStreamsConfigEnabled"
+        ],
+        "properties": {
+          "maxTeamMembers": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "teamMaxFunctionCalls": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "teamMaxActionCompute": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "teamMaxDatabaseStorage": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "teamMaxDatabaseBandwidth": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "teamMaxFileStorage": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "teamMaxFileBandwidth": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "logStreamingEnabled": {
+            "type": "boolean"
+          },
+          "streamingExportEnabled": {
+            "type": "boolean"
+          },
+          "teamMaxVectorStorage": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "teamMaxVectorBandwidth": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "customDomainsEnabled": {
+            "type": "boolean"
+          },
+          "maxCustomDomains": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "periodicBackupsEnabled": {
+            "type": "boolean"
+          },
+          "maxCloudBackups": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "maxChefTokens": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "ssoEnabled": {
+            "type": "boolean"
+          },
+          "directorySyncEnabled": {
+            "type": "boolean"
+          },
+          "auditLogRetentionDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxDeployments": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "managementApiEnabled": {
+            "type": "boolean"
+          },
+          "previewDeploymentRetentionDays": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "deploymentClassSelectionEnabled": {
+            "type": "boolean"
+          },
+          "teamMaxSearchQueries": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          },
+          "customRolesEnabled": {
+            "type": "boolean"
+          },
+          "customAuditLogsInLogStreamsConfigEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TeamId": {
+        "type": "integer",
+        "format": "int64",
+        "minimum": 0
+      },
+      "TeamMemberCustomRole": {
+        "type": "object",
+        "description": "A custom role attached to a team member, denormalized with the\nrole's display name so API consumers can render members without a\nseparate roles lookup.",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/CustomRoleId"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "TeamName": {
+        "type": "string"
+      },
+      "TeamResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "suspended",
+          "referralCode"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/TeamName"
+          },
+          "slug": {
+            "$ref": "#/components/schemas/TeamSlug"
+          },
+          "creator": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MemberId"
+              }
+            ]
+          },
+          "suspended": {
+            "type": "boolean"
+          },
+          "referralCode": {
+            "$ref": "#/components/schemas/ReferralCode"
+          },
+          "referredBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TeamId"
+              }
+            ]
+          },
+          "managedBy": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ManagedBy"
+              }
+            ]
+          },
+          "defaultRegion": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RegionName"
+              }
+            ]
+          },
+          "ssoLoginId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "managedByUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "TeamSlug": {
+        "type": "string"
+      },
+      "TeamUsageStateResponse": {
+        "type": "object",
+        "required": [
+          "teamId",
+          "usageState"
+        ],
+        "properties": {
+          "teamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "usageState": {
+            "$ref": "#/components/schemas/UsageState"
+          }
+        }
+      },
+      "TransferProjectArgs": {
+        "type": "object",
+        "required": [
+          "destinationTeamId"
+        ],
+        "properties": {
+          "destinationTeamId": {
+            "$ref": "#/components/schemas/TeamId"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnlinkDiscordAccountRequest": {
+        "type": "object",
+        "required": [
+          "discordId"
+        ],
+        "properties": {
+          "discordId": {
+            "$ref": "#/components/schemas/DiscordId"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateBillingAddressArgs": {
+        "type": "object",
+        "required": [
+          "billingAddress"
+        ],
+        "properties": {
+          "billingAddress": {
+            "$ref": "#/components/schemas/Address"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateBillingContactArgs": {
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateOauthAppArgs": {
+        "type": "object",
+        "properties": {
+          "appName": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AppName"
+              }
+            ]
+          },
+          "redirectUris": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdatePaymentMethodArgs": {
+        "type": "object",
+        "required": [
+          "paymentMethod"
+        ],
+        "properties": {
+          "paymentMethod": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateProfileNameArgs": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateProjectArgs": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectName"
+              }
+            ]
+          },
+          "slug": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProjectSlug"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateProjectRolesArgs": {
+        "type": "object",
+        "required": [
+          "updates"
+        ],
+        "properties": {
+          "updates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectRoleUpdateArg"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateSSORequest": {
+        "type": "object",
+        "properties": {
+          "requireSsoLogin": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "UpdateTeamArgs": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProposedTeamName"
+              }
+            ]
+          },
+          "slug": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TeamSlug"
+              }
+            ]
+          },
+          "defaultRegion": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RegionName",
+                "description": "When not present: don't change default_region\nWhen present and null: set default_region to null\nWhen present with value: set default_region to that value"
+              }
+            ]
+          }
+        }
+      },
+      "UsageState": {
+        "type": "string",
+        "enum": [
+          "Default",
+          "Approaching",
+          "Exceeded",
+          "Paused",
+          "Disabled"
+        ]
+      },
+      "ValidateReferralCodeResult": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "Valid"
+            ],
+            "properties": {
+              "Valid": {
+                "type": "object",
+                "required": [
+                  "teamName",
+                  "exhausted"
+                ],
+                "properties": {
+                  "teamName": {
+                    "$ref": "#/components/schemas/TeamName"
+                  },
+                  "exhausted": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "string",
+            "enum": [
+              "Invalid"
+            ]
+          }
+        ]
+      },
+      "Value": {},
+      "WorkOSAssociatedTeam": {
+        "type": "object",
+        "required": [
+          "convexTeamId",
+          "workosTeamId",
+          "workosTeamName",
+          "workosAdminEmail",
+          "creatorMemberId"
+        ],
+        "properties": {
+          "convexTeamId": {
+            "$ref": "#/components/schemas/TeamId"
+          },
+          "workosTeamId": {
+            "type": "string"
+          },
+          "workosTeamName": {
+            "type": "string"
+          },
+          "workosAdminEmail": {
+            "type": "string"
+          },
+          "creatorMemberId": {
+            "$ref": "#/components/schemas/MemberId"
+          }
+        }
+      },
+      "WorkOSEnvironmentHealthResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "clientId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkOSEnvironmentInfo": {
+        "type": "object",
+        "required": [
+          "deploymentName",
+          "workosEnvironmentId",
+          "workosEnvironmentName",
+          "workosClientId"
+        ],
+        "properties": {
+          "deploymentName": {
+            "type": "string"
+          },
+          "workosEnvironmentId": {
+            "type": "string"
+          },
+          "workosEnvironmentName": {
+            "type": "string"
+          },
+          "workosClientId": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkOSProductionState": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive",
+          "suspended",
+          "deleting"
+        ]
+      },
+      "WorkOSTeamAssociation": {
+        "type": "object",
+        "required": [
+          "workosTeamId",
+          "workosTeamName",
+          "adminEmail",
+          "creatorEmail"
+        ],
+        "properties": {
+          "workosTeamId": {
+            "type": "string"
+          },
+          "workosTeamName": {
+            "type": "string"
+          },
+          "adminEmail": {
+            "type": "string"
+          },
+          "creatorName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "creatorEmail": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkOSTeamHealthResponse": {
+        "type": "object",
+        "required": [
+          "teamProvisioned"
+        ],
+        "properties": {
+          "teamProvisioned": {
+            "type": "boolean",
+            "description": "Whether a WorkOS team has been provisioned for this Convex team"
+          },
+          "teamInfo": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/WorkOSTeamInfo",
+                "description": "WorkOS team details, present only when team_provisioned is true"
+              }
+            ]
+          }
+        }
+      },
+      "WorkOSTeamInfo": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "productionState"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "productionState": {
+            "$ref": "#/components/schemas/WorkOSProductionState"
+          }
+        }
+      },
+      "WorkOSTeamIntegrationResponse": {
+        "type": "object",
+        "required": [
+          "environments"
+        ],
+        "properties": {
+          "teamAssociation": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/WorkOSTeamAssociation",
+                "description": "WorkOS team association info, if it exists"
+              }
+            ]
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkOSEnvironmentInfo"
+            },
+            "description": "List of WorkOS environments for deployments"
+          }
+        }
+      }
+    }
+  }
+}
