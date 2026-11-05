@@ -9,7 +9,14 @@
   function read() {
     try {
       const value = JSON.parse(localStorage.getItem(KEY) || "[]");
-      return Array.isArray(value) ? value.map((item) => ({ ...item, name: /internet archive/i.test(String(item.name || "")) ? "Singles Mix" : item.name })) : [];
+      return Array.isArray(value)
+        ? value.map((item) => ({
+            ...item,
+            name: /internet archive/i.test(String(item.name || ""))
+              ? "Singles Mix"
+              : item.name,
+          }))
+        : [];
     } catch (_) {
       return [];
     }
@@ -164,20 +171,38 @@
     return playlist;
   }
   function upsertFromTracks(name, tracks) {
-    const clean = String(name || "Singles Mix").trim().slice(0, 60);
-    const items = (Array.isArray(tracks) ? tracks : []).filter((track) => track && track.src).slice(0, 24).map((track) => ({
-      title: String(track.title || "Untitled track"), artist: String(track.artist || "Unknown artist"),
-      src: String(track.src), catalogId: String(track.catalogId || ""), url: String(track.url || ""),
-      artwork: String(track.artwork || ""), license: String(track.license || ""),
-      source: String(track.source || "Internet Archive"), verificationStatus: track.verificationStatus || "VERIFYING",
-      rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED", bytesTotal: Number(track.bytesTotal) || 0,
-    }));
+    const clean = String(name || "Singles Mix")
+      .trim()
+      .slice(0, 60);
+    const items = (Array.isArray(tracks) ? tracks : [])
+      .filter((track) => track && track.src)
+      .slice(0, 24)
+      .map((track) => ({
+        title: String(track.title || "Untitled track"),
+        artist: String(track.artist || "Unknown artist"),
+        src: String(track.src),
+        catalogId: String(track.catalogId || ""),
+        url: String(track.url || ""),
+        artwork: String(track.artwork || ""),
+        license: String(track.license || ""),
+        source: String(track.source || "Internet Archive"),
+        verificationStatus: track.verificationStatus || "VERIFYING",
+        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        bytesTotal: Number(track.bytesTotal) || 0,
+      }));
     if (!clean || !items.length) return null;
     const playlists = read();
     let playlist = playlists.find((item) => item.name === clean);
-    if (playlist) { playlist.tracks = items; playlist.updatedAt = Date.now(); }
-    else {
-      playlist = { id: String(Date.now()) + Math.random().toString(36).slice(2, 7), name: clean, tracks: items, createdAt: Date.now() };
+    if (playlist) {
+      playlist.tracks = items;
+      playlist.updatedAt = Date.now();
+    } else {
+      playlist = {
+        id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+        name: clean,
+        tracks: items,
+        createdAt: Date.now(),
+      };
       playlists.push(playlist);
     }
     write(playlists);

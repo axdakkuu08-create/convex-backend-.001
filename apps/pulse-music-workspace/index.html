@@ -81,7 +81,8 @@
             <button class="genre-chip" data-home-mood="Energy">Energy</button>
           </div>
           <section
-            class="home-archive-shelf" hidden
+            class="home-archive-shelf"
+            hidden
             id="homeArchiveShelf"
             aria-labelledby="homeArchiveHeading"
           >
@@ -132,7 +133,7 @@
               aria-live="polite"
             ></div>
           </section>
-          
+
           <section
             class="home-library-section"
             aria-labelledby="homeSongsHeading"
@@ -190,25 +191,76 @@
             Discover more music with Search, or connect a source below.
           </p>
         </section>
-          <section class="pulse-charts glass-panel" id="pulseCharts" aria-labelledby="pulseChartsHeading">
-            <div class="charts-heading">
-              <div><p class="charts-kicker">LIVE RANKINGS · SOURCE-LINKED</p><h2 id="pulseChartsHeading">Top Singles</h2><p class="charts-subtitle">Genuine chart rankings, refreshed from the selected country.</p></div>
-              <span class="charts-live-dot">AUTO-REFRESH · 15 MIN</span>
+        <section
+          class="pulse-charts glass-panel"
+          id="pulseCharts"
+          aria-labelledby="pulseChartsHeading"
+        >
+          <div class="charts-heading">
+            <div>
+              <p class="charts-kicker">LIVE RANKINGS · SOURCE-LINKED</p>
+              <h2 id="pulseChartsHeading">Top Singles</h2>
+              <p class="charts-subtitle">
+                Genuine chart rankings, refreshed from the selected country.
+              </p>
             </div>
-            <div class="charts-tabs" role="tablist" aria-label="Chart categories">
-              <button class="charts-tab active" type="button" data-chart-tab="world" role="tab" aria-selected="true">World charts</button>
-              
-            </div>
-            <section class="charts-pane" id="worldChartPane" aria-label="Real-world music charts">
-              <div class="charts-source-row">
-                <div><strong>Apple Music · Top Songs</strong><small id="appleChartMeta">Country chart · loading…</small></div>
-                <div class="charts-source-actions"><button type="button" id="appleChartRefresh" aria-label="Refresh Apple Music chart">Refresh ↻</button><a href="https://music.apple.com/in/new" target="_blank" rel="noopener noreferrer" id="appleChartLink">Open chart ↗</a></div>
+            <span class="charts-live-dot">AUTO-REFRESH · 15 MIN</span>
+          </div>
+          <div class="charts-tabs" role="tablist" aria-label="Chart categories">
+            <button
+              class="charts-tab active"
+              type="button"
+              data-chart-tab="world"
+              role="tab"
+              aria-selected="true"
+            >
+              World charts
+            </button>
+          </div>
+          <section
+            class="charts-pane"
+            id="worldChartPane"
+            aria-label="Real-world music charts"
+          >
+            <div class="charts-source-row">
+              <div>
+                <strong>Apple Music · Top Songs</strong
+                ><small id="appleChartMeta">Country chart · loading…</small>
               </div>
-              <div class="charts-list" id="appleChartList" aria-live="polite"><p class="charts-loading">Loading the official Apple Music chart…</p></div>
-              <div class="charts-footer-links"><a href="https://www.billboard.com/charts/hot-100/" target="_blank" rel="noopener noreferrer">Billboard Hot 100 ↗</a><span>Rankings are supplied by chart publishers; Pulse does not invent positions or play counts.</span></div>
-            </section>
-            
+              <div class="charts-source-actions">
+                <button
+                  type="button"
+                  id="appleChartRefresh"
+                  aria-label="Refresh Apple Music chart"
+                >
+                  Refresh ↻</button
+                ><a
+                  href="https://music.apple.com/in/new"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  id="appleChartLink"
+                  >Open chart ↗</a
+                >
+              </div>
+            </div>
+            <div class="charts-list" id="appleChartList" aria-live="polite">
+              <p class="charts-loading">
+                Loading the official Apple Music chart…
+              </p>
+            </div>
+            <div class="charts-footer-links">
+              <a
+                href="https://www.billboard.com/charts/hot-100/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Billboard Hot 100 ↗</a
+              ><span
+                >Rankings are supplied by chart publishers; Pulse does not
+                invent positions or play counts.</span
+              >
+            </div>
           </section>
+        </section>
         <header>
           <button id="menu" class="mobile">☰</button>
           <div>Workspace <i>/</i> <b id="crumb">Discover</b></div>
@@ -307,7 +359,8 @@
               <span class="source-badge">LIVE CATALOGUES</span>
             </div>
             <p class="source-copy">
-              Search genuine songs and artists. Preview and full-track availability are labelled honestly.
+              Search genuine songs and artists. Preview and full-track
+              availability are labelled honestly.
             </p>
             <form id="unifiedSearchForm" class="source-form">
               <label class="source-input-label" for="unifiedQuery"
@@ -321,7 +374,14 @@
                   autocomplete="off"
                   required
                 /><button class="primary" type="submit">Search songs</button>
-                <button class="recognize-trigger" id="songRecognize" type="button" aria-label="Recognise a song using your microphone">⌁ Recognise</button>
+                <button
+                  class="recognize-trigger"
+                  id="songRecognize"
+                  type="button"
+                  aria-label="Recognise a song using your microphone"
+                >
+                  ⌁ Recognise
+                </button>
               </div>
               <div class="music-preferences">
                 <label for="musicCountry"
@@ -357,7 +417,32 @@
               Search music metadata and open-audio catalogues in one place.
             </p>
             <div id="unifiedSearchResults" class="unified-search-results"></div>
-            <section class="recognition-panel" aria-labelledby="recognitionHeading"><div class="recognition-heading"><span class="recognition-orb">⌁</span><div><small>LISTEN &amp; IDENTIFY</small><h3 id="recognitionHeading">Recognise a song</h3><p>Use your microphone to identify music playing nearby.</p></div></div><p id="recognitionStatus" class="recognition-status" role="status" aria-live="polite">Microphone recognition needs a configured recognition service.</p><div id="recognitionResult" class="recognition-result" hidden></div></section>
+            <section
+              class="recognition-panel"
+              aria-labelledby="recognitionHeading"
+            >
+              <div class="recognition-heading">
+                <span class="recognition-orb">⌁</span>
+                <div>
+                  <small>LISTEN &amp; IDENTIFY</small>
+                  <h3 id="recognitionHeading">Recognise a song</h3>
+                  <p>Use your microphone to identify music playing nearby.</p>
+                </div>
+              </div>
+              <p
+                id="recognitionStatus"
+                class="recognition-status"
+                role="status"
+                aria-live="polite"
+              >
+                Microphone recognition needs a configured recognition service.
+              </p>
+              <div
+                id="recognitionResult"
+                class="recognition-result"
+                hidden
+              ></div>
+            </section>
           </div>
           <div class="archive-search-panel" hidden>
             <div class="sectionhead">

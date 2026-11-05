@@ -260,7 +260,10 @@ async function play() {
     await audio.play();
     playing = true;
     $("audioStatus").textContent = tracks[index].archivePage
-      ? "Playing · " + tracks[index].title + " · rights status: " + (tracks[index].verificationStatus || "VERIFYING")
+      ? "Playing · " +
+        tracks[index].title +
+        " · rights status: " +
+        (tracks[index].verificationStatus || "VERIFYING")
       : "Playing · " + tracks[index].title;
     $("play").textContent = "Ⅱ";
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
@@ -589,8 +592,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
   const status = $("archiveStatus");
   const results = $("archiveResults");
   const query = $("archiveQuery").value.trim();
-  status.textContent =
-    "Searching open audio and checking available files…";
+  status.textContent = "Searching open audio and checking available files…";
   results.innerHTML = "";
   try {
     archiveItems = await window.PulseArchive.search(query, 24);

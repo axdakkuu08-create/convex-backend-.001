@@ -86,7 +86,11 @@
       "" +
       (item.duration ? " · " + esc(item.duration) : "") +
       '</small><small class="catalog-source">' +
-      esc(String(item.source || "").includes("Internet Archive") ? "Open audio catalogue" : item.source) +
+      esc(
+        String(item.source || "").includes("Internet Archive")
+          ? "Open audio catalogue"
+          : item.source,
+      ) +
       "</small>" +
       rights +
       "</div>" +
