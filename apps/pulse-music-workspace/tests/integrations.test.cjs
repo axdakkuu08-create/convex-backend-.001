@@ -122,6 +122,25 @@ test("Android Media3 lock-screen session receives the playable Pulse queue", () 
   assert.match(source, /transitionedIndex/);
 });
 
+test("Android MediaSession opens Pulse and relies on the service-managed media notification", () => {
+  const service = fs.readFileSync(
+    path.join(
+      __dirname,
+      "..",
+      "android-native/src/main/java/com/pulse/music/PulseAudioService.java",
+    ),
+    "utf8",
+  );
+  assert.match(service, /extends MediaSessionService/);
+  assert.match(service, /getLaunchIntentForPackage\(getPackageName\(\)\)/);
+  assert.match(service, /PendingIntent\.getActivity/);
+  assert.match(service, /PendingIntent\.FLAG_IMMUTABLE/);
+  assert.match(service, /sessionBuilder\.setSessionActivity\(sessionActivity\)/);
+  assert.match(service, /setAudioAttributes\(attributes, true\)/);
+  assert.match(service, /setHandleAudioBecomingNoisy\(true\)/);
+  assert.match(service, /new MediaSession\.Builder\(this, player\)/);
+});
+
 test("cloud playlists are opt-in and use owner-scoped backend functions", () => {
   assert.match(
     cloudSource,
