@@ -1,5 +1,8 @@
 package com.pulse.music;
 
+import android.app.PendingIntent;
+import android.content.Intent;
+
 import androidx.annotation.Nullable;
 import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
@@ -22,7 +25,23 @@ public final class PulseAudioService extends MediaSessionService {
         player = new ExoPlayer.Builder(this).build();
         player.setAudioAttributes(attributes, true);
         player.setHandleAudioBecomingNoisy(true);
-        mediaSession = new MediaSession.Builder(this, player).build();
+
+        // MediaSessionService supplies and updates its default MediaStyle
+        // notification, including the standard controls supported by the
+        // player's current playlist. Give the notification a reliable route
+        // back into the Capacitor application when the user taps it.
+        MediaSession.Builder sessionBuilder = new MediaSession.Builder(this, player);
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        if (launchIntent != null) {
+            PendingIntent sessionActivity = PendingIntent.getActivity(
+                this,
+                0,
+                launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+            sessionBuilder.setSessionActivity(sessionActivity);
+        }
+        mediaSession = sessionBuilder.build();
     }
 
     @Nullable
