@@ -80,11 +80,12 @@ one continuous queue. The in-app queue controls remain responsible for mixed
 playback. Offline downloads and full mixed-queue background navigation are not
 implemented.
 
-The source configures ExoPlayer audio-focus handling and pauses on audio becoming
-noisy (for example, when a wired headset is disconnected). These source-level
-integrations still require physical-device verification. A successful CI build
-proves packaging only; it does not prove background playback, audio-focus
-behavior, headphone removal, notification controls, queue transitions, Clerk
-sign-in, or Convex cloud sync on a physical Android phone. Test those on the
-target device before a public release. Official Spotify, YouTube, and SoundCloud
-embeds continue to follow provider restrictions inside Android WebView.
+The source configures ExoPlayer audio-focus handling and pauses on audio
+becoming noisy (for example, when a wired headset is disconnected). These
+source-level integrations still require physical-device verification. A
+successful CI build proves packaging only; it does not prove background
+playback, audio-focus behavior, headphone removal, notification controls, queue
+transitions, Clerk sign-in, or Convex cloud sync on a physical Android phone.
+Test those on the target device before a public release. Official Spotify,
+YouTube, and SoundCloud embeds continue to follow provider restrictions inside
+Android WebView.
