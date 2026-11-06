@@ -135,7 +135,10 @@ test("Android MediaSession opens Pulse and relies on the service-managed media n
   assert.match(service, /getLaunchIntentForPackage\(getPackageName\(\)\)/);
   assert.match(service, /PendingIntent\.getActivity/);
   assert.match(service, /PendingIntent\.FLAG_IMMUTABLE/);
-  assert.match(service, /sessionBuilder\.setSessionActivity\(sessionActivity\)/);
+  assert.match(
+    service,
+    /sessionBuilder\.setSessionActivity\(sessionActivity\)/,
+  );
   assert.match(service, /setAudioAttributes\(attributes, true\)/);
   assert.match(service, /setHandleAudioBecomingNoisy\(true\)/);
   assert.match(service, /new MediaSession\.Builder\(this, player\)/);
