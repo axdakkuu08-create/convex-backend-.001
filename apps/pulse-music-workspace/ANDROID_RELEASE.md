@@ -66,8 +66,8 @@ for future updates to the same Play app.
 
 ## Current limitations to verify before release
 
-The native Media3 service and Capacitor control bridge are present in
-source. `MediaSessionService` manages its default MediaStyle notification and
+The native Media3 service and Capacitor control bridge are present in source.
+`MediaSessionService` manages its default MediaStyle notification and
 foreground-service transitions automatically. Pulse supplies a session activity
 so tapping the media notification can reopen the app. The notification exposes
 the standard playback actions supported by the current native ExoPlayer queue;
