@@ -66,15 +66,25 @@ for future updates to the same Play app.
 
 ## Current limitations to verify before release
 
-The native Media3 service and Capacitor control bridge are now present in
-source. The bridge configures Android media audio focus and noisy-audio handling
-and exposes play, pause, seek, volume, and playback-state updates. This
-source-level integration is not yet verified by a successful Android build or
-physical-device test. Queue-aware notification next/previous actions, offline
-downloads, and end-to-end lifecycle testing remain outstanding. Official
-Spotify, YouTube, and SoundCloud embeds continue to follow provider restrictions
-inside Android WebView.
+The native Media3 service and Capacitor control bridge are present in
+source. `MediaSessionService` manages its default MediaStyle notification and
+foreground-service transitions automatically. Pulse supplies a session activity
+so tapping the media notification can reopen the app. The notification exposes
+the standard playback actions supported by the current native ExoPlayer queue;
+next/previous availability depends on whether that queue has adjacent items.
 
-A successful CI build proves packaging only. It does not prove playback, Clerk
-sign-in, Convex cloud sync, queue controls, or background playback on a physical
-Android phone. Test those on the target device before a public release.
+Only direct HTTP(S) audio tracks are placed in the native Media3 queue. Local
+`blob:` tracks remain in the WebView audio element, so system notification and
+Bluetooth queue navigation does not represent a mixed HTTP(S)/blob playlist as
+one continuous queue. The in-app queue controls remain responsible for mixed
+playback. Offline downloads and full mixed-queue background navigation are not
+implemented.
+
+The source configures ExoPlayer audio-focus handling and pauses on audio becoming
+noisy (for example, when a wired headset is disconnected). These source-level
+integrations still require physical-device verification. A successful CI build
+proves packaging only; it does not prove background playback, audio-focus
+behavior, headphone removal, notification controls, queue transitions, Clerk
+sign-in, or Convex cloud sync on a physical Android phone. Test those on the
+target device before a public release. Official Spotify, YouTube, and SoundCloud
+embeds continue to follow provider restrictions inside Android WebView.
