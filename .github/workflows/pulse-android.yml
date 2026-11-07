@@ -60,6 +60,12 @@ jobs:
       - name: Prepare web assets
         run: npm run build:web
 
+      - name: Validate and inject public cloud configuration
+        env:
+          PULSE_CONVEX_URL: ${{ vars.PULSE_CONVEX_URL }}
+          PULSE_CLERK_PUBLISHABLE_KEY: ${{ vars.PULSE_CLERK_PUBLISHABLE_KEY }}
+        run: node scripts/write-android-config.mjs
+
       - name: Generate Android project
         run: npx cap add android
 
