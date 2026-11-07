@@ -9,8 +9,8 @@
     <meta name="theme-color" content="#101114" />
     <title>Pulse — Music Workspace</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="home-refresh.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="layout">
@@ -476,10 +476,32 @@
           <span>Designed for your listening flow.</span
           ><span>Pulse · Preview build 0.1</span>
         </footer>
+
+        <section id="pulseSearchView" class="pulse-redesign-view" hidden aria-label="Search music">
+          <div class="pulse-view-heading"><p class="pulse-eyebrow">DISCOVER SOMETHING NEW</p><h1>Search music</h1><p>Explore Internet Archive recordings and iTunes metadata with clear source labels.</p></div>
+          <div id="pulseSearchMount"></div>
+        </section>
+        <section id="pulseLibraryView" class="pulse-redesign-view" hidden aria-label="Your library">
+          <div class="pulse-view-heading"><p class="pulse-eyebrow">YOUR COLLECTION</p><h1>Your library</h1><p>Saved playlists, liked tracks and music from this device.</p></div>
+          <div class="pulse-library-actions"><button id="pulseCreatePlaylist" class="primary" type="button">＋ Create playlist</button></div>
+          <div id="pulseLibraryPlaylistMount"></div>
+          <div id="pulseLibraryTracksMount"></div>
+        </section>
+        <section id="pulseProfileView" class="pulse-redesign-view" hidden aria-label="Account and sync">
+          <div class="pulse-view-heading"><p class="pulse-eyebrow">YOUR PULSE ACCOUNT</p><h1>Profile & sync</h1><p>Manage sign-in and optional cloud playlists. Local listening remains available.</p></div>
+          <div id="pulseCloudMount"></div>
+        </section>
       </main>
     </div>
-    <section class="player">
-      <div class="now">
+
+    <nav id="pulseBottomNav" class="pulse-bottom-nav" aria-label="Primary navigation">
+      <button type="button" class="pulse-nav-item active" data-pulse-view="home"><span aria-hidden="true">⌂</span><small>Home</small></button>
+      <button type="button" class="pulse-nav-item" data-pulse-view="search"><span aria-hidden="true">⌕</span><small>Search</small></button>
+      <button type="button" class="pulse-nav-item" data-pulse-view="library"><span aria-hidden="true">▤</span><small>Library</small></button>
+      <button type="button" class="pulse-nav-item" data-pulse-view="profile"><span aria-hidden="true">◉</span><small>Profile</small></button>
+    </nav>
+    <section class="player pulse-mini-player" aria-label="Music player">
+      <div class="now" id="pulseExpandPlayer" role="button" tabindex="0" aria-label="Expand music player">
         <div id="cover" class="cover violet">✳</div>
         <div>
           <b id="nowTitle">Quiet Signals</b
@@ -550,5 +572,6 @@
     <script src="home-refresh.js"></script>
     <script src="playlist-store.js"></script>
     <script src="home-archive-discovery.js"></script>
+    <script src="pulse-redesign.js"></script>
   </body>
 </html>
