@@ -329,8 +329,14 @@ test("Pulse Home view respects hidden state when navigating to other destination
   );
   assert.match(html, /id="homeFront"/);
   assert.match(adapter, /home\.hidden = !isHome/);
-  assert.match(styles, /#homeFront\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
-  assert.doesNotMatch(styles, /#homeFront\s*\{\s*display:\s*block\s*!important;/);
+  assert.match(
+    styles,
+    /#homeFront\[hidden\]\s*\{\s*display:\s*none\s*!important;/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /#homeFront\s*\{\s*display:\s*block\s*!important;/,
+  );
 });
 
 test("Pulse interface finish moves open-audio discovery into Search and adds an expandable bottom search", () => {
