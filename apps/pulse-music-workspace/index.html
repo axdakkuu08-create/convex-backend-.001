@@ -17,8 +17,14 @@
       <aside class="sidebar" id="sidebar">
         <a class="brand" href="#"
           >▥ <b>pulse<span>.</span></b></a
-        ><small>WORKSPACE</small
-        ><button class="nav active" data-view="discover">◈　Discover</button
+        ><small>WORKSPACE</small>
+        <div class="pulse-desktop-nav" aria-label="Primary navigation">
+          <button type="button" class="pulse-nav-item active" data-pulse-view="home"><span aria-hidden="true">⌂</span><small>Home</small></button>
+          <button type="button" class="pulse-nav-item" data-pulse-view="search"><span aria-hidden="true">⌕</span><small>Search</small></button>
+          <button type="button" class="pulse-nav-item" data-pulse-view="library"><span aria-hidden="true">▤</span><small>Library</small></button>
+          <button type="button" class="pulse-nav-item" data-pulse-view="profile"><span aria-hidden="true">◉</span><small>Profile</small></button>
+        </div>
+        <button class="nav active" data-view="discover">◈　Discover</button
         ><button class="nav" data-view="library">▤　Your library</button
         ><button class="nav" data-view="recent">◷　Recently played</button>
         <hr />
