@@ -68,10 +68,11 @@
     button.addEventListener("click", () => show(button.dataset.pulseView));
   });
   const profileShortcut = $("homeProfile");
-  if (profileShortcut) profileShortcut.addEventListener("click", (event) => {
-    event.stopPropagation();
-    show("profile");
-  });
+  if (profileShortcut)
+    profileShortcut.addEventListener("click", (event) => {
+      event.stopPropagation();
+      show("profile");
+    });
 
   const expandTrigger = $("pulseExpandPlayer");
   if (expandTrigger && player) {
