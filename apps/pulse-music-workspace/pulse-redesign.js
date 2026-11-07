@@ -78,7 +78,10 @@
     const toggleExpanded = (event) => {
       if (event.target.closest("#like")) return;
       player.classList.toggle("expanded");
-      player.setAttribute("aria-expanded", String(player.classList.contains("expanded")));
+      player.setAttribute(
+        "aria-expanded",
+        String(player.classList.contains("expanded")),
+      );
     };
     expandTrigger.addEventListener("click", toggleExpanded);
     expandTrigger.addEventListener("keydown", (event) => {
@@ -89,7 +92,10 @@
     });
   }
   const miniQueue = $("queue");
-  if (miniQueue) miniQueue.addEventListener("click", () => player?.classList.add("expanded"));
+  if (miniQueue)
+    miniQueue.addEventListener("click", () =>
+      player?.classList.add("expanded"),
+    );
   const queueClose = $("queueClose");
   if (queueClose) queueClose.addEventListener("click", () => player?.classList.remove("expanded"));
 
