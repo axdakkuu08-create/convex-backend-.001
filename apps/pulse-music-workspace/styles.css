@@ -1361,11 +1361,7 @@ main > header {
       rgba(163, 230, 53, 0.18),
       transparent 36%
     ),
-    linear-gradient(
-      135deg,
-      rgba(28, 39, 25, 0.94),
-      rgba(15, 19, 16, 0.92)
-    );
+    linear-gradient(135deg, rgba(28, 39, 25, 0.94), rgba(15, 19, 16, 0.92));
 }
 .hero em,
 .see-all,
@@ -1512,7 +1508,7 @@ button:focus-visible {
   main
   {
     width: 100%;
-    padding: 16px 16px calc(176px + env(safe - area - inset - bottom));
+    padding: 16px 16px calc(176px + env(safe-area-inset-bottom));
   }
   main > header,
   main > .intro,
@@ -1543,7 +1539,7 @@ button:focus-visible {
     z-index: 110;
     left: 12px;
     right: 12px;
-    bottom: calc(10px + env(safe - area - inset - bottom));
+    bottom: calc(10px + env(safe-area-inset-bottom));
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 4px;
@@ -1586,7 +1582,7 @@ button:focus-visible {
     z-index: 105;
     left: 12px;
     right: 12px;
-    bottom: calc(82px + env(safe - area - inset - bottom));
+    bottom: calc(82px + env(safe-area-inset-bottom));
     width: auto;
     padding: 9px 12px;
     display: grid;
@@ -1651,8 +1647,8 @@ button:focus-visible {
   }
   .pulse-mini-player.expanded
   {
-    inset: 12px 12px calc(82px + env(safe - area - inset - bottom));
-    bottom: calc(82px + env(safe - area - inset - bottom));
+    inset: 12px 12px calc(82px + env(safe-area-inset-bottom));
+    bottom: calc(82px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1733,7 +1729,7 @@ button:focus-visible {
     z-index: 120;
     left: 12px;
     right: 12px;
-    bottom: calc(145px + env(safe - area - inset - bottom));
+    bottom: calc(145px + env(safe-area-inset-bottom));
     width: auto;
   }
   .home-grid
