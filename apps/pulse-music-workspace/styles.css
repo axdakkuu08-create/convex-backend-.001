@@ -1752,8 +1752,8 @@ button:focus-visible {
     display: none;
   }
   #homeFront:not([hidden]) {
-  display: block;
-}
+    display: block;
+  }
 }
 
 /* Respect the hidden attribute when navigating away from Home. */
