@@ -274,7 +274,6 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
   assert.match(html, /id="queuePanel"/);
 });
 
-
 test("Pulse frosted-glass redesign preserves existing integrations and exposes four primary views", () => {
   const html = fs.readFileSync(
     path.join(__dirname, "..", "index.html"),
