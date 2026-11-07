@@ -40,6 +40,10 @@
     libraryView.hidden = view !== "library";
     profileView.hidden = view !== "profile";
     legacyChrome.forEach((node) => { node.hidden = true; });
+    const legacyView = document.querySelector(
+      '.sidebar > .nav[data-view="' + (view === "library" ? "library" : "discover") + '"]',
+    );
+    if (legacyView) legacyView.click();
     document.querySelectorAll("[data-pulse-view]").forEach((button) => {
       const active = button.dataset.pulseView === view;
       button.classList.toggle("active", active);
