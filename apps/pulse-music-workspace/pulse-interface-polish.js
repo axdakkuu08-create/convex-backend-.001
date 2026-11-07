@@ -9,7 +9,9 @@
   // Open-audio discovery belongs in Search, not on the Home landing screen.
   if (homeArchiveShelf && searchMount) searchMount.append(homeArchiveShelf);
 
-  const searchHeading = searchView?.querySelector(".pulse-view-heading p:last-child");
+  const searchHeading = searchView?.querySelector(
+    ".pulse-view-heading p:last-child",
+  );
   if (searchHeading) {
     searchHeading.textContent =
       "Find tracks, albums and open-audio selections, with source and rights details kept available.";
@@ -58,8 +60,9 @@
     const setExpanded = (expanded, focus = false) => {
       dock.classList.toggle("expanded", expanded);
       trigger.setAttribute("aria-expanded", String(expanded));
-      trigger.querySelector(".pulse-quick-search-hint").textContent =
-        expanded ? "Close" : "Tap to expand";
+      trigger.querySelector(".pulse-quick-search-hint").textContent = expanded
+        ? "Close"
+        : "Tap to expand";
       if (focus) input.focus({ preventScroll: true });
     };
 
@@ -82,7 +85,8 @@
       unifiedInput.value = query;
       unifiedForm.requestSubmit();
       const results = $("unifiedSearchResults");
-      if (results) results.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      if (results)
+        results.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && dock.classList.contains("expanded")) {
@@ -91,11 +95,13 @@
       }
     });
 
-    document.querySelectorAll('[data-pulse-view="search"]').forEach((button) => {
-      button.addEventListener("click", () => {
-        window.setTimeout(() => setExpanded(true, true), 80);
+    document
+      .querySelectorAll('[data-pulse-view="search"]')
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          window.setTimeout(() => setExpanded(true, true), 80);
+        });
       });
-    });
     const viewObserver = new MutationObserver(() => {
       const onSearch = document.body.dataset.pulseView === "search";
       dock.classList.toggle("search-active", onSearch);
