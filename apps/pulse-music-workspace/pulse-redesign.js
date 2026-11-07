@@ -97,7 +97,10 @@
       player?.classList.add("expanded"),
     );
   const queueClose = $("queueClose");
-  if (queueClose) queueClose.addEventListener("click", () => player?.classList.remove("expanded"));
+  if (queueClose)
+    queueClose.addEventListener("click", () =>
+      player?.classList.remove("expanded"),
+    );
 
   show("home");
 })();
