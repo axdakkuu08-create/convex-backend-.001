@@ -12,11 +12,21 @@
 #pulseLibraryPlaylistMount .saved-playlists,
 #pulseLibraryTracksMount .tracks {
   background:
-    radial-gradient(ellipse at 92% 0%, rgba(185, 160, 255, 0.09), transparent 42%),
-    linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.012)),
+    radial-gradient(
+      ellipse at 92% 0%,
+      rgba(185, 160, 255, 0.09),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.012)
+    ),
     var(--pulse-panel, #171b22);
-  border: 1px solid rgba(255,255,255,0.09);
-  box-shadow: 0 18px 55px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 18px 55px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 .pulse-redesign-view {
   border-radius: 26px;
@@ -29,37 +39,54 @@
 .home-grid-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 19px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018));
-  box-shadow: 0 12px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.07);
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.075),
+    rgba(255, 255, 255, 0.018)
+  );
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 .home-grid-card:active {
   transform: scale(0.985);
 }
 .home-grid-artwork {
   border-radius: 13px;
-  box-shadow: 0 10px 26px rgba(0,0,0,0.24);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
 }
 .pulse-bottom-nav {
   background: rgba(13, 17, 25, 0.82) !important;
   border-color: rgba(185, 160, 255, 0.18) !important;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.07) !important;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
 }
 .pulse-nav-item.active {
   box-shadow: 0 0 24px var(--pulse-glow);
 }
 .pulse-mini-player {
   background:
-    linear-gradient(135deg, rgba(185,160,255,0.12), transparent 48%),
+    linear-gradient(135deg, rgba(185, 160, 255, 0.12), transparent 48%),
     rgba(14, 19, 27, 0.86) !important;
-  border-color: rgba(185,160,255,0.22) !important;
-  box-shadow: 0 18px 48px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  border-color: rgba(185, 160, 255, 0.22) !important;
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 .pulse-mini-player.expanded {
   background:
-    radial-gradient(ellipse at 50% 10%, rgba(185,160,255,0.14), transparent 52%),
+    radial-gradient(
+      ellipse at 50% 10%,
+      rgba(185, 160, 255, 0.14),
+      transparent 52%
+    ),
     rgba(9, 13, 21, 0.97) !important;
 }
 .pulse-quick-search {
@@ -76,10 +103,12 @@
   gap: 10px;
   min-height: 54px;
   padding: 7px;
-  border: 1px solid rgba(185,160,255,0.25);
+  border: 1px solid rgba(185, 160, 255, 0.25);
   border-radius: 18px;
-  background: rgba(14,18,28,0.88);
-  box-shadow: 0 16px 44px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.08);
+  background: rgba(14, 18, 28, 0.88);
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(28px) saturate(145%);
   -webkit-backdrop-filter: blur(28px) saturate(145%);
 }
@@ -117,11 +146,11 @@
   flex: 1;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   outline: none;
   color: #fff;
-  background: rgba(255,255,255,0.055);
+  background: rgba(255, 255, 255, 0.055);
 }
 .pulse-quick-search-submit {
   display: none;
@@ -149,7 +178,7 @@
 }
 .pulse-quick-search input:focus-visible {
   border-color: var(--pulse-violet);
-  box-shadow: 0 0 0 3px rgba(185,160,255,0.14);
+  box-shadow: 0 0 0 3px rgba(185, 160, 255, 0.14);
 }
 @media (max-width: 760px) {
   main {
