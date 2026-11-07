@@ -27,13 +27,11 @@
     createButton.addEventListener("click", () => createPlaylist.click());
   }
 
-  const legacyChrome = [
-    main.querySelector(":scope > header"),
-    main.querySelector(":scope > .intro"),
-    main.querySelector(":scope > .hero"),
-    main.querySelector(":scope > section.moods"),
-    main.querySelector(":scope > footer"),
-  ].filter(Boolean);
+  const legacyChrome = Array.from(main.children).filter((node) => {
+    if (node.tagName === "HEADER" || node.tagName === "FOOTER") return true;
+    if (node.tagName !== "SECTION") return false;
+    return !["homeFront", "pulseSearchView", "pulseLibraryView", "pulseProfileView"].includes(node.id);
+  });
 
   function show(view) {
     const isHome = view === "home";
