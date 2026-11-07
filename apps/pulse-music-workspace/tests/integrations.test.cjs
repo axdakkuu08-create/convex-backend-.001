@@ -313,3 +313,27 @@ test("Pulse frosted-glass redesign preserves existing integrations and exposes f
   assert.match(adapter, /sourceHub && searchMount/);
   assert.match(adapter, /player\.classList\.toggle\("expanded"\)/);
 });
+
+test("Pulse interface finish moves open-audio discovery into Search and adds an expandable bottom search", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  const polish = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-interface-polish.js"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-interface.css"),
+    "utf8",
+  );
+  assert.match(html, /pulse-interface\.css/);
+  assert.match(html, /pulse-interface-polish\.js/);
+  assert.match(polish, /searchMount\.append\(homeArchiveShelf\)/);
+  assert.match(polish, /Open audio picks/);
+  assert.match(polish, /pulseQuickSearch/);
+  assert.match(polish, /aria-expanded/);
+  assert.match(polish, /unifiedForm\.requestSubmit\(\)/);
+  assert.match(styles, /backdrop-filter: blur\(28px\)/);
+  assert.match(styles, /\.pulse-quick-search\.expanded/);
+});
