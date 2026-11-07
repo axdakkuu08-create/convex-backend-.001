@@ -52,6 +52,7 @@ jobs:
           node --check app.js
           node --check media3-bridge.js
           node --check scripts/install-native-android.mjs
+          node --check scripts/write-android-config.mjs
           node -e "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8'))"
 
       - name: Install Capacitor dependencies
