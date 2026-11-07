@@ -1426,3 +1426,22 @@ main > header {
   .pulse-redesign-view { max-width: 1180px; }
   .pulse-bottom-nav { display: none; }
 }
+
+/* Final layout visibility and desktop navigation alignment. */
+#homeFront { display: block !important; }
+.pulse-desktop-nav { display: grid; gap: 7px; margin: 16px 0 20px; }
+.pulse-desktop-nav .pulse-nav-item {
+  display: flex; align-items: center; gap: 12px; min-height: 44px;
+  padding: 9px 13px; border: 1px solid transparent; border-radius: 13px;
+  background: transparent; color: var(--pulse-muted); text-align: left;
+}
+.pulse-desktop-nav .pulse-nav-item span { width: 20px; text-align: center; font-size: 18px; }
+.pulse-desktop-nav .pulse-nav-item small { font-size: 12px; font-weight: 700; }
+.pulse-desktop-nav .pulse-nav-item.active {
+  color: var(--pulse-lime); background: var(--pulse-lime-soft); border-color: rgba(163,230,53,.12);
+}
+.sidebar > .nav { display: none !important; }
+@media (max-width: 760px) {
+  .pulse-desktop-nav { display: none; }
+  #homeFront { display: block !important; }
+}
