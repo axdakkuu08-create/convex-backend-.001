@@ -30,7 +30,12 @@
   const legacyChrome = Array.from(main.children).filter((node) => {
     if (node.tagName === "HEADER" || node.tagName === "FOOTER") return true;
     if (node.tagName !== "SECTION") return false;
-    return !["homeFront", "pulseSearchView", "pulseLibraryView", "pulseProfileView"].includes(node.id);
+    return ![
+      "homeFront",
+      "pulseSearchView",
+      "pulseLibraryView",
+      "pulseProfileView",
+    ].includes(node.id);
   });
 
   function show(view) {
@@ -39,9 +44,13 @@
     searchView.hidden = view !== "search";
     libraryView.hidden = view !== "library";
     profileView.hidden = view !== "profile";
-    legacyChrome.forEach((node) => { node.hidden = true; });
+    legacyChrome.forEach((node) => {
+      node.hidden = true;
+    });
     const legacyView = document.querySelector(
-      '.sidebar > .nav[data-view="' + (view === "library" ? "library" : "discover") + '"]',
+      '.sidebar > .nav[data-view="' +
+        (view === "library" ? "library" : "discover") +
+        '"]',
     );
     if (legacyView) legacyView.click();
     document.querySelectorAll("[data-pulse-view]").forEach((button) => {
