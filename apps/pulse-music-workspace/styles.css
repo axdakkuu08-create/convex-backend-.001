@@ -1710,8 +1710,8 @@ button:focus-visible {
   }
 }
 /* Final layout visibility and desktop navigation alignment. */
-#homeFront {
-  display: block !important;
+#homeFront:not([hidden]) {
+  display: block;
 }
 .pulse-desktop-nav {
   display: grid;
@@ -1751,7 +1751,12 @@ button:focus-visible {
   .pulse-desktop-nav {
     display: none;
   }
-  #homeFront {
-    display: block !important;
-  }
+  #homeFront:not([hidden]) {
+  display: block;
+}
+}
+
+/* Respect the hidden attribute when navigating away from Home. */
+#homeFront[hidden] {
+  display: none !important;
 }
