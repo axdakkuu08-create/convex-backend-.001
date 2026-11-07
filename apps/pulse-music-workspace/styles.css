@@ -1492,49 +1492,43 @@ button:focus-visible {
   background: var(--pulse-panel-strong);
 }
 @media (max-width: 760px) {
-  body
-  {
+  body {
     overflow-x: hidden;
   }
-  .layout
-  {
+  .layout {
     display: block;
     min-height: 100dvh;
   }
-  .sidebar
-  {
+  .sidebar {
     display: none !important;
   }
-  main
-  {
+  main {
     width: 100%;
     padding: 16px 16px calc(176px + env(safe-area-inset-bottom));
   }
   main > header,
   main > .intro,
   main > .hero,
-  main > section:not(#homeFront):not(#pulseSearchView):not(#pulseLibraryView):not(#pulseProfileView),
-  main > footer
-  {
+  main
+    > section:not(#homeFront):not(#pulseSearchView):not(#pulseLibraryView):not(
+      #pulseProfileView
+    ),
+  main > footer {
     display: none !important;
   }
-  #homeFront
-  {
+  #homeFront {
     display: block;
     padding-top: 10px;
   }
-  #homeFront .home-archive-shelf
-  {
+  #homeFront .home-archive-shelf {
     margin-top: 18px;
   }
-  .pulse-redesign-view
-  {
+  .pulse-redesign-view {
     min-height: calc(100dvh - 190px);
     margin: 8px 0 0;
     padding: 18px;
   }
-  .pulse-bottom-nav
-  {
+  .pulse-bottom-nav {
     position: fixed;
     z-index: 110;
     left: 12px;
@@ -1550,8 +1544,7 @@ button:focus-visible {
     backdrop-filter: blur(26px);
     box-shadow: 0 12px 38px rgba(0, 0, 0, 0.4);
   }
-  .pulse-nav-item
-  {
+  .pulse-nav-item {
     min-height: 54px;
     display: grid;
     place-items: center;
@@ -1562,23 +1555,19 @@ button:focus-visible {
     color: var(--pulse-muted);
     background: transparent;
   }
-  .pulse-nav-item span
-  {
+  .pulse-nav-item span {
     font-size: 20px;
     line-height: 1;
   }
-  .pulse-nav-item small
-  {
+  .pulse-nav-item small {
     font-size: 10px;
     font-weight: 700;
   }
-  .pulse-nav-item.active
-  {
+  .pulse-nav-item.active {
     color: var(--pulse-lime);
     background: var(--pulse-lime-soft);
   }
-  .player
-  {
+  .player {
     z-index: 105;
     left: 12px;
     right: 12px;
@@ -1590,42 +1579,35 @@ button:focus-visible {
     gap: 8px;
     border-radius: 16px;
   }
-  .player .now
-  {
+  .player .now {
     min-width: 0;
     gap: 9px;
   }
-  .player .now .cover
-  {
+  .player .now .cover {
     width: 42px;
     height: 42px;
     flex: 0 0 42px;
   }
-  .player .now > div:last-of-type
-  {
+  .player .now > div:last-of-type {
     min-width: 0;
   }
   .player .now b,
-  .player .now small
-  {
+  .player .now small {
     max-width: 42vw;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .player .controls
-  {
+  .player .controls {
     display: flex;
     align-items: center;
   }
-  .player .controls > div:first-child
-  {
+  .player .controls > div:first-child {
     display: flex;
     align-items: center;
     gap: 3px;
   }
-  .player .controls button
-  {
+  .player .controls button {
     min-width: 32px;
     min-height: 38px;
   }
@@ -1633,20 +1615,16 @@ button:focus-visible {
   .player .controls button#prev,
   .player .controls button#repeat,
   .player .timeline,
-  .player .volume
-  {
+  .player .volume {
     display: none;
   }
-  .player .controls button#queue
-  {
+  .player .controls button#queue {
     display: none !important;
   }
-  .player .now .like
-  {
+  .player .now .like {
     display: none;
   }
-  .pulse-mini-player.expanded
-  {
+  .pulse-mini-player.expanded {
     inset: 12px 12px calc(82px + env(safe-area-inset-bottom));
     bottom: calc(82px + env(safe-area-inset-bottom));
     display: flex;
@@ -1657,17 +1635,14 @@ button:focus-visible {
     border-radius: 24px;
     background: rgba(11, 16, 12, 0.97);
   }
-  .pulse-mini-player.expanded .now
-  {
+  .pulse-mini-player.expanded .now {
     cursor: pointer;
   }
-  .pulse-mini-player.expanded .controls
-  {
+  .pulse-mini-player.expanded .controls {
     display: block;
     width: 100%;
   }
-  .pulse-mini-player.expanded .controls > div:first-child
-  {
+  .pulse-mini-player.expanded .controls > div:first-child {
     justify-content: center;
     gap: 12px;
   }
@@ -1676,74 +1651,61 @@ button:focus-visible {
   .pulse-mini-player.expanded .controls button#repeat,
   .pulse-mini-player.expanded .timeline,
   .pulse-mini-player.expanded .volume,
-  .pulse-mini-player.expanded .controls button#queue
-  {
+  .pulse-mini-player.expanded .controls button#queue {
     display: inline-flex !important;
   }
-  .pulse-mini-player.expanded .timeline
-  {
+  .pulse-mini-player.expanded .timeline {
     display: flex;
     align-items: center;
     gap: 8px;
     width: 100%;
   }
-  .pulse-mini-player.expanded .timeline input
-  {
+  .pulse-mini-player.expanded .timeline input {
     flex: 1;
     min-width: 0;
   }
-  .pulse-mini-player.expanded .volume
-  {
+  .pulse-mini-player.expanded .volume {
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .pulse-mini-player.expanded .volume input
-  {
+  .pulse-mini-player.expanded .volume input {
     width: 100%;
   }
-  .pulse-mini-player.expanded .now
-  {
+  .pulse-mini-player.expanded .now {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-  .pulse-mini-player.expanded .now .cover
-  {
+  .pulse-mini-player.expanded .now .cover {
     width: min(68vw, 280px);
     height: min(68vw, 280px);
     flex-basis: auto;
   }
   .pulse-mini-player.expanded .now b,
-  .pulse-mini-player.expanded .now small
-  {
+  .pulse-mini-player.expanded .now small {
     max-width: 80vw;
   }
-  .pulse-mini-player.expanded .now .like
-  {
+  .pulse-mini-player.expanded .now .like {
     display: inline-flex;
   }
-  .queue-panel
-  {
+  .queue-panel {
     z-index: 120;
     left: 12px;
     right: 12px;
     bottom: calc(145px + env(safe-area-inset-bottom));
     width: auto;
   }
-  .home-grid
-  {
+  .home-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (min-width: 761px) {
-  .pulse-redesign-view
-  {
+  .pulse-redesign-view {
     max-width: 1180px;
   }
-  .pulse-bottom-nav
-  {
+  .pulse-bottom-nav {
     display: none;
   }
 }
@@ -1786,12 +1748,10 @@ button:focus-visible {
   display: none !important;
 }
 @media (max-width: 760px) {
-  .pulse-desktop-nav
-  {
+  .pulse-desktop-nav {
     display: none;
   }
-  #homeFront
-  {
+  #homeFront {
     display: block !important;
   }
 }
