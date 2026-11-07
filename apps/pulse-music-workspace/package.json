@@ -1,0 +1,19 @@
+{
+  "name": "pulse-music-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pulse music workspace web and Android application",
+  "scripts": {
+    "build:web": "node scripts/prepare-web.mjs",
+    "android:sync": "npm run build:web && node scripts/install-native-android.mjs && cap sync android",
+    "android:add": "npm run build:web && cap add android && node scripts/install-native-android.mjs",
+    "android:debug": "npm run android:add && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.0",
+    "@capacitor/core": "8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.0"
+  }
+}

@@ -1,0 +1,89 @@
+name: Pulse Android build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/pulse-android-capacitor
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "apps/pulse-music-workspace/**"
+      - ".github/workflows/pulse-android.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/pulse-music-workspace
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Install Android SDK packages
+        run: >-
+          sdkmanager "platform-tools" "platforms;android-36"
+          "build-tools;36.0.0"
+
+      - name: Validate Pulse JavaScript and package metadata
+        run: |
+          node --check app.js
+          node --check media3-bridge.js
+          node --check scripts/install-native-android.mjs
+          node --check scripts/write-android-config.mjs
+          node -e "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8'))"
+
+      - name: Install Capacitor dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Prepare web assets
+        run: npm run build:web
+
+      - name: Validate and inject public cloud configuration
+        env:
+          PULSE_CONVEX_URL: ${{ vars.PULSE_CONVEX_URL }}
+          PULSE_CLERK_PUBLISHABLE_KEY: ${{ vars.PULSE_CLERK_PUBLISHABLE_KEY }}
+        run: node scripts/write-android-config.mjs
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Install native Media3 integration
+        run: node scripts/install-native-android.mjs
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: apps/pulse-music-workspace/android
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Upload installable debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-android-debug-apk
+          path: apps/pulse-music-workspace/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

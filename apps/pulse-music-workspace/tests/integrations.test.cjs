@@ -100,6 +100,50 @@ const configSource = fs.readFileSync(
   "utf8",
 );
 
+test("Android Media3 lock-screen session receives the playable Pulse queue", () => {
+  const plugin = fs.readFileSync(
+    path.join(
+      __dirname,
+      "..",
+      "android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java",
+    ),
+    "utf8",
+  );
+  const bridge = fs.readFileSync(
+    path.join(__dirname, "..", "media3-bridge.js"),
+    "utf8",
+  );
+  assert.match(plugin, /public void setQueue\(PluginCall call\)/);
+  assert.match(plugin, /setMediaItems\(items, startIndex, 0L\)/);
+  assert.match(plugin, /setMediaId\(mediaId\)/);
+  assert.match(plugin, /put\("mediaId"/);
+  assert.match(bridge, /async setQueue\(tracks, startIndex = 0\)/);
+  assert.match(source, /window\.PulseMedia3\.setQueue/);
+  assert.match(source, /transitionedIndex/);
+});
+
+test("Android MediaSession opens Pulse and relies on the service-managed media notification", () => {
+  const service = fs.readFileSync(
+    path.join(
+      __dirname,
+      "..",
+      "android-native/src/main/java/com/pulse/music/PulseAudioService.java",
+    ),
+    "utf8",
+  );
+  assert.match(service, /extends MediaSessionService/);
+  assert.match(service, /getLaunchIntentForPackage\(getPackageName\(\)\)/);
+  assert.match(service, /PendingIntent\.getActivity/);
+  assert.match(service, /PendingIntent\.FLAG_IMMUTABLE/);
+  assert.match(
+    service,
+    /sessionBuilder\.setSessionActivity\(sessionActivity\)/,
+  );
+  assert.match(service, /setAudioAttributes\(attributes, true\)/);
+  assert.match(service, /setHandleAudioBecomingNoisy\(true\)/);
+  assert.match(service, /new MediaSession\.Builder\(this, player\)/);
+});
+
 test("cloud playlists are opt-in and use owner-scoped backend functions", () => {
   assert.match(
     cloudSource,
@@ -228,4 +272,93 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
   assert.match(app, /queueClear/);
   assert.match(html, /id="queue"/);
   assert.match(html, /id="queuePanel"/);
+});
+
+test("Pulse frosted-glass redesign preserves existing integrations and exposes four primary views", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  const adapter = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-redesign.js"),
+    "utf8",
+  );
+  for (const view of ["home", "search", "library", "profile"]) {
+    assert.match(html, new RegExp('data-pulse-view="' + view + '"'));
+  }
+  for (const mount of [
+    "pulseSearchMount",
+    "pulseLibraryPlaylistMount",
+    "pulseLibraryTracksMount",
+    "pulseCloudMount",
+    "pulseExpandPlayer",
+  ]) {
+    assert.match(html, new RegExp('id="' + mount + '"'));
+  }
+  for (const integration of [
+    "config.js",
+    "internet-archive.js",
+    "catalog-search.js",
+    "media3-bridge.js",
+    "app.js",
+    "cloud-sync.js",
+    "playlist-store.js",
+    "home-archive-discovery.js",
+    "pulse-redesign.js",
+  ]) {
+    assert.match(html, new RegExp(integration.replace(".", "\\.")));
+  }
+  assert.match(adapter, /PulsePlaylistStore\.render/);
+  assert.match(adapter, /cloudMount\.append/);
+  assert.match(adapter, /sourceHub && searchMount/);
+  assert.match(adapter, /player\.classList\.toggle\("expanded"\)/);
+});
+
+test("Pulse Home view respects hidden state when navigating to other destinations", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  const adapter = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-redesign.js"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(__dirname, "..", "styles.css"),
+    "utf8",
+  );
+  assert.match(html, /id="homeFront"/);
+  assert.match(adapter, /home\.hidden = !isHome/);
+  assert.match(
+    styles,
+    /#homeFront\[hidden\]\s*\{\s*display:\s*none\s*!important;/,
+  );
+  assert.doesNotMatch(
+    styles,
+    /#homeFront\s*\{\s*display:\s*block\s*!important;/,
+  );
+});
+
+test("Pulse interface finish moves open-audio discovery into Search and adds an expandable bottom search", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  const polish = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-interface-polish.js"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-interface.css"),
+    "utf8",
+  );
+  assert.match(html, /pulse-interface\.css/);
+  assert.match(html, /pulse-interface-polish\.js/);
+  assert.match(polish, /searchMount\.append\(homeArchiveShelf\)/);
+  assert.match(polish, /Open audio picks/);
+  assert.match(polish, /pulseQuickSearch/);
+  assert.match(polish, /aria-expanded/);
+  assert.match(polish, /unifiedForm\.requestSubmit\(\)/);
+  assert.match(styles, /backdrop-filter: blur\(28px\)/);
+  assert.match(styles, /\.pulse-quick-search\.expanded/);
 });

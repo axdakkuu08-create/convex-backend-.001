@@ -1,0 +1,8 @@
+{
+  "appId": "com.pulse.music",
+  "appName": "Pulse",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,215 @@
+/* Pulse glossy interface finish — layered glass, controlled neon accents, and safe-area aware search dock. */
+:root {
+  --pulse-glass: rgba(18, 22, 31, 0.78);
+  --pulse-glass-strong: rgba(14, 18, 27, 0.94);
+  --pulse-glow: rgba(183, 243, 107, 0.18);
+  --pulse-violet: #b9a0ff;
+}
+.pulse-redesign-view,
+.home-archive-shelf,
+.sourcehub,
+.home-library-section,
+#pulseLibraryPlaylistMount .saved-playlists,
+#pulseLibraryTracksMount .tracks {
+  background:
+    radial-gradient(
+      ellipse at 92% 0%,
+      rgba(185, 160, 255, 0.09),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.012)
+    ),
+    var(--pulse-panel, #171b22);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 18px 55px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+.pulse-redesign-view {
+  border-radius: 26px;
+}
+.home-library-section {
+  padding: 18px;
+  margin: 18px 0;
+  border-radius: 22px;
+}
+.home-grid-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 19px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.075),
+    rgba(255, 255, 255, 0.018)
+  );
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.home-grid-card:active {
+  transform: scale(0.985);
+}
+.home-grid-artwork {
+  border-radius: 13px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
+}
+.pulse-bottom-nav {
+  background: rgba(13, 17, 25, 0.82) !important;
+  border-color: rgba(185, 160, 255, 0.18) !important;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+}
+.pulse-nav-item.active {
+  box-shadow: 0 0 24px var(--pulse-glow);
+}
+.pulse-mini-player {
+  background:
+    linear-gradient(135deg, rgba(185, 160, 255, 0.12), transparent 48%),
+    rgba(14, 19, 27, 0.86) !important;
+  border-color: rgba(185, 160, 255, 0.22) !important;
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+.pulse-mini-player.expanded {
+  background:
+    radial-gradient(
+      ellipse at 50% 10%,
+      rgba(185, 160, 255, 0.14),
+      transparent 52%
+    ),
+    rgba(9, 13, 21, 0.97) !important;
+}
+.pulse-quick-search {
+  display: none;
+}
+.pulse-quick-search.search-active {
+  position: fixed;
+  z-index: 108;
+  left: 18px;
+  right: 18px;
+  bottom: calc(154px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 7px;
+  border: 1px solid rgba(185, 160, 255, 0.25);
+  border-radius: 18px;
+  background: rgba(14, 18, 28, 0.88);
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(28px) saturate(145%);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+}
+.pulse-quick-search-trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--pulse-text, #f4f4f6);
+  background: transparent;
+  text-align: left;
+}
+.pulse-quick-search-trigger > span:first-child {
+  color: var(--pulse-lime, #b8f36b);
+  font-size: 23px;
+  line-height: 1;
+}
+.pulse-quick-search-label {
+  font-weight: 700;
+}
+.pulse-quick-search-hint {
+  margin-left: auto;
+  color: var(--pulse-muted, #9295a2);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.pulse-quick-search input {
+  display: none;
+  min-width: 0;
+  flex: 1;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  outline: none;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.055);
+}
+.pulse-quick-search-submit {
+  display: none;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border: 0;
+  border-radius: 13px;
+  color: #11151b;
+  background: linear-gradient(135deg, #d5ff9a, #a6e95b);
+  font-size: 20px;
+  font-weight: 800;
+}
+.pulse-quick-search.expanded .pulse-quick-search-trigger {
+  flex: 0 0 auto;
+  padding: 0 8px;
+}
+.pulse-quick-search.expanded .pulse-quick-search-label,
+.pulse-quick-search.expanded .pulse-quick-search-hint {
+  display: none;
+}
+.pulse-quick-search.expanded input,
+.pulse-quick-search.expanded .pulse-quick-search-submit {
+  display: block;
+}
+.pulse-quick-search input:focus-visible {
+  border-color: var(--pulse-violet);
+  box-shadow: 0 0 0 3px rgba(185, 160, 255, 0.14);
+}
+@media (max-width: 760px) {
+  main {
+    padding-bottom: calc(230px + env(safe-area-inset-bottom));
+  }
+  #pulseSearchView {
+    padding-bottom: 110px;
+  }
+  #pulseSearchMount .sourcehub {
+    padding-bottom: 18px;
+  }
+  #pulseSearchMount .home-archive-shelf {
+    margin-top: 18px;
+  }
+  .pulse-quick-search.search-active {
+    bottom: calc(154px + env(safe-area-inset-bottom));
+  }
+  .pulse-mini-player.expanded {
+    z-index: 130;
+  }
+  .pulse-mini-player.expanded ~ .pulse-quick-search {
+    display: none;
+  }
+}
+@media (min-width: 761px) {
+  .pulse-quick-search {
+    display: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-grid-card {
+    transition: none;
+  }
+}

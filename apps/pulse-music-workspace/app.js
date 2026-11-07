@@ -277,8 +277,44 @@ function loadMusicEmbed(raw) {
 function setTrack(i, autoplay = false) {
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
-  audio.src = t.src;
-  audio.load();
+  const wasNativeTrack = nativeTrackActive;
+  nativeTrackActive = !!(
+    window.PulseMedia3 &&
+    window.PulseMedia3.isNative &&
+    /^https?:\/\//i.test(t.src)
+  );
+  if (nativeTrackActive) {
+    audio.pause();
+    nativeEndedHandled = false;
+    const nativeQueue = tracks.filter((candidate) =>
+      /^https?:\/\//i.test(candidate.src),
+    );
+    const nativeQueueIndex = nativeQueue.findIndex(
+      (candidate) => String(candidate.id) === String(t.id),
+    );
+    nativeLoadPromise = window.PulseMedia3.setQueue(
+      nativeQueue.map((candidate) => ({
+        id: String(candidate.id),
+        url: candidate.src,
+        title: candidate.title,
+        artist: candidate.artist,
+      })),
+      Math.max(0, nativeQueueIndex),
+    );
+    nativeLoadPromise.catch((error) => {
+      $("audioStatus").textContent =
+        error && error.message
+          ? error.message
+          : "Android audio service could not load this track.";
+      toast("Native playback could not load this track.");
+    });
+  } else {
+    if (wasNativeTrack && window.PulseMedia3) {
+      window.PulseMedia3.pause().catch(() => {});
+    }
+    audio.src = t.src;
+    audio.load();
+  }
   $("audioStatus").textContent = t.archivePage
     ? "Internet Archive audio · verify item rights before reuse. Open the item page for details."
     : t.localFile
@@ -300,7 +336,12 @@ function setTrack(i, autoplay = false) {
 }
 async function play() {
   try {
-    await audio.play();
+    if (nativeTrackActive) {
+      await nativeLoadPromise;
+      await window.PulseMedia3.play();
+    } else {
+      await audio.play();
+    }
     playing = true;
     $("audioStatus").textContent = tracks[index].archivePage
       ? "Playing · " +
@@ -325,7 +366,13 @@ async function play() {
   }
 }
 function pause() {
-  audio.pause();
+  if (nativeTrackActive) {
+    window.PulseMedia3.pause().catch(() =>
+      toast("Could not pause native playback."),
+    );
+  } else {
+    audio.pause();
+  }
   playing = false;
   $("play").textContent = "▶";
   render();
@@ -337,7 +384,11 @@ function next() {
   let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
   if (n >= tracks.length && !repeatOn) {
     pause();
-    audio.currentTime = 0;
+    if (nativeTrackActive) {
+      window.PulseMedia3.seekTo(0).catch(() => {});
+    } else {
+      audio.currentTime = 0;
+    }
     return;
   }
   setTrack(n, true);
@@ -420,8 +471,12 @@ $("shuffle").onclick = () => {
 };
 $("next").onclick = next;
 $("prev").onclick = () => {
-  if (audio.currentTime > 3) {
-    audio.currentTime = 0;
+  const currentPosition = nativeTrackActive
+    ? nativePositionSeconds
+    : audio.currentTime;
+  if (currentPosition > 3) {
+    if (nativeTrackActive) window.PulseMedia3.seekTo(0).catch(() => {});
+    else audio.currentTime = 0;
     return;
   }
   setTrack(index - 1, true);
@@ -432,7 +487,14 @@ $("repeat").onclick = () => {
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
 $("like").onclick = () => like(tracks[index].id);
-$("volume").oninput = (e) => (audio.volume = Number(e.target.value));
+$("volume").oninput = (e) => {
+  const volume = Number(e.target.value);
+  if (nativeTrackActive) {
+    window.PulseMedia3.setVolume(volume).catch(() => {});
+  } else {
+    audio.volume = volume;
+  }
+};
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
   if (Number.isFinite(audio.duration) && audio.duration > 0) {
@@ -442,10 +504,72 @@ audio.ontimeupdate = () => {
   }
 };
 $("progress").oninput = (e) => {
-  if (Number.isFinite(audio.duration))
+  if (nativeTrackActive) {
+    window.PulseMedia3.seekTo(
+      (Number(e.target.value) / 100) * nativeDurationSeconds,
+    ).catch(() => {});
+  } else if (Number.isFinite(audio.duration)) {
     audio.currentTime = (Number(e.target.value) / 100) * audio.duration;
+  }
 };
 audio.onended = () => (repeatOn ? ((audio.currentTime = 0), play()) : next());
+
+let nativeLoadPromise = Promise.resolve();
+let nativeDurationSeconds = 0;
+let nativePositionSeconds = 0;
+let nativeTrackActive = false;
+let nativeEndedHandled = false;
+
+if (window.PulseMedia3 && window.PulseMedia3.isNative) {
+  window.PulseMedia3.setVolume(0.75).catch(() => {});
+  window.PulseMedia3.addStateListener((state) => {
+    if (!state) return;
+    const mediaId = String(state.mediaId || "");
+    const transitionedIndex = mediaId
+      ? tracks.findIndex((track) => String(track.id) === mediaId)
+      : -1;
+    if (transitionedIndex >= 0 && transitionedIndex !== index) {
+      index = transitionedIndex;
+      const currentTrack = tracks[index];
+      $("nowTitle").textContent = currentTrack.title;
+      $("nowArtist").textContent = currentTrack.artist;
+      $("cover").className = "cover " + currentTrack.cover;
+      $("cover").textContent = currentTrack.symbol;
+      $("like").textContent = liked.has(currentTrack.id) ? "♥" : "♡";
+      $("like").classList.toggle("liked", liked.has(currentTrack.id));
+      $("duration").textContent = currentTrack.time;
+      render();
+      renderQueuePanel();
+    }
+    const position = Number(state.positionSeconds) || 0;
+    const duration = Number(state.durationSeconds) || 0;
+    nativePositionSeconds = position;
+    nativeDurationSeconds = duration;
+    if (duration > 0) {
+      $("progress").value = (position / duration) * 100;
+      $("time").textContent = fmt(position);
+      $("duration").textContent = fmt(duration);
+    }
+    const isNowPlaying = !!state.isPlaying;
+    if (playing !== isNowPlaying) {
+      playing = isNowPlaying;
+      $("play").textContent = playing ? "Ⅱ" : "▶";
+      render();
+    }
+    if (state.playbackState === 4 && !nativeEndedHandled) {
+      nativeEndedHandled = true;
+      if (repeatOn) {
+        window.PulseMedia3.seekTo(0)
+          .then(() => play())
+          .catch(() => {});
+      } else {
+        next();
+      }
+    } else if (state.playbackState !== 4) {
+      nativeEndedHandled = false;
+    }
+  });
+}
 audio.onwaiting = () => {
   $("audioStatus").textContent =
     "Loading audio… If it stays here, the link may not be a direct audio file.";
@@ -526,8 +650,10 @@ $("queueNext")?.addEventListener("click", () => $("next").click());
 $("queueClear")?.addEventListener("click", () => {
   const current = tracks[index];
   if (!current) return;
+  const wasPlaying = playing;
   tracks.splice(0, tracks.length, current);
   index = 0;
+  if (nativeTrackActive) setTrack(0, wasPlaying);
   render();
   renderQueuePanel();
   toast("Queue cleared");
