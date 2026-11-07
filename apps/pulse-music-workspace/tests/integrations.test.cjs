@@ -314,6 +314,25 @@ test("Pulse frosted-glass redesign preserves existing integrations and exposes f
   assert.match(adapter, /player\.classList\.toggle\("expanded"\)/);
 });
 
+test("Pulse Home view respects hidden state when navigating to other destinations", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  const adapter = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-redesign.js"),
+    "utf8",
+  );
+  const styles = fs.readFileSync(
+    path.join(__dirname, "..", "styles.css"),
+    "utf8",
+  );
+  assert.match(html, /id="homeFront"/);
+  assert.match(adapter, /home\.hidden = !isHome/);
+  assert.match(styles, /#homeFront\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
+  assert.doesNotMatch(styles, /#homeFront\s*\{\s*display:\s*block\s*!important;/);
+});
+
 test("Pulse interface finish moves open-audio discovery into Search and adds an expandable bottom search", () => {
   const html = fs.readFileSync(
     path.join(__dirname, "..", "index.html"),
