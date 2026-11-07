@@ -273,3 +273,44 @@ test("mobile home speed dial uses country-chart metadata and queue controls are 
   assert.match(html, /id="queue"/);
   assert.match(html, /id="queuePanel"/);
 });
+
+
+test("Pulse frosted-glass redesign preserves existing integrations and exposes four primary views", () => {
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
+  const adapter = fs.readFileSync(
+    path.join(__dirname, "..", "pulse-redesign.js"),
+    "utf8",
+  );
+  for (const view of ["home", "search", "library", "profile"]) {
+    assert.match(html, new RegExp('data-pulse-view="' + view + '"'));
+  }
+  for (const mount of [
+    "pulseSearchMount",
+    "pulseLibraryPlaylistMount",
+    "pulseLibraryTracksMount",
+    "pulseCloudMount",
+    "pulseExpandPlayer",
+  ]) {
+    assert.match(html, new RegExp('id="' + mount + '"'));
+  }
+  for (const integration of [
+    "config.js",
+    "internet-archive.js",
+    "catalog-search.js",
+    "media3-bridge.js",
+    "app.js",
+    "cloud-sync.js",
+    "playlist-store.js",
+    "home-archive-discovery.js",
+    "pulse-redesign.js",
+  ]) {
+    assert.match(html, new RegExp(integration.replace(".", "\\.")));
+  }
+  assert.match(adapter, /PulsePlaylistStore\.render/);
+  assert.match(adapter, /cloudMount\.append/);
+  assert.match(adapter, /sourceHub && searchMount/);
+  assert.match(adapter, /player\.classList\.toggle\("expanded"\)/);
+});
