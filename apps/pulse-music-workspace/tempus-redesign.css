@@ -66,3 +66,7 @@ body{background:radial-gradient(ellipse at 78% -18%,#38263d 0,transparent 36%),v
  .tempus-player-art{width:min(78vw,360px);margin-top:clamp(26px,6vh,52px)}
 }
 @media(min-width:761px){.tempus-player-overlay{padding-left:clamp(28px,8vw,120px);padding-right:clamp(28px,8vw,120px)}}
+
+.pulse-downloads-notice{margin:28px auto;padding:28px;max-width:900px;background:linear-gradient(125deg,#252034,#19252d);border:1px solid #494050;border-radius:18px}
+.pulse-downloads-notice h2{font:800 clamp(22px,4vw,32px) Manrope;margin:8px 0}
+.pulse-downloads-notice p{max-width:620px;color:var(--pulse-muted);line-height:1.7}
