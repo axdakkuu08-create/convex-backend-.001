@@ -743,3 +743,20 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
 });
 
 setTrack(0);
+
+/* Public bridge for the Tempus-inspired presentation layer; player engine remains here. */
+window.PulsePlayerBridge = {
+  currentTrack: () => tracks[index] || null,
+  isLiked: (id) => liked.has(id),
+  reorder: (from, to) => {
+    if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < 0 || from >= tracks.length || to >= tracks.length || from === to) return;
+    const [moved] = tracks.splice(from, 1);
+    tracks.splice(to, 0, moved);
+    if (index === from) index = to;
+    else if (from < index && to >= index) index--;
+    else if (from > index && to <= index) index++;
+    render();
+    renderQueuePanel();
+    window.dispatchEvent(new CustomEvent("pulse:queue-reordered", { detail: { from, to } }));
+  },
+};
