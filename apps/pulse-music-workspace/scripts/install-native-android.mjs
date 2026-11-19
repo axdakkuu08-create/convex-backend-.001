@@ -34,7 +34,10 @@ if (!gradle.includes("androidx.media3:media3-exoplayer")) {
   if (!dependencyBlock.test(gradle)) {
     throw new Error("Could not locate app Gradle dependencies block");
   }
-  gradle = gradle.replace(dependencyBlock, (match) => match + "\n" + mediaDependencies);
+  gradle = gradle.replace(
+    dependencyBlock,
+    (match) => match + "\n" + mediaDependencies,
+  );
   await writeFile(gradlePath, gradle);
 }
 
@@ -54,7 +57,10 @@ const permissions = [
 for (const permission of permissions) {
   const permissionName = permission.match(/android:name="([^"]+)"/)[1];
   if (!manifest.includes(permissionName)) {
-    manifest = manifest.replace("<application", permission + "\n    <application");
+    manifest = manifest.replace(
+      "<application",
+      permission + "\n    <application",
+    );
   }
 }
 if (!manifest.includes("com.pulse.music.PulseAudioService")) {
@@ -68,16 +74,23 @@ if (!manifest.includes("com.pulse.music.PulseAudioService")) {
             </intent-filter>
         </service>`;
   if (!manifest.includes("</application>")) {
-    throw new Error("Could not locate Android manifest application closing tag");
+    throw new Error(
+      "Could not locate Android manifest application closing tag",
+    );
   }
-  manifest = manifest.replace("</application>", service + "\n    </application>");
+  manifest = manifest.replace(
+    "</application>",
+    service + "\n    </application>",
+  );
 }
 await writeFile(manifestPath, manifest);
 
 let activity = await readFile(activityPath, "utf8");
 const bridgeImport = "import com.getcapacitor.BridgeActivity;";
 if (!activity.includes(bridgeImport)) {
-  throw new Error("Generated MainActivity does not extend the expected Capacitor BridgeActivity");
+  throw new Error(
+    "Generated MainActivity does not extend the expected Capacitor BridgeActivity",
+  );
 }
 if (!activity.includes("import android.os.Bundle;")) {
   activity = activity.replace(
@@ -92,12 +105,16 @@ if (!activity.includes("import com.pulse.music.PulseMedia3Plugin;")) {
   );
 }
 
-const classDeclaration = /public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{/;
+const classDeclaration =
+  /public\s+class\s+MainActivity\s+extends\s+BridgeActivity\s*\{/;
 if (!classDeclaration.test(activity)) {
-  throw new Error("Could not locate MainActivity class declaration for plugin registration");
+  throw new Error(
+    "Could not locate MainActivity class declaration for plugin registration",
+  );
 }
 if (!activity.includes("registerPlugin(PulseMedia3Plugin.class)")) {
-  const onCreate = /public\s+void\s+onCreate\s*\(\s*Bundle\s+savedInstanceState\s*\)\s*\{/;
+  const onCreate =
+    /public\s+void\s+onCreate\s*\(\s*Bundle\s+savedInstanceState\s*\)\s*\{/;
   if (onCreate.test(activity)) {
     activity = activity.replace(
       onCreate,
@@ -141,4 +158,6 @@ if (!finalActivity.includes("registerPlugin(PulseMedia3Plugin.class)")) {
   throw new Error("PulseMedia3 plugin is not registered in MainActivity");
 }
 
-console.log("Verified PulseMedia3 plugin, MediaSessionService, Gradle dependencies, and Android manifest registration.");
+console.log(
+  "Verified PulseMedia3 plugin, MediaSessionService, Gradle dependencies, and Android manifest registration.",
+);
