@@ -105,7 +105,7 @@ public final class PulseMedia3Plugin extends Plugin {
                 JSONObject track = tracks.getJSONObject(i);
                 String url = track.optString("url", "");
                 String mediaId = track.optString("id", "pulse-" + i);
-                if (!(url.startsWith("https://") || url.startsWith("https://"))) {
+                if (!(url.startsWith("https://"))) {
                     call.reject("Every native queue item must use an HTTP or HTTPS audio URL");
                     return;
                 }
@@ -126,7 +126,17 @@ public final class PulseMedia3Plugin extends Plugin {
 
         int startIndex = Math.max(0, Math.min(requestedIndex, items.size() - 1));
         withController(call, mediaController -> {
-            mediaController.setMediaItems(items, startIndex, Math.max(0L, (long) (call.getDouble("startPositionSeconds", 0.0) * 1000)));
+            mediaController.setMediaItems(
+                items,
+                startIndex,
+                Math.max(0L, (long) (call.getDouble("startPositionSeconds", 0.0) * 1000))
+            );
+            mediaController.setShuffleModeEnabled(call.getBoolean("shuffle", false));
+            mediaController.setRepeatMode(
+                call.getBoolean("repeat", false)
+                    ? androidx.media3.common.Player.REPEAT_MODE_ALL
+                    : androidx.media3.common.Player.REPEAT_MODE_OFF
+            );
             mediaController.prepare();
             call.resolve();
         });
@@ -202,6 +212,28 @@ public final class PulseMedia3Plugin extends Plugin {
     public void previous(PluginCall call) {
         withController(call, mediaController -> {
             mediaController.seekToPreviousMediaItem();
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
+    public void setShuffle(PluginCall call) {
+        boolean enabled = call.getBoolean("enabled", false);
+        withController(call, mediaController -> {
+            mediaController.setShuffleModeEnabled(enabled);
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
+    public void setRepeat(PluginCall call) {
+        boolean enabled = call.getBoolean("enabled", false);
+        withController(call, mediaController -> {
+            mediaController.setRepeatMode(
+                enabled
+                    ? androidx.media3.common.Player.REPEAT_MODE_ALL
+                    : androidx.media3.common.Player.REPEAT_MODE_OFF
+            );
             call.resolve();
         });
     }
