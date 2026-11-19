@@ -17,6 +17,9 @@
   function writeRecords(records) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
   }
+  function records() {
+    return readRecords();
+  }
   function isSaved(url) {
     return readRecords().some((item) => item.url === String(url || ""));
   }
@@ -117,6 +120,7 @@
   window.PulseOfflineMedia = {
     cacheName: CACHE_NAME,
     list,
+    records,
     isSaved,
     download,
     remove,
