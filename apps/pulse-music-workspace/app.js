@@ -345,10 +345,7 @@ async function restoreQueue() {
   const changedBeforeRestore = queueDirty;
   const normalized = queueStorage.normalizeSnapshot(
     snapshot,
-    (track) =>
-      track &&
-      (/^https?:\/\//i.test(String(track.src || "")) ||
-        String(track.src || "").startsWith("blob:")),
+    (track) => track && /^https?:\/\//i.test(String(track.src || "")),
   );
   if (!changedBeforeRestore && normalized) {
     const restored = normalized.tracks.map((track, queueIndex) => ({
