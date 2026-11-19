@@ -51,8 +51,17 @@ function rangeResponse(response, rangeHeader) {
     const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader || "");
     if (!match) return original;
     const size = buffer.byteLength;
-    const start = match[1] ? Number(match[1]) : 0;
-    const end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
+    const suffixLength = !match[1] && match[2] ? Number(match[2]) : 0;
+    const start = suffixLength
+      ? Math.max(0, size - suffixLength)
+      : match[1]
+        ? Number(match[1])
+        : 0;
+    const end = suffixLength
+      ? size - 1
+      : match[2]
+        ? Math.min(Number(match[2]), size - 1)
+        : size - 1;
     if (start >= size || end < start) {
       return new Response(null, { status: 416, headers: { "Content-Range": "bytes */" + size } });
     }
