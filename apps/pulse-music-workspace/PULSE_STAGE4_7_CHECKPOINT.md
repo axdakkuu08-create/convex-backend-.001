@@ -41,7 +41,7 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 
 | ID  | Required verification / work                                                                 | Acceptance evidence                       | Status            |
 | --- | -------------------------------------------------------------------------------------------- | ----------------------------------------- | ----------------- |
-| B13 | Audit and integrate native Media3 playback service against the current Pulse player contract | reviewed source diff + Android build      | IN PROGRESS       |
+| B13 | Audit and integrate native Media3 playback service against the current Pulse player contract | reviewed source diff + Android build      | PASS              |
 | B14 | Verify background playback after app is backgrounded and screen is locked                    | physical Android test log/video           | NOT TESTABLE HERE |
 | B15 | Verify notification / lock-screen play, pause, next, previous controls                       | physical Android test log/video           | NOT TESTABLE HERE |
 | B16 | Verify audio focus, interruptions, headset/Bluetooth disconnect behavior                     | physical Android test log/video           | NOT TESTABLE HERE |
@@ -102,20 +102,18 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 
 ## CI observations
 
-- Pulse Workspace Tests run #80 passed on the initial checkpoint commit
-  5b31a8badf0bb7a0de8ac74e8ce0f3e8a1081fd3. Later shuffle/repeat changes and the
-  final queue predicate correction were made after that run; they still need a
-  fresh run.
-- Android build run #161 failed during the Android SDK setup step, before Node
-  validation, Capacitor generation, Gradle compilation, or APK creation. The
-  setup action requested the obsolete SDK package named "tools". Both Android
-  workflow definitions have since been changed to request platform-tools and
-  explicitly install Android 36 / Build Tools 36. A rerun against the latest
-  branch head has not been observed.
-- Prettier run #418 reported eight files needing dprint formatting. Formatting
-  updates have been applied to those files; a fresh formatting result has not
-  been observed.
-- CLA check run #457 failed because PR #40 does not contain the repository's
+- Pulse Workspace Tests run #109 passed on commit
+  98ca01a4fdc510f8a2fac476784b99e6232cb1fe, including the Media3 bridge and
+  native seek regression checks.
+- Android build run #190 passed on the same commit and uploaded the
+  pulse-android-debug-apk artifact (artifact ID 14523572453). This proves the
+  reviewed native source compiles and packages; it does not replace device
+  acceptance. A subsequent build for the formatting-only checkpoint head is
+  running separately.
+- Prettier run #434 still reports two Markdown files needing dprint formatting:
+  PULSE_STAGE4_7_CHECKPOINT.md and ANDROID_PLAYBACK.md. Runtime source files
+  passed formatting in that run.
+- CLA check run #473 failed because PR #40 does not contain the repository's
   required contribution declaration. No legal attestation has been inserted
   on the user's behalf. PR description confirmation remains a human action.
 - Vercel status was pending on the latest observed PR head. No production
@@ -125,12 +123,11 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 
 **Overall: IN PROGRESS — Stage 4 is not accepted.**
 
-B13 source integration has begun on this checkpoint branch: the PR #32 Media3
-service/plugin and Capacitor build foundation were selectively ported; native
-mode is restricted to all-HTTPS queues so mixed local-file queues stay on the
-existing web player. The installer now disables cleartext traffic and adds media
-foreground-service, wake-lock and notification permissions. A dedicated Android
-build workflow and bridge contract tests have been added. These changes remain
-unverified until fresh CI completes. B14–B18 require real Android hardware
-verification. Stage 5 and Stage 6 must follow in order; Stage 7 remains blocked
-until all evidence is collected.
+B13 is PASS on the evidence above. The PR #32 Media3 service/plugin and
+Capacitor build foundation were selectively ported; native mode is restricted
+to all-HTTPS queues so mixed local-file queues stay on the existing web player.
+The full-screen player now routes native seek and progress through Media3. The
+installer disables cleartext traffic and adds media foreground-service,
+wake-lock and notification permissions. B14–B18 still require real Android
+hardware verification. Stage 5 and Stage 6 must follow in order; Stage 7
+remains blocked until all evidence is collected.
