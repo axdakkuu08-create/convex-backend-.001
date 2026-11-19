@@ -31,7 +31,11 @@ keys or signing credentials to these variables.
 
 ## Current limits
 
-- This foundation does not download/cache audio for offline playback.
+- The PWA offline adapter can cache rights-approved Internet Archive audio in
+  browser Cache Storage. This cache is available to WebView/HTML audio requests.
+- Media3 does not yet read the PWA Cache Storage or an Android Filesystem copy.
+  Offline-cached items therefore stay on the web audio path and do not gain
+  native background playback while offline.
 - Local file blob URLs and mixed HTTP/blob queues use web playback and do not
   gain native background playback.
 - A green Android build proves packaging and compilation only. It does not
