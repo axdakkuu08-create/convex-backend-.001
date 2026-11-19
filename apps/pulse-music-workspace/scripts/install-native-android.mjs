@@ -39,9 +39,17 @@ if (!gradle.includes("androidx.media3:media3-exoplayer")) {
 }
 
 let manifest = await readFile(manifestPath, "utf8");
+if (!manifest.includes("usesCleartextTraffic")) {
+  manifest = manifest.replace(
+    "<application",
+    '<application android:usesCleartextTraffic="false"',
+  );
+}
 const permissions = [
   '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />',
   '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />',
+  '    <uses-permission android:name="android.permission.WAKE_LOCK" />',
+  '    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />',
 ];
 for (const permission of permissions) {
   const permissionName = permission.match(/android:name="([^"]+)"/)[1];
