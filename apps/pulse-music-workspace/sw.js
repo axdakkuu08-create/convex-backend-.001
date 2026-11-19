@@ -5,6 +5,8 @@ const SHELL_FILES = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./icons/pulse-192.svg",
+  "./icons/pulse-512.svg",
   "./styles.css",
   "./home-refresh.css",
   "./charts-dashboard.css",
