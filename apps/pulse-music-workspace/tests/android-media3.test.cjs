@@ -31,8 +31,9 @@ test("native plugin rejects non-HTTPS URLs and exposes transport controls", () =
     ),
     "utf8",
   );
-  assert.match(plugin, /url\.startsWith\("https:\/\/"/);
-  assert.doesNotMatch(plugin, /url\.startsWith\("http:\/\/"\)/);
+  assert.match(plugin, /isSafeHttpsUrl\(url\)/);
+  assert.match(plugin, /uri\.getHost\(\)/);
+  assert.match(plugin, /safePositionMs/);
   assert.match(plugin, /public void next\(PluginCall call\)/);
   assert.match(plugin, /public void previous\(PluginCall call\)/);
   assert.match(plugin, /public void setShuffle\(PluginCall call\)/);
