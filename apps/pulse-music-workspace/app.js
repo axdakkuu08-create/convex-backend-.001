@@ -289,6 +289,17 @@ function loadMusicEmbed(raw) {
 }
 
 const queueStorage = window.PulseQueueStorage;
+let offlineCacheAvailable = false;
+const offlineLibraryReady =
+  window.PulseOfflineMedia?.list?.()
+    .then(() => {
+      offlineCacheAvailable = true;
+      return true;
+    })
+    .catch(() => false) || Promise.resolve(false);
+function isOfflineCached(url) {
+  return offlineCacheAvailable && Boolean(window.PulseOfflineMedia?.isSaved(url));
+}
 let queueReady = false;
 let queueDirty = false;
 function makeQueueSnapshot() {
@@ -352,6 +363,7 @@ function persistQueue() {
   });
 }
 async function restoreQueue() {
+  await offlineLibraryReady;
   let snapshot = null;
   try {
     snapshot = await queueStorage.load();
@@ -376,7 +388,7 @@ async function restoreQueue() {
         "user_audio",
       licenseLabel: String(track.licenseLabel || track.archiveLicense || ""),
       sourcePage: String(track.sourcePage || track.archivePage || ""),
-      offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(track.src)),
+      offlineCached: isOfflineCached(track.src),
     }));
     tracks.splice(0, tracks.length, ...restored);
     index = normalized.currentIndex;
@@ -655,7 +667,11 @@ function setView(v) {
     .forEach((b) => b.classList.toggle("active", b.dataset.view === v));
   render();
   if (v === "downloads") {
-    void window.PulseOfflineMedia?.list?.().then(render).catch(() => {
+    void window.PulseOfflineMedia?.list?.().then(() => {
+      offlineCacheAvailable = true;
+      render();
+    }).catch(() => {
+      offlineCacheAvailable = false;
       toast("Offline library could not be refreshed.");
     });
   }
@@ -1146,7 +1162,7 @@ $("archiveResults").addEventListener("click", async (e) => {
     verificationStatus: item.verificationStatus || "VERIFYING",
     rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
     bytesTotal: Number(item.fileSize) || 0,
-    offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(item.audioUrl)),
+    offlineCached: isOfflineCached(item.audioUrl),
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -1187,7 +1203,7 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
     verificationStatus: item.verificationStatus || "UNAVAILABLE",
     rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
     bytesTotal: Number(item.bytesTotal) || 0,
-    offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(item.src)),
+    offlineCached: isOfflineCached(item.src),
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -1284,7 +1300,8 @@ if (window.PulseMedia3?.isNative) {
   });
 }
 
-function playPlaylistQueue(playlistName, incomingTracks) {
+async function playPlaylistQueue(playlistName, incomingTracks) {
+  await offlineLibraryReady;
   const normalized =
     window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incomingTracks }) ||
     [];
