@@ -14,6 +14,14 @@
       return false;
     }
   }
+  function isWebAudioUrl(value) {
+    try {
+      const url = new URL(String(value || ""));
+      return ["https:", "http:"].includes(url.protocol) && Boolean(url.hostname);
+    } catch (_) {
+      return false;
+    }
+  }
   function sourceType(track) {
     const explicit = String(track?.sourceType || "");
     if (ALLOWED_SOURCE_TYPES.has(explicit)) return explicit;
@@ -48,6 +56,7 @@
   }
   window.PulseMediaPolicy = {
     isHttpsAudioUrl,
+    isWebAudioUrl,
     sourceType,
     licenseLabel,
     canDownloadOffline,
