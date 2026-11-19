@@ -1,65 +1,4 @@
-const tracks = [
-  {
-    id: 1,
-    title: "Quiet Signals",
-    artist: "Pulse Sessions",
-    mood: "Focus",
-    time: "5:42",
-    cover: "violet",
-    symbol: "✳",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-  },
-  {
-    id: 2,
-    title: "Blue Hour",
-    artist: "Northbound",
-    mood: "Ambient",
-    time: "6:18",
-    cover: "blue",
-    symbol: "◌",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-  },
-  {
-    id: 3,
-    title: "Little By Little",
-    artist: "Sunday Club",
-    mood: "Energy",
-    time: "4:36",
-    cover: "orange",
-    symbol: "ϟ",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-  },
-  {
-    id: 4,
-    title: "Soft Geometry",
-    artist: "Mira Vale",
-    mood: "Focus",
-    time: "5:09",
-    cover: "green",
-    symbol: "◈",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-  },
-  {
-    id: 5,
-    title: "Afterimage",
-    artist: "Low Season",
-    mood: "Night",
-    time: "4:58",
-    cover: "pink",
-    symbol: "☾",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-  },
-  {
-    id: 6,
-    title: "Open Water",
-    artist: "Still Forms",
-    mood: "Ambient",
-    time: "6:01",
-    cover: "blue",
-    symbol: "≈",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
-  },
-];
+const tracks = [];
 const $ = (id) => document.getElementById(id),
   audio = $("audio");
 let index = 0,
@@ -120,11 +59,11 @@ function render() {
     .map(
       (t, i) =>
         '<div class="row ' +
-        (tracks[index].id === t.id ? "playing" : "") +
+        (tracks[index] && tracks[index].id === t.id ? "playing" : "") +
         '" data-id="' +
         t.id +
         '"><div class="num"><button class="rowplay" aria-label="Play">' +
-        (tracks[index].id === t.id && playing
+        (tracks[index] && tracks[index].id === t.id && playing
           ? "Ⅱ"
           : String(i + 1).padStart(2, "0")) +
         '</button></div><div class="info"><div class="cover ' +
@@ -144,7 +83,7 @@ function render() {
               t.source === "Apple/iTunes catalogue"
                 ? "30-SEC PREVIEW"
                 : String(t.source).includes("Internet Archive")
-                  ? "INTERNET ARCHIVE · AUDIO"
+                  ? "OPEN AUDIO"
                   : t.source,
             ) +
             "</small>"
@@ -274,18 +213,177 @@ function loadMusicEmbed(raw) {
     $("sourceUrl").setAttribute("aria-invalid", "true");
   }
 }
+
+const QUEUE_DB_NAME = "pulse-player-state";
+const QUEUE_STORE_NAME = "player-state";
+const QUEUE_STORAGE_KEY = "pulse.playerQueue.v1";
+let queueDatabasePromise = null;
+let queueReady = false;
+let queueDirty = false;
+
+function openQueueDatabase() {
+  if (!window.indexedDB) return Promise.resolve(null);
+  if (!queueDatabasePromise) {
+    queueDatabasePromise = new Promise((resolve) => {
+      const request = window.indexedDB.open(QUEUE_DB_NAME, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(QUEUE_STORE_NAME))
+          db.createObjectStore(QUEUE_STORE_NAME);
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => resolve(null);
+      request.onblocked = () => resolve(null);
+    });
+  }
+  return queueDatabasePromise;
+}
+function makeQueueSnapshot() {
+  const stableTracks = tracks
+    .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+    .map((track) => ({
+      id: track.id,
+      catalogId: String(track.catalogId || ""),
+      source: String(track.source || "Saved audio"),
+      title: String(track.title || "Untitled track"),
+      artist: String(track.artist || "Unknown artist"),
+      mood: String(track.mood || "Playlist"),
+      time: String(track.time || "—"),
+      cover: String(track.cover || "violet"),
+      symbol: String(track.symbol || "♫"),
+      src: String(track.src),
+      customUrl: true,
+      artwork: String(track.artwork || ""),
+      sourcePage: String(track.sourcePage || track.url || ""),
+      archivePage: String(track.archivePage || ""),
+      archiveLicense: String(track.archiveLicense || track.license || ""),
+      verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
+      rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"),
+      bytesTotal: Number(track.bytesTotal) || 0,
+    }));
+  const currentId = tracks[index]?.id ?? null;
+  return {
+    tracks: stableTracks,
+    currentTrackId: stableTracks.some(
+      (track) => String(track.id) === String(currentId),
+    )
+      ? currentId
+      : null,
+    currentIndex: stableTracks.findIndex(
+      (track) => String(track.id) === String(currentId),
+    ),
+    repeatOn,
+    shuffleOn,
+    updatedAt: Date.now(),
+  };
+}
+function persistQueue() {
+  if (!queueReady) {
+    queueDirty = true;
+    return;
+  }
+  const snapshot = makeQueueSnapshot();
+  try {
+    localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(snapshot));
+  } catch (_) {}
+  void openQueueDatabase().then((db) => {
+    if (!db) return;
+    try {
+      db.transaction(QUEUE_STORE_NAME, "readwrite")
+        .objectStore(QUEUE_STORE_NAME)
+        .put(snapshot, "queue");
+    } catch (_) {}
+  });
+}
+async function readQueueSnapshot() {
+  const db = await openQueueDatabase();
+  if (db) {
+    const stored = await new Promise((resolve) => {
+      try {
+        const request = db
+          .transaction(QUEUE_STORE_NAME, "readonly")
+          .objectStore(QUEUE_STORE_NAME)
+          .get("queue");
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => resolve(null);
+      } catch (_) {
+        resolve(null);
+      }
+    });
+    if (stored) return stored;
+  }
+  try {
+    return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+async function restoreQueue() {
+  const snapshot = await readQueueSnapshot();
+  if (!queueDirty && Array.isArray(snapshot?.tracks)) {
+    const restored = snapshot.tracks
+      .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+      .map((track, queueIndex) => ({
+        ...track,
+        id: track.id ?? Date.now() + queueIndex,
+        mood: track.mood || "Playlist",
+        time: track.time || "—",
+        cover: track.cover || "violet",
+        symbol: track.symbol || "♫",
+        customUrl: true,
+      }));
+    if (restored.length) {
+      tracks.splice(0, tracks.length, ...restored);
+      const current = restored.findIndex(
+        (track) => String(track.id) === String(snapshot.currentTrackId),
+      );
+      index =
+        current >= 0
+          ? current
+          : Math.min(
+              Math.max(Number(snapshot.currentIndex) || 0, 0),
+              restored.length - 1,
+            );
+    }
+    repeatOn = Boolean(snapshot.repeatOn);
+    shuffleOn = Boolean(snapshot.shuffleOn);
+  }
+  queueReady = true;
+  queueDirty = false;
+  setTrack(tracks.length ? index : 0, false);
+  renderQueuePanel();
+}
 function setTrack(i, autoplay = false) {
+  if (!tracks.length) {
+    index = 0;
+    audio.removeAttribute("src");
+    audio.load();
+    $("nowTitle").textContent = "Choose a song";
+    $("nowArtist").textContent = "Search or recognise a song";
+    $("cover").className = "cover violet";
+    $("cover").style.backgroundImage = "";
+    $("cover").textContent = "♫";
+    $("audioStatus").textContent = "Ready when you are · search for a single";
+    $("duration").textContent = "0:00";
+    $("time").textContent = "0:00";
+    $("progress").value = 0;
+    $("like").disabled = true;
+    render();
+    persistQueue();
+    return;
+  }
+  $("like").disabled = false;
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
   audio.src = t.src;
   audio.load();
   $("audioStatus").textContent = t.archivePage
-    ? "Internet Archive audio · verify item rights before reuse. Open the item page for details."
+    ? "Open-audio source · rights review required; availability is not permission."
     : t.localFile
       ? "Playing a file selected from this device."
       : t.customUrl
         ? "Using your direct audio link."
-        : "Demo preview · internet connection required.";
+        : "Ready to play.";
   $("nowTitle").textContent = t.title;
   $("nowArtist").textContent = t.artist;
   $("cover").className = "cover " + t.cover;
@@ -296,17 +394,25 @@ function setTrack(i, autoplay = false) {
   $("time").textContent = "0:00";
   $("progress").value = 0;
   render();
+  persistQueue();
   if (autoplay) play();
 }
 async function play() {
+  if (!tracks.length || !tracks[index]) {
+    playing = false;
+    $("play").textContent = "▶";
+    $("audioStatus").textContent =
+      "Choose a song from search or your playlists.";
+    return;
+  }
   try {
     await audio.play();
     playing = true;
     $("audioStatus").textContent = tracks[index].archivePage
       ? "Playing · " +
         tracks[index].title +
-        " · Rights: " +
-        (tracks[index].archiveLicense || "check the Archive item page")
+        " · rights status: " +
+        (tracks[index].verificationStatus || "VERIFYING")
       : "Playing · " + tracks[index].title;
     $("play").textContent = "Ⅱ";
     if (!recent.includes(tracks[index].id)) recent.unshift(tracks[index].id);
@@ -334,15 +440,23 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
-  let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
-  if (n >= tracks.length && !repeatOn) {
+  const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(
+    index,
+    tracks.length,
+    {
+      shuffle: shuffleOn,
+      repeat: repeatOn,
+    },
+  );
+  if (!Number.isInteger(nextIndex)) {
     pause();
-    audio.currentTime = 0;
+    if (Number.isFinite(audio.duration)) audio.currentTime = 0;
     return;
   }
-  setTrack(n, true);
+  setTrack(nextIndex, true);
 }
 function like(id) {
+  if (!tracks[index] || id == null) return;
   liked.has(id) ? liked.delete(id) : liked.add(id);
   save();
   $("like").textContent = liked.has(tracks[index].id) ? "♥" : "♡";
@@ -410,6 +524,10 @@ $("search").oninput = (e) => {
 $("play").onclick = toggle;
 $("heroPlay").onclick = () => setTrack(0, true);
 $("shuffleAll").onclick = () => {
+  if (!tracks.length) {
+    toast("Add a song before starting shuffle.");
+    return;
+  }
   shuffleOn = true;
   toast("Shuffle is on");
   setTrack(Math.floor(Math.random() * tracks.length), true);
@@ -428,10 +546,10 @@ $("prev").onclick = () => {
 };
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
-  audio.loop = repeatOn;
+  audio.loop = false;
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
-$("like").onclick = () => like(tracks[index].id);
+$("like").onclick = () => like(tracks[index]?.id);
 $("volume").oninput = (e) => (audio.volume = Number(e.target.value));
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
@@ -445,7 +563,7 @@ $("progress").oninput = (e) => {
   if (Number.isFinite(audio.duration))
     audio.currentTime = (Number(e.target.value) / 100) * audio.duration;
 };
-audio.onended = () => (repeatOn ? ((audio.currentTime = 0), play()) : next());
+audio.onended = () => next();
 audio.onwaiting = () => {
   $("audioStatus").textContent =
     "Loading audio… If it stays here, the link may not be a direct audio file.";
@@ -468,7 +586,7 @@ $("allMoods").onclick = () => {
   query = "";
   $("search").value = "";
   render();
-  toast("Showing all demo tracks");
+  toast("Showing all singles");
 };
 $("newPlaylist").onclick = () => {
   let n = prompt("Name your playlist");
@@ -500,7 +618,24 @@ function renderQueuePanel() {
       String(track.title || "Untitled track") +
       " — " +
       String(track.artist || "Unknown artist");
-    item.append(button);
+    const actions = document.createElement("span");
+    actions.className = "queue-item-controls";
+    const up = document.createElement("button");
+    up.type = "button";
+    up.textContent = "↑";
+    up.disabled = queueIndex === 0;
+    up.dataset.queueIndex = String(queueIndex);
+    up.dataset.queueMove = String(queueIndex - 1);
+    up.setAttribute("aria-label", "Move " + track.title + " up");
+    const down = document.createElement("button");
+    down.type = "button";
+    down.textContent = "↓";
+    down.disabled = queueIndex === tracks.length - 1;
+    down.dataset.queueIndex = String(queueIndex);
+    down.dataset.queueMove = String(queueIndex + 1);
+    down.setAttribute("aria-label", "Move " + track.title + " down");
+    actions.append(up, down);
+    item.append(button, actions);
     list.append(item);
   });
 }
@@ -514,6 +649,14 @@ $("queueClose")?.addEventListener("click", () => {
   $("queuePanel").hidden = true;
 });
 $("queueItems")?.addEventListener("click", (event) => {
+  const move = event.target.closest("[data-queue-move]");
+  if (move) {
+    window.PulsePlayerBridge?.reorder?.(
+      Number(move.dataset.queueIndex),
+      Number(move.dataset.queueMove),
+    );
+    return;
+  }
   const button = event.target.closest("[data-queue-index]");
   if (!button) return;
   const target = Number(button.dataset.queueIndex);
@@ -530,6 +673,7 @@ $("queueClear")?.addEventListener("click", () => {
   index = 0;
   render();
   renderQueuePanel();
+  persistQueue();
   toast("Queue cleared");
 });
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
@@ -635,8 +779,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
   const status = $("archiveStatus");
   const results = $("archiveResults");
   const query = $("archiveQuery").value.trim();
-  status.textContent =
-    "Searching Internet Archive and checking for playable audio files…";
+  status.textContent = "Searching open audio and checking available files…";
   results.innerHTML = "";
   try {
     archiveItems = await window.PulseArchive.search(query, 24);
@@ -648,7 +791,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
     }
     status.textContent =
       archiveItems.length +
-      " playable archive item(s) found. Check each item's rights before reuse.";
+      " playable audio item(s) found. Check each item's rights before reuse.";
     results.innerHTML = archiveItems
       .map(
         (item, i) =>
@@ -703,7 +846,7 @@ $("archiveResults").addEventListener("click", (e) => {
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
-  toast("Playing archive audio · next track stays in sequence");
+  toast("Playing selected single · next track stays in sequence");
 });
 
 window.addEventListener("pulse:play-catalog-track", (event) => {
@@ -744,10 +887,88 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   $("audioStatus").textContent =
     item.source === "Apple/iTunes catalogue"
       ? "Playing the available catalogue preview. Open the provider page for full-track options."
-      : "Archive stream status: " +
+      : "Open-audio status: " +
         track.verificationStatus +
         ". Rights review is separate; check the source page and licence.";
   toast("Loading " + track.title);
 });
 
-setTrack(0);
+window.addEventListener("pulse:play-playlist", (event) => {
+  const detail = event.detail || {};
+  const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
+  const normalized =
+    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incoming }) || [];
+  const queue = normalized.map((item, queueIndex) => {
+    const source = String(item.source || "Saved audio");
+    const isLocal = String(item.src || "").startsWith("blob:");
+    return {
+      id: Date.now() + queueIndex,
+      catalogId: String(item.catalogId || ""),
+      source,
+      title: String(item.title || "Untitled track"),
+      artist: String(item.artist || "Unknown artist"),
+      mood: "Playlist",
+      time: String(item.duration || "—"),
+      cover: "violet",
+      symbol: "♫",
+      src: String(item.src),
+      customUrl: !isLocal,
+      localFile: isLocal,
+      artwork: String(item.artwork || ""),
+      sourcePage: String(item.url || ""),
+      archivePage: source.includes("Internet Archive")
+        ? String(item.url || "")
+        : "",
+      archiveLicense: String(item.license || ""),
+      verificationStatus: item.verificationStatus || "UNAVAILABLE",
+      rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+      bytesTotal: Number(item.bytesTotal) || 0,
+    };
+  });
+  if (!queue.length) {
+    toast("This playlist has no playable songs.");
+    return;
+  }
+  tracks.splice(0, tracks.length, ...queue);
+  index = 0;
+  shuffleOn = false;
+  setTrack(0, true);
+  renderQueuePanel();
+  toast(
+    "Playing playlist · " +
+      queue.length +
+      " tracks in saved order · " +
+      String(detail.playlistName || detail.name || "Singles Mix"),
+  );
+});
+
+window.PulsePlayerBridge = {
+  currentTrack: () => tracks[index] || null,
+  isLiked: (id) => liked.has(id),
+  reorder: (from, to) => {
+    if (
+      !Number.isInteger(from) ||
+      !Number.isInteger(to) ||
+      from < 0 ||
+      to < 0 ||
+      from >= tracks.length ||
+      to >= tracks.length ||
+      from === to
+    )
+      return false;
+    const [moved] = tracks.splice(from, 1);
+    tracks.splice(to, 0, moved);
+    if (index === from) index = to;
+    else if (from < index && to >= index) index--;
+    else if (from > index && to <= index) index++;
+    render();
+    renderQueuePanel();
+    persistQueue();
+    window.dispatchEvent(
+      new CustomEvent("pulse:queue-reordered", { detail: { from, to } }),
+    );
+    return true;
+  },
+};
+
+void restoreQueue();

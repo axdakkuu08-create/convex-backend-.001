@@ -344,7 +344,7 @@
     height: calc(59px + env(safe-area-inset-bottom));
     padding: 6px 18px env(safe-area-inset-bottom);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     align-items: center;
     background: #101013f5;
     border-top: 1px solid #29292e;

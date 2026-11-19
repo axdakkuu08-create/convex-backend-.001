@@ -5,7 +5,18 @@ const signInButton = document.getElementById("cloudSignIn");
 const signOutButton = document.getElementById("cloudSignOut");
 const createButton = document.getElementById("cloudNewPlaylist");
 const cloudList = document.getElementById("cloudPlaylists");
-const config = window.PULSE_CONFIG || {};
+async function loadPublicConfig() {
+  const fallback = window.PULSE_CONFIG || {};
+  try {
+    const response = await fetch("/api/pulse-config", { cache: "no-store" });
+    if (!response.ok) return fallback;
+    const runtime = await response.json();
+    return { ...fallback, ...runtime };
+  } catch (_) {
+    return fallback;
+  }
+}
+const config = Object.freeze(await loadPublicConfig());
 
 function status(message) {
   if (cloudStatus) cloudStatus.textContent = message;

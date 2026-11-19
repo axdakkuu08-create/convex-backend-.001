@@ -197,8 +197,8 @@
           "No suitable recordings were found for an automatic mix. Try a broader search.";
         return;
       }
-      const playlistName = "Archive Mix · " + base.slice(0, 32);
-      const playlist = window.PulsePlaylistStore?.createFromTracks(
+      const playlistName = "Internet Archive Mix";
+      const playlist = window.PulsePlaylistStore?.upsertFromTracks(
         playlistName,
         tracks.map((item) => ({
           title: item.title,

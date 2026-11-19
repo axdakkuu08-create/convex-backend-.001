@@ -1,9 +1,23 @@
 /* Mobile home interactions bridge into Pulse's existing player actions. */
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) => [
+  const queryAll = (selector, root = document) => [
     ...root.querySelectorAll(selector),
   ];
+
+  const safeExternalUrl = (value) => {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    try {
+      const parsed = new URL(raw, window.location.href);
+      return parsed.protocol === "https:" ||
+        parsed.origin === window.location.origin
+        ? parsed.href
+        : "";
+    } catch (_) {
+      return "";
+    }
+  };
 
   function playTrack(id) {
     const row = $('.row[data-id="' + String(id).replace(/[^0-9]/g, "") + '"]');
@@ -29,11 +43,8 @@
           }),
         );
       } else if (trackButton.dataset.homeUrl) {
-        window.open(
-          trackButton.dataset.homeUrl,
-          "_blank",
-          "noopener,noreferrer",
-        );
+        const url = safeExternalUrl(trackButton.dataset.homeUrl);
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
       } else {
         playTrack(trackButton.dataset.homeTrack);
       }
@@ -42,7 +53,7 @@
 
     const moodButton = event.target.closest("[data-home-mood]");
     if (moodButton) {
-      $$(".genre-chip").forEach((chip) =>
+      queryAll(".genre-chip").forEach((chip) =>
         chip.classList.toggle("selected", chip === moodButton),
       );
       const mood = moodButton.dataset.homeMood;
@@ -76,7 +87,7 @@
       const view = mobileNav.dataset.mobileView;
       document.body.classList.toggle("show-sourcehub", view === "search");
       document.body.classList.toggle("show-library", view === "library");
-      $$(".mobile-bottom-nav button").forEach((button) =>
+      queryAll(".mobile-bottom-nav button").forEach((button) =>
         button.classList.toggle("active", button === mobileNav),
       );
       if (view === "search") {
@@ -90,6 +101,24 @@
       if (view === "library") {
         const library = $('.nav[data-view="library"]');
         if (library) library.click();
+        document.getElementById("pulseDownloadsNotice")?.remove();
+      }
+      if (view === "downloads") {
+        document.getElementById("pulseDownloadsNotice")?.remove();
+        const notice = document.createElement("section");
+        notice.id = "pulseDownloadsNotice";
+        notice.className = "pulse-downloads-notice";
+        const heading = document.createElement("h2");
+        heading.textContent = "Downloads are coming with the Android player.";
+        const copy = document.createElement("p");
+        copy.textContent =
+          "Native offline downloads are not enabled in this web version. Pulse will add managed on-device caching in a later Android phase.";
+        notice.append(heading, copy);
+        const main = document.querySelector("main");
+        if (main) main.prepend(notice);
+        document
+          .getElementById("homeFront")
+          ?.scrollIntoView({ block: "start" });
       }
       if (view === "home") {
         const discover = $('.nav[data-view="discover"]');
@@ -104,7 +133,7 @@
     nav.className = "mobile-bottom-nav";
     nav.setAttribute("aria-label", "Main navigation");
     nav.innerHTML =
-      '<button class="active" data-mobile-view="home"><span>⌂</span>Home</button><button data-mobile-view="search"><span>⌕</span>Search</button><button data-mobile-view="library"><span>▤</span>Library</button>';
+      '<button class="active" data-mobile-view="home"><span>⌂</span>Home</button><button data-mobile-view="library"><span>▤</span>Library</button><button data-mobile-view="search"><span>⌕</span>Search</button><button data-mobile-view="downloads"><span>⇩</span>Downloads</button>';
     document.body.appendChild(nav);
   }
 
@@ -477,7 +506,8 @@
           }),
         );
       } else if (item?.url) {
-        window.open(item.url, "_blank", "noopener,noreferrer");
+        const url = safeExternalUrl(item.url);
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
       }
     }
   });
