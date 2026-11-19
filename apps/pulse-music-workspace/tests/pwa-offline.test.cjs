@@ -46,6 +46,19 @@ test("service worker app-shell precache list contains real workspace assets", ()
   for (const asset of assets) {
     assert.ok(fs.existsSync(path.join(root, asset)), "missing precache asset: " + asset);
   }
+  const html = read("index.html");
+  const localAssets = [
+    ...html.matchAll(/<script[^>]+src="([^"]+)"/g),
+    ...html.matchAll(/<link[^>]+(?:href)="([^"]+)"/g),
+  ]
+    .map((match) => match[1])
+    .filter((value) => !/^(https?:|#|data:)/i.test(value));
+  for (const asset of localAssets) {
+    assert.ok(
+      assets.includes(asset) || assets.includes(asset.replace(/^\.\//, "")),
+      "local app-shell resource is not precached: " + asset,
+    );
+  }
 });
 
 test("service worker returns correct partial and suffix byte ranges", async () => {
