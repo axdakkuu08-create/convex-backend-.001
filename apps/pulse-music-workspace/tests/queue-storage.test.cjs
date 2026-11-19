@@ -11,3 +11,13 @@ test("IndexedDB transaction failure falls back to localStorage",async()=>{const 
 test("localStorage recovery copy migrates into empty IndexedDB",async()=>{const v=snapshot("legacy-"),idb=fakeIDB(),x=instance(idb,localStore({"pulse.playerQueue.v1":JSON.stringify(v)}));assert.deepEqual(JSON.parse(JSON.stringify(await x.storage.load())),v);assert.deepEqual(JSON.parse(JSON.stringify(idb.records.get("queue"))),v);});
 test("overlapping saves serialize and retain latest queue",async()=>{const x=instance(fakeIDB()),a=snapshot("a-",[1]),b=snapshot("b-",[7,8,9]);await Promise.all([x.storage.save(a),x.storage.save(b)]);assert.deepEqual(JSON.parse(JSON.stringify(await x.storage.load())),b);});
 test("corrupt localStorage recovery data is ignored",async()=>{const x=instance(null,localStore({"pulse.playerQueue.v1":"{broken"}));assert.equal(await x.storage.load(),null);});
+
+test("reload restoration removes invalid tracks and preserves current track by ID", () => {
+  const x = instance(null);
+  const input = { ...snapshot("restore-", [10, 11, 12]), currentTrackId: 12, currentIndex: 2 };
+  input.tracks[1].src = "javascript:alert(1)";
+  const normalized = x.storage.normalizeSnapshot(input, (track) => /^https?:\/\//i.test(track.src));
+  assert.deepEqual(Array.from(normalized.tracks, (track) => track.id), [10, 12]);
+  assert.equal(normalized.currentTrackId, 12);
+  assert.equal(normalized.currentIndex, 1);
+});
