@@ -46,9 +46,10 @@ self.addEventListener("activate", (event) => {
   );
 });
 function rangeResponse(response, rangeHeader) {
+  const original = response.clone();
   return response.arrayBuffer().then((buffer) => {
     const match = /^bytes=(\d*)-(\d*)$/i.exec(rangeHeader || "");
-    if (!match) return response;
+    if (!match) return original;
     const size = buffer.byteLength;
     const start = match[1] ? Number(match[1]) : 0;
     const end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
