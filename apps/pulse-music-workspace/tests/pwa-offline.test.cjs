@@ -37,6 +37,48 @@ test("PWA registration is isolated from player startup and has an update signal"
   assert.match(read("pwa-runtime.js"), /updatefound/);
 });
 
+test("service worker app-shell precache list contains real workspace assets", () => {
+  const worker = read("sw.js");
+  const block = worker.match(/const SHELL_FILES = \[([\s\S]*?)\];/);
+  assert.ok(block);
+  const assets = [...block[1].matchAll(/"\.\/([^"]+)"/g)].map((match) => match[1]);
+  assert.ok(assets.length > 10);
+  for (const asset of assets) {
+    assert.ok(fs.existsSync(path.join(root, asset)), "missing precache asset: " + asset);
+  }
+});
+
+test("service worker returns correct partial and suffix byte ranges", async () => {
+  const handlers = {};
+  const context = {
+    self: {
+      location: { origin: "https://pulse.example" },
+      addEventListener: (name, handler) => { handlers[name] = handler; },
+      skipWaiting: () => Promise.resolve(),
+      clients: { claim: () => Promise.resolve() },
+    },
+    caches: { open: () => Promise.resolve({ addAll: () => Promise.resolve() }), keys: () => Promise.resolve([]) },
+    URL,
+    Response,
+    Promise,
+    fetch,
+  };
+  vm.runInNewContext(read("sw.js"), context);
+  const partial = await context.rangeResponse(
+    new Response("abcdefgh", { headers: { "Content-Type": "audio/mpeg" } }),
+    "bytes=2-4",
+  );
+  assert.equal(partial.status, 206);
+  assert.equal(await partial.text(), "cde");
+  assert.equal(partial.headers.get("content-range"), "bytes 2-4/8");
+  const suffix = await context.rangeResponse(
+    new Response("abcdefgh", { headers: { "Content-Type": "audio/mpeg" } }),
+    "bytes=-3",
+  );
+  assert.equal(suffix.status, 206);
+  assert.equal(await suffix.text(), "fgh");
+});
+
 test("service worker versions the app shell and preserves the separate media cache", () => {
   const worker = read("sw.js");
   assert.match(worker, /pulse-shell-v1/);
