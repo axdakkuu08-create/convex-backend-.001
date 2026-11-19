@@ -322,7 +322,7 @@ async function play() {
     $("play").textContent = "▶";
     $("audioStatus").textContent =
       "Choose a song from search or your playlists.";
-    return;
+    return false;
   }
   try {
     await audio.play();
@@ -339,6 +339,7 @@ async function play() {
     recent = recent.slice(0, 6);
     save();
     render();
+    return true;
   } catch (e) {
     playing = false;
     $("play").textContent = "▶";
@@ -348,6 +349,7 @@ async function play() {
         : "Could not start this audio. Check the link or try another file.";
     reportPlayback("error", msg);
     toast(msg);
+    return false;
   }
 }
 function pause() {
@@ -813,11 +815,8 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   toast("Loading " + track.title);
 });
 
-window.addEventListener("pulse:play-playlist", (event) => {
-  const detail = event.detail || {};
-  const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
-  const normalized =
-    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incoming }) || [];
+function playPlaylistQueue(playlistName, incomingTracks) {
+  const normalized = window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incomingTracks }) || [];
   const queue = normalized.map((item, queueIndex) => {
     const source = String(item.source || "Saved audio");
     const isLocal = String(item.src || "").startsWith("blob:");
@@ -836,9 +835,7 @@ window.addEventListener("pulse:play-playlist", (event) => {
       localFile: isLocal,
       artwork: String(item.artwork || ""),
       sourcePage: String(item.url || ""),
-      archivePage: source.includes("Internet Archive")
-        ? String(item.url || "")
-        : "",
+      archivePage: source.includes("Internet Archive") ? String(item.url || "") : "",
       archiveLicense: String(item.license || ""),
       verificationStatus: item.verificationStatus || "UNAVAILABLE",
       rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
@@ -847,22 +844,19 @@ window.addEventListener("pulse:play-playlist", (event) => {
   });
   if (!queue.length) {
     toast("This playlist has no playable songs.");
-    return;
+    return Promise.resolve(false);
   }
   tracks.splice(0, tracks.length, ...queue);
   index = 0;
   shuffleOn = false;
-  setTrack(0, true);
+  setTrack(0, false);
   renderQueuePanel();
-  toast(
-    "Playing playlist · " +
-      queue.length +
-      " tracks in saved order · " +
-      String(detail.playlistName || detail.name || "Singles Mix"),
-  );
-});
+  toast("Playing playlist · " + queue.length + " tracks in saved order · " + String(playlistName || "Singles Mix"));
+  return play();
+}
 
 window.PulsePlayerBridge = {
+  playPlaylist: playPlaylistQueue,
   currentTrack: () => tracks[index] || null,
   isLiked: (id) => liked.has(id),
   reorder: (from, to) => {
