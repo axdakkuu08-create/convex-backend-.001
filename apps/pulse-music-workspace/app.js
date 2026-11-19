@@ -244,19 +244,21 @@ async function restoreQueue() {
   let snapshot = null;
   try { snapshot = await queueStorage.load(); } catch (_) {}
   const changedBeforeRestore = queueDirty;
-  if (!changedBeforeRestore && Array.isArray(snapshot?.tracks)) {
-    const restored = snapshot.tracks.filter((track) => track && /^https?:\/\//i.test(String(track.src || ""))).map((track, queueIndex) => ({
+  const normalized = queueStorage.normalizeSnapshot(snapshot, (track) =>
+    track && /^https?:\/\//i.test(String(track.src || "")),
+  );
+  if (!changedBeforeRestore && normalized) {
+    const restored = normalized.tracks.map((track, queueIndex) => ({
       ...track, id: track.id ?? Date.now() + queueIndex, mood: track.mood || "Playlist",
       time: track.time || "—", cover: track.cover || "violet", symbol: track.symbol || "♫", customUrl: true
     }));
-    if (restored.length) {
-      tracks.splice(0, tracks.length, ...restored);
-      const current = restored.findIndex((track) => String(track.id) === String(snapshot.currentTrackId));
-      index = current >= 0 ? current : Math.min(Math.max(Number(snapshot.currentIndex) || 0, 0), restored.length - 1);
-    }
-    repeatOn = Boolean(snapshot.repeatOn); shuffleOn = Boolean(snapshot.shuffleOn);
+    tracks.splice(0, tracks.length, ...restored);
+    index = normalized.currentIndex;
+    repeatOn = Boolean(normalized.repeatOn);
+    shuffleOn = Boolean(normalized.shuffleOn);
   }
-  queueReady = true; queueDirty = false;
+  queueReady = true;
+  queueDirty = false;
   setTrack(tracks.length ? index : 0, false);
   renderQueuePanel();
   if (changedBeforeRestore) persistQueue();
@@ -462,11 +464,10 @@ $("shuffle").onclick = () => {
 };
 $("next").onclick = next;
 $("prev").onclick = () => {
-  if (audio.currentTime > 3) {
-    audio.currentTime = 0;
-    return;
-  }
-  setTrack(index - 1, true);
+  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+  const previous = window.PulsePlaylistPlayback?.previousIndex?.(index, tracks.length, { repeat: repeatOn });
+  if (!Number.isInteger(previous)) return;
+  setTrack(previous, true);
 };
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
@@ -556,7 +557,12 @@ function renderQueuePanel() {
     down.dataset.queueIndex = String(queueIndex);
     down.dataset.queueMove = String(queueIndex + 1);
     down.setAttribute("aria-label", "Move " + track.title + " down");
-    actions.append(up, down);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.dataset.queueRemove = String(queueIndex);
+    remove.setAttribute("aria-label", "Remove " + track.title + " from queue");
+    actions.append(up, down, remove);
     item.append(button, actions);
     list.append(item);
   });
@@ -571,6 +577,11 @@ $("queueClose")?.addEventListener("click", () => {
   $("queuePanel").hidden = true;
 });
 $("queueItems")?.addEventListener("click", (event) => {
+  const remove = event.target.closest("[data-queue-remove]");
+  if (remove) {
+    window.PulsePlayerBridge?.remove?.(Number(remove.dataset.queueRemove));
+    return;
+  }
   const move = event.target.closest("[data-queue-move]");
   if (move) {
     window.PulsePlayerBridge?.reorder?.(
@@ -857,6 +868,22 @@ function playPlaylistQueue(playlistName, incomingTracks) {
 
 window.PulsePlayerBridge = {
   playPlaylist: playPlaylistQueue,
+  remove: (queueIndex) => {
+    const oldCurrentIndex = index;
+    const wasPlaying = playing;
+    const result = window.PulsePlaylistPlayback?.removeTrackAt?.(tracks, index, queueIndex);
+    if (!result) return false;
+    tracks.splice(0, tracks.length, ...result.tracks);
+    index = result.currentIndex;
+    if (!tracks.length || queueIndex === oldCurrentIndex) {
+      setTrack(tracks.length ? index : 0, tracks.length > 0 && wasPlaying);
+    } else {
+      render();
+      renderQueuePanel();
+      persistQueue();
+    }
+    return true;
+  },
   currentTrack: () => tracks[index] || null,
   isLiked: (id) => liked.has(id),
   reorder: (from, to) => {
