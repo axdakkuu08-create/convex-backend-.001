@@ -6,11 +6,14 @@
 
 **Checkpoint branch:** checkpoint/pulse-stage4-7-2026-11-19
 
-**Checkpoint base:** fix/pulse-b01-b17-core-storage at 86b73375ead726a23ceece227828b3c06235738e
+**Checkpoint base:** fix/pulse-b01-b17-core-storage at
+86b73375ead726a23ceece227828b3c06235738e
 
-**Upstream integration base:** integration/pulse-pr33-37-consolidated at PR #39 base SHA 45ac2164e4c4bb74cda47ffb0d25b9db3d40d9fa
+**Upstream integration base:** integration/pulse-pr33-37-consolidated at PR #39
+base SHA 45ac2164e4c4bb74cda47ffb0d25b9db3d40d9fa
 
-**Governance:** isolated work only; do not merge, deploy, change provider settings, or modify main.
+**Governance:** isolated work only; do not merge, deploy, change provider
+settings, or modify main.
 
 ## Baseline evidence
 
