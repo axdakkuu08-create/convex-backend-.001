@@ -9,6 +9,7 @@ on:
     branches:
       - feat/pulse-glass-charts-archive-mix
       - integration/pulse-pr33-37-consolidated
+      - fix/pulse-b01-b17-core-storage
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-workspace-tests.yml"
@@ -29,6 +30,7 @@ jobs:
       - name: Syntax-check Pulse workspace modules
         run: |
           node --check apps/pulse-music-workspace/app.js
+          node --check apps/pulse-music-workspace/queue-storage.js
           node --check apps/pulse-music-workspace/playlist-playback.js
           node --check apps/pulse-music-workspace/playlist-store.js
           node --check apps/pulse-music-workspace/home-refresh.js
@@ -39,4 +41,4 @@ jobs:
           node --check apps/pulse-music-workspace/api/apple-charts.js
           node --check apps/pulse-music-workspace/api/pulse-config.js
       - name: Run Pulse integration tests
-        run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs
+        run: node --test apps/pulse-music-workspace/tests/*.test.cjs

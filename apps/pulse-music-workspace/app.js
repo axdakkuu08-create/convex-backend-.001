@@ -214,30 +214,9 @@ function loadMusicEmbed(raw) {
   }
 }
 
-const QUEUE_DB_NAME = "pulse-player-state";
-const QUEUE_STORE_NAME = "player-state";
-const QUEUE_STORAGE_KEY = "pulse.playerQueue.v1";
-let queueDatabasePromise = null;
+const queueStorage = window.PulseQueueStorage;
 let queueReady = false;
 let queueDirty = false;
-
-function openQueueDatabase() {
-  if (!window.indexedDB) return Promise.resolve(null);
-  if (!queueDatabasePromise) {
-    queueDatabasePromise = new Promise((resolve) => {
-      const request = window.indexedDB.open(QUEUE_DB_NAME, 1);
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(QUEUE_STORE_NAME))
-          db.createObjectStore(QUEUE_STORE_NAME);
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => resolve(null);
-      request.onblocked = () => resolve(null);
-    });
-  }
-  return queueDatabasePromise;
-}
 function makeQueueSnapshot() {
   const stableTracks = tracks
     .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
@@ -263,6 +242,7 @@ function makeQueueSnapshot() {
     }));
   const currentId = tracks[index]?.id ?? null;
   return {
+    schemaVersion: 2,
     tracks: stableTracks,
     currentTrackId: stableTracks.some(
       (track) => String(track.id) === String(currentId),
@@ -282,76 +262,44 @@ function persistQueue() {
     queueDirty = true;
     return;
   }
-  const snapshot = makeQueueSnapshot();
-  try {
-    localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(snapshot));
-  } catch (_) {}
-  void openQueueDatabase().then((db) => {
-    if (!db) return;
-    try {
-      db.transaction(QUEUE_STORE_NAME, "readwrite")
-        .objectStore(QUEUE_STORE_NAME)
-        .put(snapshot, "queue");
-    } catch (_) {}
+  void queueStorage.save(makeQueueSnapshot()).catch(() => {
+    if (typeof reportPlayback === "function")
+      reportPlayback(
+        "storage-error",
+        "Queue could not be saved. Check browser storage.",
+      );
   });
 }
-async function readQueueSnapshot() {
-  const db = await openQueueDatabase();
-  if (db) {
-    const stored = await new Promise((resolve) => {
-      try {
-        const request = db
-          .transaction(QUEUE_STORE_NAME, "readonly")
-          .objectStore(QUEUE_STORE_NAME)
-          .get("queue");
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => resolve(null);
-      } catch (_) {
-        resolve(null);
-      }
-    });
-    if (stored) return stored;
-  }
-  try {
-    return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || "null");
-  } catch (_) {
-    return null;
-  }
-}
 async function restoreQueue() {
-  const snapshot = await readQueueSnapshot();
-  if (!queueDirty && Array.isArray(snapshot?.tracks)) {
-    const restored = snapshot.tracks
-      .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
-      .map((track, queueIndex) => ({
-        ...track,
-        id: track.id ?? Date.now() + queueIndex,
-        mood: track.mood || "Playlist",
-        time: track.time || "—",
-        cover: track.cover || "violet",
-        symbol: track.symbol || "♫",
-        customUrl: true,
-      }));
-    if (restored.length) {
-      tracks.splice(0, tracks.length, ...restored);
-      const current = restored.findIndex(
-        (track) => String(track.id) === String(snapshot.currentTrackId),
-      );
-      index =
-        current >= 0
-          ? current
-          : Math.min(
-              Math.max(Number(snapshot.currentIndex) || 0, 0),
-              restored.length - 1,
-            );
-    }
-    repeatOn = Boolean(snapshot.repeatOn);
-    shuffleOn = Boolean(snapshot.shuffleOn);
+  let snapshot = null;
+  try {
+    snapshot = await queueStorage.load();
+  } catch (_) {}
+  const changedBeforeRestore = queueDirty;
+  const normalized = queueStorage.normalizeSnapshot(
+    snapshot,
+    (track) => track && /^https?:\/\//i.test(String(track.src || "")),
+  );
+  if (!changedBeforeRestore && normalized) {
+    const restored = normalized.tracks.map((track, queueIndex) => ({
+      ...track,
+      id: track.id ?? Date.now() + queueIndex,
+      mood: track.mood || "Playlist",
+      time: track.time || "—",
+      cover: track.cover || "violet",
+      symbol: track.symbol || "♫",
+      customUrl: true,
+    }));
+    tracks.splice(0, tracks.length, ...restored);
+    index = normalized.currentIndex;
+    repeatOn = Boolean(normalized.repeatOn);
+    shuffleOn = Boolean(normalized.shuffleOn);
   }
   queueReady = true;
   queueDirty = false;
   setTrack(tracks.length ? index : 0, false);
   renderQueuePanel();
+  if (changedBeforeRestore) persistQueue();
 }
 function setTrack(i, autoplay = false) {
   if (!tracks.length) {
@@ -397,17 +345,39 @@ function setTrack(i, autoplay = false) {
   persistQueue();
   if (autoplay) play();
 }
+function reportPlayback(state, message) {
+  const current = tracks[index] || null;
+  if (message) $("audioStatus").textContent = message;
+  window.dispatchEvent(
+    new CustomEvent("pulse:playback-report", {
+      detail: {
+        state,
+        trackId: current?.id ?? null,
+        title: current?.title || null,
+        positionMs: Number.isFinite(audio.currentTime)
+          ? Math.round(audio.currentTime * 1000)
+          : 0,
+        durationMs: Number.isFinite(audio.duration)
+          ? Math.round(audio.duration * 1000)
+          : 0,
+        updatedAt: Date.now(),
+      },
+    }),
+  );
+}
+
 async function play() {
   if (!tracks.length || !tracks[index]) {
     playing = false;
     $("play").textContent = "▶";
     $("audioStatus").textContent =
       "Choose a song from search or your playlists.";
-    return;
+    return false;
   }
   try {
     await audio.play();
     playing = true;
+    reportPlayback("playing", "Playing · " + (tracks[index]?.title || "Audio"));
     $("audioStatus").textContent = tracks[index].archivePage
       ? "Playing · " +
         tracks[index].title +
@@ -419,6 +389,7 @@ async function play() {
     recent = recent.slice(0, 6);
     save();
     render();
+    return true;
   } catch (e) {
     playing = false;
     $("play").textContent = "▶";
@@ -426,14 +397,19 @@ async function play() {
       e && e.name === "NotAllowedError"
         ? "Tap Play again to allow audio playback."
         : "Could not start this audio. Check the link or try another file.";
-    $("audioStatus").textContent = msg;
+    reportPlayback("error", msg);
     toast(msg);
+    return false;
   }
 }
 function pause() {
   audio.pause();
   playing = false;
   $("play").textContent = "▶";
+  reportPlayback(
+    "paused",
+    "Paused · " + (tracks[index]?.title || "No track selected"),
+  );
   render();
 }
 function toggle() {
@@ -443,14 +419,15 @@ function next() {
   const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(
     index,
     tracks.length,
-    {
-      shuffle: shuffleOn,
-      repeat: repeatOn,
-    },
+    { shuffle: shuffleOn, repeat: repeatOn },
   );
   if (!Number.isInteger(nextIndex)) {
-    pause();
+    audio.pause();
+    playing = false;
+    $("play").textContent = "▶";
     if (Number.isFinite(audio.duration)) audio.currentTime = 0;
+    reportPlayback("ended", "Playlist finished.");
+    render();
     return;
   }
   setTrack(nextIndex, true);
@@ -542,7 +519,13 @@ $("prev").onclick = () => {
     audio.currentTime = 0;
     return;
   }
-  setTrack(index - 1, true);
+  const previous = window.PulsePlaylistPlayback?.previousIndex?.(
+    index,
+    tracks.length,
+    { repeat: repeatOn },
+  );
+  if (!Number.isInteger(previous)) return;
+  setTrack(previous, true);
 };
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
@@ -565,19 +548,21 @@ $("progress").oninput = (e) => {
 };
 audio.onended = () => next();
 audio.onwaiting = () => {
-  $("audioStatus").textContent =
-    "Loading audio… If it stays here, the link may not be a direct audio file.";
+  reportPlayback(
+    "buffering",
+    "Loading audio… If it stays here, the link may not be a direct audio file.",
+  );
 };
 audio.oncanplay = () => {
-  $("audioStatus").textContent =
-    "Audio ready · press Play if it has not started.";
+  if (!playing)
+    reportPlayback("ready", "Audio ready · press Play if it has not started.");
 };
 audio.onerror = () => {
   playing = false;
   $("play").textContent = "▶";
   const msg =
     "Audio failed to load. Try a local file or a direct .mp3/.m4a/.ogg link; Spotify/YouTube page links will not work here.";
-  $("audioStatus").textContent = msg;
+  reportPlayback("error", msg);
   toast("Audio could not load. Try another source.");
   render();
 };
@@ -634,7 +619,12 @@ function renderQueuePanel() {
     down.dataset.queueIndex = String(queueIndex);
     down.dataset.queueMove = String(queueIndex + 1);
     down.setAttribute("aria-label", "Move " + track.title + " down");
-    actions.append(up, down);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.dataset.queueRemove = String(queueIndex);
+    remove.setAttribute("aria-label", "Remove " + track.title + " from queue");
+    actions.append(up, down, remove);
     item.append(button, actions);
     list.append(item);
   });
@@ -649,6 +639,11 @@ $("queueClose")?.addEventListener("click", () => {
   $("queuePanel").hidden = true;
 });
 $("queueItems")?.addEventListener("click", (event) => {
+  const remove = event.target.closest("[data-queue-remove]");
+  if (remove) {
+    window.PulsePlayerBridge?.remove?.(Number(remove.dataset.queueRemove));
+    return;
+  }
   const move = event.target.closest("[data-queue-move]");
   if (move) {
     window.PulsePlayerBridge?.reorder?.(
@@ -893,11 +888,10 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   toast("Loading " + track.title);
 });
 
-window.addEventListener("pulse:play-playlist", (event) => {
-  const detail = event.detail || {};
-  const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
+function playPlaylistQueue(playlistName, incomingTracks) {
   const normalized =
-    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incoming }) || [];
+    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incomingTracks }) ||
+    [];
   const queue = normalized.map((item, queueIndex) => {
     const source = String(item.source || "Saved audio");
     const isLocal = String(item.src || "").startsWith("blob:");
@@ -927,22 +921,44 @@ window.addEventListener("pulse:play-playlist", (event) => {
   });
   if (!queue.length) {
     toast("This playlist has no playable songs.");
-    return;
+    return Promise.resolve(false);
   }
   tracks.splice(0, tracks.length, ...queue);
   index = 0;
   shuffleOn = false;
-  setTrack(0, true);
+  setTrack(0, false);
   renderQueuePanel();
   toast(
     "Playing playlist · " +
       queue.length +
       " tracks in saved order · " +
-      String(detail.playlistName || detail.name || "Singles Mix"),
+      String(playlistName || "Singles Mix"),
   );
-});
+  return play();
+}
 
 window.PulsePlayerBridge = {
+  playPlaylist: playPlaylistQueue,
+  remove: (queueIndex) => {
+    const oldCurrentIndex = index;
+    const wasPlaying = playing;
+    const result = window.PulsePlaylistPlayback?.removeTrackAt?.(
+      tracks,
+      index,
+      queueIndex,
+    );
+    if (!result) return false;
+    tracks.splice(0, tracks.length, ...result.tracks);
+    index = result.currentIndex;
+    if (!tracks.length || queueIndex === oldCurrentIndex) {
+      setTrack(tracks.length ? index : 0, tracks.length > 0 && wasPlaying);
+    } else {
+      render();
+      renderQueuePanel();
+      persistQueue();
+    }
+    return true;
+  },
   currentTrack: () => tracks[index] || null,
   isLiked: (id) => liked.has(id),
   reorder: (from, to) => {
