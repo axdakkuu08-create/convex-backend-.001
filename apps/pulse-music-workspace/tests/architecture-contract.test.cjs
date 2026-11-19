@@ -24,6 +24,7 @@ test("Android installer attaches strict network policy", () => {
   const policy = read("android-native/src/main/res/xml/network_security_config.xml");
   assert.match(installer, /networkSecurityConfig/);
   assert.match(installer, /usesCleartextTraffic="false"/);
+  assert.match(installer, /allowBackup="false"/);
   assert.match(policy, /cleartextTrafficPermitted="false"/);
   assert.match(policy, /certificates src="system"/);
 });
