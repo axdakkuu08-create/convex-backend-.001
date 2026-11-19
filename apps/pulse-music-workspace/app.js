@@ -1135,6 +1135,7 @@ $("archiveResults").addEventListener("click", async (e) => {
     verificationStatus: item.verificationStatus || "VERIFYING",
     rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
     bytesTotal: Number(item.fileSize) || 0,
+    offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(item.audioUrl)),
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -1159,7 +1160,6 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
     src: item.src,
     customUrl: true,
     artwork: item.artwork || "",
-    sourcePage: item.url || "",
     archivePage: String(item.source || "").includes("Internet Archive")
       ? item.url || ""
       : "",
@@ -1176,6 +1176,7 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
     verificationStatus: item.verificationStatus || "UNAVAILABLE",
     rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
     bytesTotal: Number(item.bytesTotal) || 0,
+    offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(item.src)),
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
