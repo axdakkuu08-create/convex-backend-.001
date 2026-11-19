@@ -12,6 +12,7 @@ function makeEnvironment(options = {}) {
   const values = new Map();
   const records = new Map();
   let fetchCalls = 0;
+  let fetchOptions = null;
   const localStorage = {
     getItem: (key) => values.get(key) ?? null,
     setItem: (key, value) => {
@@ -25,10 +26,11 @@ function makeEnvironment(options = {}) {
     async delete(key) { return records.delete(String(key)); },
   };
   const caches = { async open() { return cache; } };
-  const navigator = { storage: { async estimate() { return { quota: 1e9, usage: 0 }; }, async persist() { return true; } } };
+  const navigator = { storage: { async estimate() { return options.estimate || { quota: 1e9, usage: 0 }; }, async persist() { return true; } } };
   const window = {};
-  const fetch = async () => {
+  const fetch = async (_url, requestOptions) => {
     fetchCalls += 1;
+    fetchOptions = requestOptions;
     return options.response || new Response(new Blob(["audio bytes"], { type: "audio/mpeg" }), {
       status: 200,
       headers: { "Content-Type": "audio/mpeg" },
@@ -37,7 +39,7 @@ function makeEnvironment(options = {}) {
   const context = { window, localStorage, caches, navigator, fetch, Response, URL, Promise, Date, String, Number, Boolean, Error, JSON };
   vm.runInNewContext(policySource, context);
   vm.runInNewContext(offlineSource, context);
-  return { api: window.PulseOfflineMedia, values, records, get fetchCalls() { return fetchCalls; } };
+  return { api: window.PulseOfflineMedia, values, records, get fetchCalls() { return fetchCalls; }, get fetchOptions() { return fetchOptions; } };
 }
 
 const approved = {
@@ -70,6 +72,8 @@ test("approved full-track audio is cached with attribution metadata", async () =
   assert.equal(env.api.isSaved(approved.src), true);
   assert.equal((await env.api.list()).length, 1);
   assert.equal(env.fetchCalls, 1);
+  assert.equal(env.fetchOptions.credentials, "omit");
+  assert.equal(env.fetchOptions.mode, "cors");
 });
 
 test("non-audio response is rejected and not recorded", async () => {
@@ -81,6 +85,12 @@ test("non-audio response is rejected and not recorded", async () => {
   });
   await assert.rejects(env.api.download(approved), /did not return an audio file/i);
   assert.equal(env.api.isSaved(approved.src), false);
+});
+
+test("insufficient reported quota rejects a download before cache write", async () => {
+  const env = makeEnvironment({ estimate: { quota: 5, usage: 0 } });
+  await assert.rejects(env.api.download(approved), /Not enough available browser storage/i);
+  assert.equal(env.records.has(approved.src), false);
 });
 
 test("metadata storage failure rolls back cached audio", async () => {
