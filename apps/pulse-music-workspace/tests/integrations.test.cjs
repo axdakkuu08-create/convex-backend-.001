@@ -257,10 +257,10 @@ test("saved playlist playback queues every playable song in saved order", () => 
     path.join(__dirname, "..", "playlist-playback.js"),
     "utf8",
   );
-  assert.match(playback, /pulse:play-playlist/);
+  assert.match(playback, /player\.playPlaylist/);
   assert.match(playlists, /Array\.isArray\(tracks\)/);
   assert.match(playlists, /\.filter\(\(track\) => track && track\.src\)/);
-  assert.match(app, /pulse:play-playlist/);
+  assert.match(app, /playPlaylist: playPlaylistQueue/);
   assert.match(app, /tracks\.splice\(0, tracks\.length, \.\.\.queue\)/);
   assert.match(app, /audio\.onended/);
 });
@@ -475,4 +475,11 @@ test("queue storage loads before player initialization", () => {
   const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
   assert.ok(html.indexOf("queue-storage.js") >= 0);
   assert.ok(html.indexOf("queue-storage.js") < html.indexOf('src="app.js"'));
+});
+
+test("playlist start reports autoplay failure instead of claiming success", () => {
+  const playbackSource = fs.readFileSync(path.join(__dirname, "..", "playlist-playback.js"), "utf8");
+  assert.match(playbackSource, /then\(\(started\) => started === true, \(\) => false\)/);
+  const store = fs.readFileSync(path.join(__dirname, "..", "playlist-store.js"), "utf8");
+  assert.match(store, /started = await window\.PulsePlaylistPlayback/);
 });
