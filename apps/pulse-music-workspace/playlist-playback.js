@@ -44,16 +44,12 @@
 
   function start(playlist) {
     const tracks = buildQueue(playlist);
-    if (!tracks.length) return false;
-    window.dispatchEvent(
-      new CustomEvent("pulse:play-playlist", {
-        detail: {
-          playlistName: String(playlist?.name || "Playlist"),
-          tracks,
-        },
-      }),
-    );
-    return true;
+    if (!tracks.length) return Promise.resolve(false);
+    const player = window.PulsePlayerBridge;
+    if (typeof player?.playPlaylist !== "function") return Promise.resolve(false);
+    return Promise.resolve()
+      .then(() => player.playPlaylist(String(playlist?.name || "Playlist"), tracks))
+      .then((started) => started === true, () => false);
   }
 
   window.PulsePlaylistPlayback = { buildQueue, nextIndex, start };
