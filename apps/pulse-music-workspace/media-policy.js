@@ -41,6 +41,7 @@
         sourceType(track) === "internet_archive" &&
         isHttpsAudioUrl(track.src || track.audioUrl) &&
         licenseLabel(track) &&
+        String(track.sourcePage || track.archivePage || track.url || "").trim() &&
         String(track.verificationStatus || "") === "VERIFIED_FULL" &&
         String(track.rightsReviewStatus || "") === "APPROVED",
     );
