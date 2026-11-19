@@ -10,6 +10,7 @@ on:
       - feat/pulse-glass-charts-archive-mix
       - integration/pulse-pr33-37-consolidated
       - fix/pulse-b01-b17-core-storage
+      - checkpoint/pulse-stage4-7-2026-11-19
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-workspace-tests.yml"
@@ -30,6 +31,7 @@ jobs:
       - name: Syntax-check Pulse workspace modules
         run: |
           node --check apps/pulse-music-workspace/app.js
+          node --check apps/pulse-music-workspace/media3-bridge.js
           node --check apps/pulse-music-workspace/queue-storage.js
           node --check apps/pulse-music-workspace/playlist-playback.js
           node --check apps/pulse-music-workspace/playlist-store.js
