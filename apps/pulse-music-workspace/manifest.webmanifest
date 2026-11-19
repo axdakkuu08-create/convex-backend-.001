@@ -5,5 +5,22 @@
   "display": "standalone",
   "background_color": "#101114",
   "theme_color": "#101114",
-  "description": "A clean music workspace inspired by modern developer dashboards."
+  "description": "A clean music workspace inspired by modern developer dashboards.",
+  "id": "./",
+  "scope": "./",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/pulse-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/pulse-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
