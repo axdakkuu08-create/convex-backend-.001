@@ -70,7 +70,18 @@
       if (fallback) { try { await transact("readwrite", (store) => store.put(fallback, "queue")); } catch (_) {} }
       return fallback;
     }
-    return { load, save };
+    function normalizeSnapshot(snapshot, isPlayable) {
+      if (!validSnapshot(snapshot)) return null;
+      const predicate = typeof isPlayable === "function" ? isPlayable : () => true;
+      const tracks = snapshot.tracks.filter((track) => predicate(track));
+      let currentIndex = tracks.findIndex((track) => String(track.id) === String(snapshot.currentTrackId));
+      if (currentIndex < 0 && tracks.length) {
+        const requested = Number(snapshot.currentIndex);
+        currentIndex = Math.min(Math.max(Number.isInteger(requested) ? requested : 0, 0), tracks.length - 1);
+      }
+      return { ...snapshot, tracks, currentIndex, currentTrackId: tracks[currentIndex]?.id ?? null };
+    }
+    return { load, save, normalizeSnapshot };
   }
   window.PulseQueueStorage = createQueueStorage(window);
   window.PulseQueueStorage.create = createQueueStorage;
