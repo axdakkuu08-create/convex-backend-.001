@@ -9,6 +9,7 @@
     <meta name="theme-color" content="#101114" />
     <title>Pulse — Music Workspace</title>
     <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/pulse-192.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="home-refresh.css" />
     <link rel="stylesheet" href="charts-dashboard.css" />
@@ -24,6 +25,7 @@
         ><button class="nav active" data-view="discover">◈　Discover</button
         ><button class="nav" data-view="library">▤　Your library</button
         ><button class="nav" data-view="recent">◷　Recently played</button>
+        <button class="nav" data-view="downloads">↓　Offline downloads</button>
         <hr />
         <small
           >YOUR COLLECTION
@@ -44,6 +46,7 @@
           <p id="cloudStatus" role="status" aria-live="polite">
             Cloud sync is optional.
           </p>
+          <p id="pwaStatus" role="status" aria-live="polite">Checking offline app support…</p>
           <button id="cloudSignIn" class="nav" type="button">
             Sign in to sync
           </button>
@@ -645,6 +648,8 @@
     <script src="catalog-search.js"></script>
     <script src="playlist-playback.js"></script>
     <script src="queue-storage.js"></script>
+    <script src="media-policy.js"></script>
+    <script src="offline-media.js"></script>
     <script src="media3-bridge.js"></script>
     <script src="app.js"></script>
     <script type="module" src="cloud-sync.js"></script>
@@ -654,5 +659,6 @@
     <script src="charts-dashboard.js"></script>
     <script src="song-recognition.js"></script>
     <script src="tempus-player.js"></script>
+    <script src="pwa-runtime.js"></script>
   </body>
 </html>
