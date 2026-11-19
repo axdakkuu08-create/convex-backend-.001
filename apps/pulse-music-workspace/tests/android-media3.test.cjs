@@ -50,6 +50,13 @@ test("full-screen player routes native seeking and progress through Media3", () 
   assert.match(player, /tempusPlayerElapsed/);
 });
 
+test("native-to-web playback waits for Media3 pause before starting HTML audio", () => {
+  const app = read("app.js");
+  assert.match(app, /nativeHandoffPromise/);
+  assert.match(app, /await nativeHandoffPromise/);
+  assert.match(app, /tracks\[index\]\?\.src !== requestedSource/);
+});
+
 test("native service enables audio focus and headset-disconnect handling", () => {
   const service = fs.readFileSync(
     path.join(
@@ -61,6 +68,9 @@ test("native service enables audio focus and headset-disconnect handling", () =>
   assert.match(service, /setAudioAttributes\(attributes, true\)/);
   assert.match(service, /setHandleAudioBecomingNoisy\(true\)/);
   assert.match(service, /extends MediaSessionService/);
+  const plugin = read("android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java");
+  assert.match(plugin, /getPlayerError\(\)/);
+  assert.match(plugin, /errorMessage/);
 });
 
 test("native installer applies secure transport and media foreground permissions", () => {
@@ -69,4 +79,6 @@ test("native installer applies secure transport and media foreground permissions
   assert.match(installer, /FOREGROUND_SERVICE_MEDIA_PLAYBACK/);
   assert.match(installer, /WAKE_LOCK/);
   assert.match(installer, /PulseAudioService/);
+  assert.match(installer, /MEDIA_CONTENT_CONTROL/);
+  assert.match(installer, /networkSecurityConfig/);
 });
