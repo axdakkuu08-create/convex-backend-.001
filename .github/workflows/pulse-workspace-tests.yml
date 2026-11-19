@@ -1,6 +1,7 @@
 name: Pulse Workspace Tests
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "apps/pulse-music-workspace/**"
