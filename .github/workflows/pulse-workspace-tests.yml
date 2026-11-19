@@ -39,4 +39,4 @@ jobs:
           node --check apps/pulse-music-workspace/api/apple-charts.js
           node --check apps/pulse-music-workspace/api/pulse-config.js
       - name: Run Pulse integration tests
-        run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs
+        run: node --test apps/pulse-music-workspace/tests/*.test.cjs
