@@ -45,38 +45,38 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 | B14 | Verify background playback after app is backgrounded and screen is locked                    | physical Android test log/video           | NOT TESTABLE HERE |
 | B15 | Verify notification / lock-screen play, pause, next, previous controls                       | physical Android test log/video           | NOT TESTABLE HERE |
 | B16 | Verify audio focus, interruptions, headset/Bluetooth disconnect behavior                     | physical Android test log/video           | NOT TESTABLE HERE |
-| B17 | Verify supported audio formats, stream errors, seek and queue transitions                    | automated tests + physical device results | NOT STARTED       |
-| B18 | Verify Android lifecycle recovery and web/native playback handoff without duplicate audio    | automated tests + physical device results | NOT STARTED       |
+| B17 | Verify supported audio formats, stream errors, seek and queue transitions                    | automated tests + physical device results | IN PROGRESS      |
+| B18 | Verify Android lifecycle recovery and web/native playback handoff without duplicate audio    | automated tests + physical device results | IN PROGRESS      |
 
 ### Stage 5 — Offline reliability (B19–B23)
 
 | ID  | Required verification / work                                                     | Acceptance evidence                           | Status            |
 | --- | -------------------------------------------------------------------------------- | --------------------------------------------- | ----------------- |
-| B19 | Add/verify PWA manifest, icons, installability metadata                          | manifest audit + browser installability check | NOT STARTED       |
-| B20 | Add/verify service worker lifecycle and versioned app-shell caching              | service-worker tests + browser evidence       | NOT STARTED       |
-| B21 | Define offline media storage and rights/attribution metadata policy              | design review + storage tests                 | NOT STARTED       |
-| B22 | Implement resilient offline queue/library restoration and cache failure handling | automated storage tests                       | NOT STARTED       |
+| B19 | Add/verify PWA manifest, icons, installability metadata                          | manifest audit + browser installability check | IN PROGRESS      |
+| B20 | Add/verify service worker lifecycle and versioned app-shell caching              | service-worker tests + browser evidence       | IN PROGRESS      |
+| B21 | Define offline media storage and rights/attribution metadata policy              | design review + storage tests                 | IN PROGRESS      |
+| B22 | Implement resilient offline queue/library restoration and cache failure handling | automated storage tests                       | IN PROGRESS      |
 | B23 | Verify install, offline reopen, cached navigation and recovery after update      | browser + physical device evidence            | NOT TESTABLE HERE |
 
 ### Stage 6 — Architecture improvements (B24–B29)
 
 | ID  | Required verification / work                                         | Acceptance evidence                    | Status      |
 | --- | -------------------------------------------------------------------- | -------------------------------------- | ----------- |
-| B24 | Document current web/native playback ownership and bridge contract   | architecture decision + contract tests | NOT STARTED |
-| B25 | Separate platform adapters without replacing working web playback    | focused diff + regression tests        | NOT STARTED |
-| B26 | Harden media lifecycle, error, permission and storage boundaries     | security review + tests                | NOT STARTED |
-| B27 | Preserve source attribution, rights status and provider restrictions | regression tests + data-flow review    | NOT STARTED |
-| B28 | Remove duplication only where tests prove behavior is preserved      | before/after test evidence             | NOT STARTED |
-| B29 | Verify migration/backward compatibility and document rollback        | migration tests + rollback notes       | NOT STARTED |
+| B24 | Document current web/native playback ownership and bridge contract   | architecture decision + contract tests | IN PROGRESS |
+| B25 | Separate platform adapters without replacing working web playback    | focused diff + regression tests        | IN PROGRESS |
+| B26 | Harden media lifecycle, error, permission and storage boundaries     | security review + tests                | IN PROGRESS |
+| B27 | Preserve source attribution, rights status and provider restrictions | regression tests + data-flow review    | IN PROGRESS |
+| B28 | Remove duplication only where tests prove behavior is preserved      | before/after test evidence             | IN PROGRESS |
+| B29 | Verify migration/backward compatibility and document rollback        | migration tests + rollback notes       | IN PROGRESS |
 
 ### Stage 7 — Final acceptance
 
 | Gate                    | Required evidence                                                                 | Status            |
 | ----------------------- | --------------------------------------------------------------------------------- | ----------------- |
-| Regression suite        | all relevant Pulse tests green on final branch head                               | NOT STARTED       |
+| Regression suite        | all relevant Pulse tests green on final branch head                               | IN PROGRESS       |
 | Production build        | reproducible build succeeds; no production deployment implied                     | NOT STARTED       |
 | Browser tests           | installability, responsive layout, playback, queue and offline flows              | NOT STARTED       |
-| Android build           | debug APK artifact from the final branch                                          | NOT STARTED       |
+| Android build           | debug APK artifact from the final branch                                          | IN PROGRESS       |
 | Physical Android checks | background playback, controls, audio compatibility, interruptions, offline reopen | NOT TESTABLE HERE |
 | Governance review       | main unchanged; no merge/deploy; all diffs and CI reviewed                        | IN PROGRESS       |
 
@@ -103,31 +103,51 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 ## CI observations
 
 - Pulse Workspace Tests run #109 passed on commit
-  98ca01a4fdc510f8a2fac476784b99e6232cb1fe, including the Media3 bridge and
-  native seek regression checks.
-- Android build run #190 passed on the same commit and uploaded the
-  pulse-android-debug-apk artifact (artifact ID 14523572453). This proves the
-  reviewed native source compiles and packages; it does not replace device
-  acceptance. A subsequent build for the formatting-only checkpoint head is
-  running separately.
-- Prettier run #434 still reports two Markdown files needing dprint formatting:
-  PULSE_STAGE4_7_CHECKPOINT.md and ANDROID_PLAYBACK.md. Runtime source files
-  passed formatting in that run.
-- CLA check run #473 failed because PR #40 does not contain the repository's
-  required contribution declaration. No legal attestation has been inserted
-  on the user's behalf. PR description confirmation remains a human action.
-- Vercel status was pending on the latest observed PR head. No production
-  deployment was requested or performed.
+  98ca01a4fdc510f8a2fac476784b99e6232cb1fe, and Android build run #190
+  produced a debug APK on that pre-offline implementation commit.
+- The current branch adds PWA/offline modules, media-policy contracts, Android
+  network hardening, lifecycle handoff changes, and new regression tests after
+  that APK. No successful CI run for the current final head has been observed.
+- The latest observed Pulse Workspace Tests and Android build workflows were
+  still queued on an earlier branch head. The most recent Prettier workflow
+  was cancelled before it produced a formatting result for the new files.
+- The CLA check remains a human PR-description action. No legal attestation has
+  been inserted on the user's behalf.
+- The Vercel preview integration reported its daily deployment API limit.
+  No production deployment was requested or performed.
 
 ## Current checkpoint decision
 
-**Overall: IN PROGRESS — Stage 4 is not accepted.**
+**Overall: IN PROGRESS — Stages 4–7 are not accepted.**
 
-B13 is PASS on the evidence above. The PR #32 Media3 service/plugin and
-Capacitor build foundation were selectively ported; native mode is restricted
-to all-HTTPS queues so mixed local-file queues stay on the existing web player.
-The full-screen player now routes native seek and progress through Media3. The
-installer disables cleartext traffic and adds media foreground-service,
-wake-lock and notification permissions. B14–B18 still require real Android
-hardware verification. Stage 5 and Stage 6 must follow in order; Stage 7
-remains blocked until all evidence is collected.
+B13 is PASS based on the prior successful Android build and Media3 integration
+checks. B17 and B18 have additional source-level changes and regression
+coverage: native error reporting, strict HTTPS URL validation, bounded seek
+positions, and a pause-before-web handoff that prevents simultaneous native and
+web audio. Physical Android playback, lock-screen controls, Bluetooth behavior,
+and lifecycle recovery remain unverified.
+
+Stage 5 now has a PWA manifest with local SVG icons, a versioned service worker,
+app-shell caching, byte-range support for explicitly cached audio, an Offline
+Downloads view, and a Cache Storage manager. Offline saving is restricted to
+Internet Archive items with a non-empty licence label, VERIFIED_FULL status,
+and explicit APPROVED rights review. iTunes previews and unreviewed items are
+not eligible. These changes have automated contract tests, but current-head CI
+and real browser installation/offline reopening have not been observed.
+
+Stage 6 now has documented playback ownership, shared media URL/source policy,
+separate PWA/offline adapters, Android system-trust-only TLS policy, disabled
+cleartext traffic and backup, attribution propagation, and additive migration
+and rollback documentation. Tests have been added but are not yet verified by
+a completed workflow run.
+
+Important remaining boundary: Cache Storage is available to the PWA/WebView
+audio path. Media3 does not yet read a native Filesystem copy, so saved offline
+tracks do not have native background playback while offline. A dedicated
+Filesystem-to-Media3 adapter is still required for that behavior.
+
+B23, browser installation, offline reopening, and B14–B18 physical-device
+checks require browser/device evidence. The final regression suite, production
+build, current-head APK, and final acceptance remain HOLD until their evidence
+is available. PR #40 remains Draft; main is untouched; no merge or production
+deployment has been performed.
