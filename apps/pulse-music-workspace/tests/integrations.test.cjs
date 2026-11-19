@@ -390,7 +390,10 @@ test("playback reporting is explicit and canplay does not overwrite active playb
   const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
   assert.match(app, /function reportPlayback\(state, message\)/);
   assert.match(app, /pulse:playback-report/);
-  assert.match(app, /audio\.oncanplay = \(\) => \{\s*if \(!playing\)\s*reportPlayback\("ready"/s);
+  assert.match(
+    app,
+    /audio\.oncanplay = \(\) => \{\s*if \(!playing\)\s*reportPlayback\("ready"/s,
+  );
 });
 test("queue storage loads before player initialization", () => {
   const html = fs.readFileSync(
