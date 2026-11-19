@@ -1,6 +1,7 @@
 package com.pulse.music;
 
 import android.content.ComponentName;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -29,6 +30,7 @@ public final class PulseMedia3Plugin extends Plugin {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private ListenableFuture<MediaController> controllerFuture;
     private MediaController controller;
+    private boolean controllerListenerAttached = false;
     private final Runnable positionTicker = new Runnable() {
         @Override
         public void run() {
@@ -57,26 +59,47 @@ public final class PulseMedia3Plugin extends Plugin {
         }
         controllerFuture.addListener(() -> {
             try {
-                controller = controllerFuture.get();
-                controller.addListener(new androidx.media3.common.Player.Listener() {
-                    @Override
-                    public void onEvents(androidx.media3.common.Player player,
-                                         androidx.media3.common.Player.Events events) {
-                        emitState(player);
-                        mainHandler.removeCallbacks(positionTicker);
-                        if (player.isPlaying()) mainHandler.post(positionTicker);
-                    }
-                });
+                MediaController connected = controllerFuture.get();
+                if (controller == null) controller = connected;
+                if (!controllerListenerAttached) {
+                    controller.addListener(new androidx.media3.common.Player.Listener() {
+                        @Override
+                        public void onEvents(androidx.media3.common.Player player,
+                                             androidx.media3.common.Player.Events events) {
+                            emitState(player);
+                            mainHandler.removeCallbacks(positionTicker);
+                            if (player.isPlaying()) mainHandler.post(positionTicker);
+                        }
+                    });
+                    controllerListenerAttached = true;
+                }
                 action.run(controller);
             } catch (InterruptedException error) {
                 Thread.currentThread().interrupt();
+                controllerFuture = null;
                 call.reject("Interrupted while connecting to the audio service", error);
             } catch (ExecutionException error) {
+                controllerFuture = null;
                 call.reject("Could not connect to the Android audio service", error);
             } catch (RuntimeException error) {
                 call.reject("Android audio operation failed", error);
             }
         }, mainHandler::post);
+    }
+
+    private boolean isSafeHttpsUrl(String value) {
+        if (value == null) return false;
+        Uri uri = Uri.parse(value);
+        return "https".equalsIgnoreCase(uri.getScheme())
+            && uri.getHost() != null
+            && !uri.getHost().isEmpty();
+    }
+
+    private long safePositionMs(double seconds) {
+        if (!Double.isFinite(seconds) || seconds <= 0) return 0L;
+        double milliseconds = seconds * 1000.0;
+        if (milliseconds >= Long.MAX_VALUE) return Long.MAX_VALUE;
+        return (long) milliseconds;
     }
 
     private void emitState(androidx.media3.common.Player player) {
@@ -105,8 +128,8 @@ public final class PulseMedia3Plugin extends Plugin {
                 JSONObject track = tracks.getJSONObject(i);
                 String url = track.optString("url", "");
                 String mediaId = track.optString("id", "pulse-" + i);
-                if (!(url.startsWith("https://"))) {
-                    call.reject("Every native queue item must use an HTTP or HTTPS audio URL");
+                if (!isSafeHttpsUrl(url)) {
+                    call.reject("Every native queue item must use a valid HTTPS audio URL");
                     return;
                 }
                 MediaMetadata metadata = new MediaMetadata.Builder()
@@ -129,7 +152,7 @@ public final class PulseMedia3Plugin extends Plugin {
             mediaController.setMediaItems(
                 items,
                 startIndex,
-                Math.max(0L, (long) (call.getDouble("startPositionSeconds", 0.0) * 1000))
+                safePositionMs(call.getDouble("startPositionSeconds", 0.0))
             );
             mediaController.setShuffleModeEnabled(call.getBoolean("shuffle", false));
             mediaController.setRepeatMode(
@@ -145,8 +168,8 @@ public final class PulseMedia3Plugin extends Plugin {
     @PluginMethod
     public void loadTrack(PluginCall call) {
         String url = call.getString("url");
-        if (url == null || !(url.startsWith("https://") || url.startsWith("https://"))) {
-            call.reject("A direct HTTP or HTTPS audio URL is required");
+        if (!isSafeHttpsUrl(url)) {
+            call.reject("A direct HTTPS audio URL is required");
             return;
         }
         String title = call.getString("title", "Pulse audio");
@@ -186,7 +209,7 @@ public final class PulseMedia3Plugin extends Plugin {
     public void seekTo(PluginCall call) {
         double seconds = call.getDouble("positionSeconds", 0.0);
         withController(call, mediaController -> {
-            mediaController.seekTo(Math.max(0L, (long) (seconds * 1000)));
+            mediaController.seekTo(safePositionMs(seconds));
             call.resolve();
         });
     }
