@@ -24,7 +24,7 @@ Status vocabulary: NOT STARTED, IN PROGRESS, PASS, FAIL, BLOCKED, NOT TESTABLE H
 
 | ID | Required verification / work | Acceptance evidence | Status |
 |---|---|---|---|
-| B13 | Audit and integrate native Media3 playback service against the current Pulse player contract | reviewed source diff + Android build | NOT STARTED |
+| B13 | Audit and integrate native Media3 playback service against the current Pulse player contract | reviewed source diff + Android build | IN PROGRESS |
 | B14 | Verify background playback after app is backgrounded and screen is locked | physical Android test log/video | NOT TESTABLE HERE |
 | B15 | Verify notification / lock-screen play, pause, next, previous controls | physical Android test log/video | NOT TESTABLE HERE |
 | B16 | Verify audio focus, interruptions, headset/Bluetooth disconnect behavior | physical Android test log/video | NOT TESTABLE HERE |
