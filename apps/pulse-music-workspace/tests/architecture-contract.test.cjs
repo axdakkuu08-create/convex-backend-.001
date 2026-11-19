@@ -31,6 +31,8 @@ test("Android installer attaches strict network policy", () => {
   assert.match(installer, /allowBackup="false"/);
   assert.match(policy, /cleartextTrafficPermitted="false"/);
   assert.match(policy, /certificates src="system"/);
+  assert.match(read("scripts/audit-android-manifest.py"), /MEDIA_CONTENT_CONTROL/);
+  assert.match(read("scripts/audit-android-manifest.py"), /usesCleartextTraffic/);
 });
 
 test("offline download metadata never includes credentials or provider session fields", () => {
