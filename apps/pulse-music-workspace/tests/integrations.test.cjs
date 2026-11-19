@@ -464,3 +464,15 @@ test("mobile home navigation validates external provider links", () => {
   assert.match(home, /const queryAll =/);
   assert.match(home, /safeExternalUrl\(item\.url\)/);
 });
+
+test("playback reporting is explicit and canplay does not overwrite active playback", () => {
+  const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+  assert.match(app, /function reportPlayback\(state, message\)/);
+  assert.match(app, /pulse:playback-report/);
+  assert.match(app, /if \(!playing\) reportPlayback\("ready"/);
+});
+test("queue storage loads before player initialization", () => {
+  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  assert.ok(html.indexOf("queue-storage.js") >= 0);
+  assert.ok(html.indexOf("queue-storage.js") < html.indexOf('src="app.js"'));
+});
