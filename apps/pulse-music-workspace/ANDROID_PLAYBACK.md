@@ -33,6 +33,8 @@ keys or signing credentials to these variables.
 
 - The PWA offline adapter can cache rights-approved Internet Archive audio in
   browser Cache Storage. This cache is available to WebView/HTML audio requests.
+  It is not an encrypted native Filesystem vault and does not satisfy the
+  blueprint's full Android offline-storage requirement.
 - Media3 does not yet read the PWA Cache Storage or an Android Filesystem copy.
   Offline-cached items therefore stay on the web audio path and do not gain
   native background playback while offline.
