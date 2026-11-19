@@ -23,7 +23,7 @@ function canUseNativeQueue() {
   return Boolean(
     window.PulseMedia3?.isNative &&
     tracks.length > 0 &&
-    tracks.every((track) => /^https:\/\//i.test(String(track.src || "")),
+    tracks.every((track) => /^https:\/\//i.test(String(track.src || ""))),
   );
 }
 function nativeQueueItems() {
