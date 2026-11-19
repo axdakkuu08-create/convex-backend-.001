@@ -336,6 +336,10 @@ async function restoreQueue() {
 }
 function setTrack(i, autoplay = false) {
   if (!tracks.length) {
+    if (nativePlaybackActive && window.PulseMedia3)
+      window.PulseMedia3.pause().catch(() => {});
+    nativePlaybackActive = false;
+    nativeLoadPromise = Promise.resolve(false);
     index = 0;
     audio.removeAttribute("src");
     audio.load();
@@ -748,8 +752,10 @@ $("queueNext")?.addEventListener("click", () => $("next").click());
 $("queueClear")?.addEventListener("click", () => {
   const current = tracks[index];
   if (!current) return;
+  const wasPlaying = playing;
   tracks.splice(0, tracks.length, current);
   index = 0;
+  if (nativePlaybackActive) setTrack(0, wasPlaying);
   render();
   renderQueuePanel();
   persistQueue();
