@@ -19,6 +19,7 @@ let nativeDurationSeconds = 0;
 let nativePositionSeconds = 0;
 let nativeEndedHandled = false;
 let nativeHandoffPromise = Promise.resolve();
+let nativeLastError = "";
 
 function canUseNativeQueue() {
   return Boolean(
@@ -1126,6 +1127,16 @@ if (window.PulseMedia3?.isNative) {
   window.PulseMedia3.setVolume(0.75).catch(() => {});
   window.PulseMedia3.addStateListener((state) => {
     if (!state || !nativePlaybackActive) return;
+    const errorMessage = String(state.errorMessage || "");
+    if (errorMessage && errorMessage !== nativeLastError) {
+      nativeLastError = errorMessage;
+      playing = false;
+      reportPlayback("error", "Android playback error: " + errorMessage);
+      $("play").textContent = "▶";
+      render();
+    } else if (!errorMessage) {
+      nativeLastError = "";
+    }
     const mediaId = String(state.mediaId || "");
     const transitionedIndex = mediaId
       ? tracks.findIndex((track) => String(track.id) === mediaId)
