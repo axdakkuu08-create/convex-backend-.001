@@ -383,15 +383,15 @@ function setTrack(i, autoplay = false) {
       shuffleOn,
       repeatOn,
     ).catch((error) => {
-        nativePlaybackActive = false;
-        audio.src = t.src;
-        audio.load();
-        reportPlayback(
-          "error",
-          error?.message || "Android audio service could not load this track.",
-        );
-        return false;
-      });
+      nativePlaybackActive = false;
+      audio.src = t.src;
+      audio.load();
+      reportPlayback(
+        "error",
+        error?.message || "Android audio service could not load this track.",
+      );
+      return false;
+    });
   } else {
     if (wasNativePlayback && window.PulseMedia3)
       window.PulseMedia3.pause().catch(() => {});
@@ -601,8 +601,7 @@ $("shuffleAll").onclick = () => {
     return;
   }
   shuffleOn = true;
-  if (nativePlaybackActive)
-    window.PulseMedia3.setShuffle(true).catch(() => {});
+  if (nativePlaybackActive) window.PulseMedia3.setShuffle(true).catch(() => {});
   toast("Shuffle is on");
   setTrack(Math.floor(Math.random() * tracks.length), true);
 };
@@ -1069,18 +1068,18 @@ if (window.PulseMedia3?.isNative) {
     if (document.visibilityState !== "visible" || !nativePlaybackActive) return;
     window.PulseMedia3.getState()
       .then((state) => {
-      if (!state) return;
-      nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
-      nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
-      playing = Boolean(state.isPlaying);
-      $("play").textContent = playing ? "Ⅱ" : "▶";
-      if (nativeDurationSeconds > 0) {
-        $("progress").value =
-          (nativePositionSeconds / nativeDurationSeconds) * 100;
-        $("time").textContent = fmt(nativePositionSeconds);
-        $("duration").textContent = fmt(nativeDurationSeconds);
-      }
-      render();
+        if (!state) return;
+        nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
+        nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
+        playing = Boolean(state.isPlaying);
+        $("play").textContent = playing ? "Ⅱ" : "▶";
+        if (nativeDurationSeconds > 0) {
+          $("progress").value =
+            (nativePositionSeconds / nativeDurationSeconds) * 100;
+          $("time").textContent = fmt(nativePositionSeconds);
+          $("duration").textContent = fmt(nativeDurationSeconds);
+        }
+        render();
       })
       .catch(() => {});
   });
