@@ -43,9 +43,31 @@
       });
       return true;
     },
-    async setQueue(tracks, startIndex = 0, startPositionSeconds = 0) {
+    async setQueue(
+      tracks,
+      startIndex = 0,
+      startPositionSeconds = 0,
+      shuffle = false,
+      repeat = false,
+    ) {
       const plugin = await getPlugin();
-      await plugin.setQueue({ tracks, startIndex, startPositionSeconds });
+      await plugin.setQueue({
+        tracks,
+        startIndex,
+        startPositionSeconds,
+        shuffle,
+        repeat,
+      });
+      return true;
+    },
+    async setShuffle(enabled) {
+      const plugin = await getPlugin();
+      await plugin.setShuffle({ enabled });
+      return true;
+    },
+    async setRepeat(enabled) {
+      const plugin = await getPlugin();
+      await plugin.setRepeat({ enabled });
       return true;
     },
     async next() {
