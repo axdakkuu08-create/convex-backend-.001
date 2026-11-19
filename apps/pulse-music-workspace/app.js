@@ -213,6 +213,108 @@ function loadMusicEmbed(raw) {
     $("sourceUrl").setAttribute("aria-invalid", "true");
   }
 }
+
+const QUEUE_DB_NAME = "pulse-player-state";
+const QUEUE_STORE_NAME = "player-state";
+const QUEUE_STORAGE_KEY = "pulse.playerQueue.v1";
+let queueDatabasePromise = null;
+let queueReady = false;
+let queueDirty = false;
+
+function openQueueDatabase() {
+  if (!window.indexedDB) return Promise.resolve(null);
+  if (!queueDatabasePromise) {
+    queueDatabasePromise = new Promise((resolve) => {
+      const request = window.indexedDB.open(QUEUE_DB_NAME, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(QUEUE_STORE_NAME))
+          db.createObjectStore(QUEUE_STORE_NAME);
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => resolve(null);
+      request.onblocked = () => resolve(null);
+    });
+  }
+  return queueDatabasePromise;
+}
+function makeQueueSnapshot() {
+  const stableTracks = tracks
+    .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+    .map((track) => ({
+      id: track.id, catalogId: String(track.catalogId || ""),
+      source: String(track.source || "Saved audio"),
+      title: String(track.title || "Untitled track"),
+      artist: String(track.artist || "Unknown artist"),
+      mood: String(track.mood || "Playlist"), time: String(track.time || "—"),
+      cover: String(track.cover || "violet"), symbol: String(track.symbol || "♫"),
+      src: String(track.src), customUrl: true, artwork: String(track.artwork || ""),
+      sourcePage: String(track.sourcePage || track.url || ""),
+      archivePage: String(track.archivePage || ""),
+      archiveLicense: String(track.archiveLicense || track.license || ""),
+      verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
+      rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"),
+      bytesTotal: Number(track.bytesTotal) || 0,
+    }));
+  const currentId = tracks[index]?.id ?? null;
+  return {
+    tracks: stableTracks,
+    currentTrackId: stableTracks.some((track) => String(track.id) === String(currentId)) ? currentId : null,
+    currentIndex: stableTracks.findIndex((track) => String(track.id) === String(currentId)),
+    repeatOn, shuffleOn, updatedAt: Date.now(),
+  };
+}
+function persistQueue() {
+  if (!queueReady) { queueDirty = true; return; }
+  const snapshot = makeQueueSnapshot();
+  try { localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(snapshot)); } catch (_) {}
+  void openQueueDatabase().then((db) => {
+    if (!db) return;
+    try {
+      db.transaction(QUEUE_STORE_NAME, "readwrite")
+        .objectStore(QUEUE_STORE_NAME).put(snapshot, "queue");
+    } catch (_) {}
+  });
+}
+async function readQueueSnapshot() {
+  const db = await openQueueDatabase();
+  if (db) {
+    const stored = await new Promise((resolve) => {
+      try {
+        const request = db.transaction(QUEUE_STORE_NAME, "readonly")
+          .objectStore(QUEUE_STORE_NAME).get("queue");
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => resolve(null);
+      } catch (_) { resolve(null); }
+    });
+    if (stored) return stored;
+  }
+  try { return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || "null"); }
+  catch (_) { return null; }
+}
+async function restoreQueue() {
+  const snapshot = await readQueueSnapshot();
+  if (!queueDirty && Array.isArray(snapshot?.tracks)) {
+    const restored = snapshot.tracks
+      .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+      .map((track, queueIndex) => ({
+        ...track, id: track.id ?? Date.now() + queueIndex,
+        mood: track.mood || "Playlist", time: track.time || "—",
+        cover: track.cover || "violet", symbol: track.symbol || "♫", customUrl: true,
+      }));
+    if (restored.length) {
+      tracks.splice(0, tracks.length, ...restored);
+      const current = restored.findIndex((track) => String(track.id) === String(snapshot.currentTrackId));
+      index = current >= 0 ? current : Math.min(Math.max(Number(snapshot.currentIndex) || 0, 0), restored.length - 1);
+    }
+    repeatOn = Boolean(snapshot.repeatOn);
+    shuffleOn = Boolean(snapshot.shuffleOn);
+  }
+  queueReady = true;
+  queueDirty = false;
+  setTrack(tracks.length ? index : 0, false);
+  renderQueuePanel();
+}
 function setTrack(i, autoplay = false) {
   if (!tracks.length) {
     index = 0;
@@ -229,6 +331,7 @@ function setTrack(i, autoplay = false) {
     $("progress").value = 0;
     $("like").disabled = true;
     render();
+    persistQueue();
     return;
   }
   $("like").disabled = false;
@@ -253,6 +356,7 @@ function setTrack(i, autoplay = false) {
   $("time").textContent = "0:00";
   $("progress").value = 0;
   render();
+  persistQueue();
   if (autoplay) play();
 }
 async function play() {
@@ -298,17 +402,15 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
-  if (!tracks.length) {
+  const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(index, tracks.length, {
+    shuffle: shuffleOn, repeat: repeatOn,
+  });
+  if (!Number.isInteger(nextIndex)) {
     pause();
+    if (Number.isFinite(audio.duration)) audio.currentTime = 0;
     return;
   }
-  let n = shuffleOn ? Math.floor(Math.random() * tracks.length) : index + 1;
-  if (n >= tracks.length && !repeatOn) {
-    pause();
-    audio.currentTime = 0;
-    return;
-  }
-  setTrack(n, true);
+  setTrack(nextIndex, true);
 }
 function like(id) {
   if (!tracks[index] || id == null) return;
@@ -379,6 +481,10 @@ $("search").oninput = (e) => {
 $("play").onclick = toggle;
 $("heroPlay").onclick = () => setTrack(0, true);
 $("shuffleAll").onclick = () => {
+  if (!tracks.length) {
+    toast("Add a song before starting shuffle.");
+    return;
+  }
   shuffleOn = true;
   toast("Shuffle is on");
   setTrack(Math.floor(Math.random() * tracks.length), true);
@@ -397,10 +503,10 @@ $("prev").onclick = () => {
 };
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
-  audio.loop = repeatOn;
+  audio.loop = false;
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
-$("like").onclick = () => like(tracks[index].id);
+$("like").onclick = () => like(tracks[index]?.id);
 $("volume").oninput = (e) => (audio.volume = Number(e.target.value));
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
@@ -414,7 +520,7 @@ $("progress").oninput = (e) => {
   if (Number.isFinite(audio.duration))
     audio.currentTime = (Number(e.target.value) / 100) * audio.duration;
 };
-audio.onended = () => (repeatOn ? ((audio.currentTime = 0), play()) : next());
+audio.onended = () => next();
 audio.onwaiting = () => {
   $("audioStatus").textContent =
     "Loading audio… If it stays here, the link may not be a direct audio file.";
@@ -464,12 +570,25 @@ function renderQueuePanel() {
     button.type = "button";
     button.className = "queue-item-button";
     button.dataset.queueIndex = String(queueIndex);
-    button.textContent =
-      (queueIndex === index ? "▶ " : "") +
-      String(track.title || "Untitled track") +
-      " — " +
+    button.textContent = (queueIndex === index ? "▶ " : "") +
+      String(track.title || "Untitled track") + " — " +
       String(track.artist || "Unknown artist");
-    item.append(button);
+    const actions = document.createElement("span");
+    actions.className = "queue-item-controls";
+    const up = document.createElement("button");
+    up.type = "button"; up.textContent = "↑";
+    up.disabled = queueIndex === 0;
+    up.dataset.queueIndex = String(queueIndex);
+    up.dataset.queueMove = String(queueIndex - 1);
+    up.setAttribute("aria-label", "Move " + track.title + " up");
+    const down = document.createElement("button");
+    down.type = "button"; down.textContent = "↓";
+    down.disabled = queueIndex === tracks.length - 1;
+    down.dataset.queueIndex = String(queueIndex);
+    down.dataset.queueMove = String(queueIndex + 1);
+    down.setAttribute("aria-label", "Move " + track.title + " down");
+    actions.append(up, down);
+    item.append(button, actions);
     list.append(item);
   });
 }
@@ -483,6 +602,11 @@ $("queueClose")?.addEventListener("click", () => {
   $("queuePanel").hidden = true;
 });
 $("queueItems")?.addEventListener("click", (event) => {
+  const move = event.target.closest("[data-queue-move]");
+  if (move) {
+    window.PulsePlayerBridge?.reorder?.(Number(move.dataset.queueIndex), Number(move.dataset.queueMove));
+    return;
+  }
   const button = event.target.closest("[data-queue-index]");
   if (!button) return;
   const target = Number(button.dataset.queueIndex);
@@ -499,6 +623,7 @@ $("queueClear")?.addEventListener("click", () => {
   index = 0;
   render();
   renderQueuePanel();
+  persistQueue();
   toast("Queue cleared");
 });
 $("menu").onclick = () => $("sidebar").classList.toggle("open");
@@ -721,39 +846,52 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
 window.addEventListener("pulse:play-playlist", (event) => {
   const detail = event.detail || {};
   const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
-  const queue = incoming
-    .filter((item) => item && /^https?:\/\//i.test(String(item.src || "")))
-    .map((item, queueIndex) => ({
-      id: Date.now() + queueIndex,
-      catalogId: String(item.catalogId || ""),
-      source: String(item.source || "Saved audio"),
-      title: String(item.title || "Untitled track"),
-      artist: String(item.artist || "Unknown artist"),
-      mood: "Playlist",
-      time: "—",
-      cover: "violet",
-      symbol: "♫",
-      src: String(item.src),
-      customUrl: true,
-      artwork: String(item.artwork || ""),
-      sourcePage: String(item.url || ""),
-      archivePage: String(item.source || "").includes("Internet Archive")
-        ? String(item.url || "")
-        : "",
+  const normalized = window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incoming }) || [];
+  const queue = normalized.map((item, queueIndex) => {
+    const source = String(item.source || "Saved audio");
+    const isLocal = String(item.src || "").startsWith("blob:");
+    return {
+      id: Date.now() + queueIndex, catalogId: String(item.catalogId || ""),
+      source, title: String(item.title || "Untitled track"),
+      artist: String(item.artist || "Unknown artist"), mood: "Playlist",
+      time: String(item.duration || "—"), cover: "violet", symbol: "♫",
+      src: String(item.src), customUrl: !isLocal, localFile: isLocal,
+      artwork: String(item.artwork || ""), sourcePage: String(item.url || ""),
+      archivePage: source.includes("Internet Archive") ? String(item.url || "") : "",
       archiveLicense: String(item.license || ""),
       verificationStatus: item.verificationStatus || "UNAVAILABLE",
       rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
       bytesTotal: Number(item.bytesTotal) || 0,
-    }));
-  if (!queue.length) {
-    toast("This playlist has no playable songs.");
-    return;
-  }
+    };
+  });
+  if (!queue.length) { toast("This playlist has no playable songs."); return; }
   tracks.splice(0, tracks.length, ...queue);
   index = 0;
+  shuffleOn = false;
   setTrack(0, true);
   renderQueuePanel();
-  toast("Playing playlist · " + String(detail.name || "Singles Mix"));
+  toast("Playing playlist · " + queue.length + " tracks in saved order · " +
+    String(detail.playlistName || detail.name || "Singles Mix"));
 });
 
-setTrack(0);
+window.PulsePlayerBridge = {
+  currentTrack: () => tracks[index] || null,
+  isLiked: (id) => liked.has(id),
+  reorder: (from, to) => {
+    if (!Number.isInteger(from) || !Number.isInteger(to) ||
+        from < 0 || to < 0 || from >= tracks.length || to >= tracks.length || from === to)
+      return false;
+    const [moved] = tracks.splice(from, 1);
+    tracks.splice(to, 0, moved);
+    if (index === from) index = to;
+    else if (from < index && to >= index) index--;
+    else if (from > index && to <= index) index++;
+    render();
+    renderQueuePanel();
+    persistQueue();
+    window.dispatchEvent(new CustomEvent("pulse:queue-reordered", { detail: { from, to } }));
+    return true;
+  },
+};
+
+void restoreQueue();

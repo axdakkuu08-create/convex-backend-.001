@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - feat/pulse-glass-charts-archive-mix
+      - integration/pulse-pr33-37-consolidated
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-workspace-tests.yml"
@@ -25,5 +26,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Syntax-check Pulse workspace modules
+        run: |
+          node --check apps/pulse-music-workspace/app.js
+          node --check apps/pulse-music-workspace/playlist-playback.js
+          node --check apps/pulse-music-workspace/playlist-store.js
+          node --check apps/pulse-music-workspace/home-refresh.js
+          node --check apps/pulse-music-workspace/home-archive-discovery.js
+          node --check apps/pulse-music-workspace/charts-dashboard.js
+          node --check apps/pulse-music-workspace/song-recognition.js
+          node --check apps/pulse-music-workspace/tempus-player.js
+          node --check apps/pulse-music-workspace/api/apple-charts.js
+          node --check apps/pulse-music-workspace/api/pulse-config.js
       - name: Run Pulse integration tests
         run: node --test apps/pulse-music-workspace/tests/integrations.test.cjs

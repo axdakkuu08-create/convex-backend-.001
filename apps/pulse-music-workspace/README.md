@@ -95,5 +95,29 @@ music providers, and an HTML interface smoke test.
 
 ## Run checks locally
 
-From the repository root, run `node --check apps/pulse-music-workspace/app.js`
-and `node --test apps/pulse-music-workspace/tests/integrations.test.cjs`.
+From the repository root, run `node --check apps/pulse-music-workspace/app.js` and
+`node --test apps/pulse-music-workspace/tests/integrations.test.cjs`.
+
+## Runtime cloud configuration on Vercel
+
+The static frontend reads browser-safe public settings from the same-origin
+`/api/pulse-config` endpoint. Add these **Vercel Project Environment Variables**
+for the `apps/pulse-music-workspace` project (Preview and Production as
+appropriate):
+
+- `PULSE_CONVEX_URL`: the public HTTPS Convex deployment URL, for example
+  `https://<deployment>.convex.cloud`.
+- `PULSE_CLERK_PUBLISHABLE_KEY`: the Clerk **publishable** key (`pk_test_...`
+  or `pk_live_...`).
+
+Do not add a Clerk secret key, Convex deploy key, or other credential to either
+variable or to source control. After setting variables, create a new Vercel
+deployment so the serverless endpoint can expose only these public values. The
+endpoint returns empty strings until both variables are configured; the app then
+remains in local mode. A successful Vercel deployment is not proof of Clerk
+authentication or Convex sync—test sign-in and create/add/remove/reload
+operations against the intended deployment.
+
+Favorites and recent history remain device-local in this release. The backend
+has saved-track operations, but the frontend does not yet define a complete
+cross-device favorite/history contract; do not imply these are cloud-synced.

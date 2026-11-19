@@ -264,3 +264,95 @@ test("empty player and queue actions do not dereference a missing current track"
   assert.match(app, /if \(!tracks\.length \|\| !tracks\[index\]\)/);
   assert.match(app, /if \(!tracks\.length\) \{/);
 });
+
+
+const playlistPlaybackSource = fs.readFileSync(
+  path.join(__dirname, "..", "playlist-playback.js"),
+  "utf8",
+);
+const playlistPlaybackEvents = [];
+class PlaylistPlaybackCustomEvent {
+  constructor(type, options) { this.type = type; this.detail = options?.detail; }
+}
+const playlistPlaybackSandbox = {
+  window: { dispatchEvent(event) { playlistPlaybackEvents.push(event); } },
+  CustomEvent: PlaylistPlaybackCustomEvent,
+  Math: Object.assign(Object.create(Math), { random: () => 0 }),
+};
+vm.runInNewContext(playlistPlaybackSource, playlistPlaybackSandbox);
+const playback = playlistPlaybackSandbox.window.PulsePlaylistPlayback;
+
+test("shared queue accepts HTTP(S) and session blob sources but rejects unsafe schemes", () => {
+  const queue = playback.buildQueue({ tracks: [
+    { title: "Secure", src: "https://audio.example/secure.mp3" },
+    { title: "HTTP", src: "http://audio.example/legacy.mp3" },
+    { title: "Local", src: "blob:https://pulse.example/local-id" },
+    { title: "Script", src: "javascript:alert(1)" },
+    { title: "Data", src: "data:audio/mp3;base64,AAAA" },
+    { title: "File", src: "file:///storage/audio.mp3" },
+  ]});
+  assert.deepEqual(Array.from(queue, (track) => track.title), ["Secure", "HTTP", "Local"]);
+});
+
+test("queue advancement validates indices and supports ordered repeat-all", () => {
+  assert.equal(playback.nextIndex(0, 0), null);
+  assert.equal(playback.nextIndex(-1, 3), null);
+  assert.equal(playback.nextIndex(3, 3), null);
+  assert.equal(playback.nextIndex(0, 3), 1);
+  assert.equal(playback.nextIndex(1, 3), 2);
+  assert.equal(playback.nextIndex(2, 3), null);
+  assert.equal(playback.nextIndex(2, 3, { repeat: true }), 0);
+  assert.equal(playback.nextIndex(0, 1), null);
+  assert.equal(playback.nextIndex(0, 1, { repeat: true }), 0);
+});
+
+test("shuffle selects a different valid item and respects repeat boundaries", () => {
+  assert.equal(playback.nextIndex(0, 3, { shuffle: true }), 1);
+  assert.equal(playback.nextIndex(2, 3, { shuffle: true }), 1);
+  assert.equal(playback.nextIndex(0, 1, { shuffle: true }), null);
+  assert.equal(playback.nextIndex(0, 1, { shuffle: true, repeat: true }), 0);
+});
+
+test("starting a playlist dispatches the complete normalized queue in saved order", () => {
+  assert.equal(playback.start({ name: "Saved order", tracks: [
+    { title: "First", src: "https://audio.example/1.mp3", source: "Internet Archive" },
+    { title: "Second", src: "blob:https://pulse.example/2" },
+    { title: "Invalid", src: "javascript:alert(1)" },
+  ]}), true);
+  const event = playlistPlaybackEvents.at(-1);
+  assert.equal(event.type, "pulse:play-playlist");
+  assert.equal(event.detail.playlistName, "Saved order");
+  assert.deepEqual(Array.from(event.detail.tracks, (track) => track.title), ["First", "Second"]);
+});
+
+test("shared app integration persists stable queues and exposes reorder controls", () => {
+  const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const store = fs.readFileSync(path.join(__dirname, "..", "playlist-store.js"), "utf8");
+  assert.match(app, /indexedDB\.open/);
+  assert.match(app, /function restoreQueue/);
+  assert.match(app, /audio\.onended = \(\) => next\(\)/);
+  assert.match(app, /PulsePlaylistPlayback\?\.nextIndex/);
+  assert.match(app, /window\.PulsePlayerBridge =/);
+  assert.match(app, /data-queue-move/);
+  assert.match(store, /createOrUpdateFromTracks/);
+  assert.match(store, /upsertFromTracks/);
+  assert.match(store, /PulsePlaylistPlayback\?\.start/);
+  assert.ok(html.indexOf("playlist-playback.js") < html.indexOf("app.js"));
+  assert.match(html, /tempus-player\.js/);
+});
+
+test("Android home navigation styles all four destinations", () => {
+  const css = fs.readFileSync(path.join(__dirname, "..", "home-refresh.css"), "utf8");
+  const home = fs.readFileSync(path.join(__dirname, "..", "home-refresh.js"), "utf8");
+  assert.match(home, /data-mobile-view="downloads"/);
+  assert.match(css, /grid-template-columns:\s*repeat\(4,\s*1fr\)/);
+});
+
+test("recognition requires explicit consent and uses a secure endpoint", () => {
+  const source = fs.readFileSync(path.join(__dirname, "..", "song-recognition.js"), "utf8");
+  assert.match(source, /window\.confirm/);
+  assert.match(source, /parsed\.protocol === "https:"/);
+  assert.match(source, /stream\?\.getTracks\(\)\.forEach/);
+  assert.doesNotMatch(source, /result\.innerHTML\s*=/);
+});

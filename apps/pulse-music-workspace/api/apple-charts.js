@@ -1,4 +1,9 @@
 module.exports = async function handler(req, res) {
+  if (req.method && req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
   const rawCountry = String(req.query?.country || "in")
     .trim()
     .toLowerCase();
@@ -9,12 +14,19 @@ module.exports = async function handler(req, res) {
     return;
   }
   try {
-    const upstream = await fetch(
-      "https://rss.applemarketingtools.com/api/v2/" +
-        encodeURIComponent(rawCountry) +
-        "/music/most-played/25/songs.json",
-      { headers: { Accept: "application/json" } },
-    );
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    let upstream;
+    try {
+      upstream = await fetch(
+        "https://rss.applemarketingtools.com/api/v2/" +
+          encodeURIComponent(rawCountry) +
+          "/music/most-played/25/songs.json",
+        { headers: { Accept: "application/json" }, signal: controller.signal },
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
     if (!upstream.ok) {
       res.setHeader(
         "Cache-Control",
@@ -27,7 +39,7 @@ module.exports = async function handler(req, res) {
     }
     const payload = await upstream.json();
     const results = payload?.feed?.results;
-    if (!Array.isArray(results)) {
+    if (!Array.isArray(results) || results.length === 0) {
       res
         .status(502)
         .json({ error: "Apple Music returned an invalid chart response." });

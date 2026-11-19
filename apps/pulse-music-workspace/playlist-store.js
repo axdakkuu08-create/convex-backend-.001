@@ -9,14 +9,7 @@
   function read() {
     try {
       const value = JSON.parse(localStorage.getItem(KEY) || "[]");
-      return Array.isArray(value)
-        ? value.map((item) => ({
-            ...item,
-            name: /internet archive/i.test(String(item.name || ""))
-              ? "Singles Mix"
-              : item.name,
-          }))
-        : [];
+      return Array.isArray(value) ? value : [];
     } catch (_) {
       return [];
     }
@@ -141,7 +134,7 @@
         (duplicate ? "Already saved in " : "Added to ") + target.name + ".";
   }
   function createFromTracks(name, tracks) {
-    const clean = String(name || "Singles Mix")
+    const clean = String(name || "Archive Mix")
       .trim()
       .slice(0, 60);
     const items = (Array.isArray(tracks) ? tracks : [])
@@ -155,7 +148,7 @@
         url: String(track.url || ""),
         artwork: String(track.artwork || ""),
         license: String(track.license || ""),
-        source: String(track.source || "Open audio catalogue"),
+        source: String(track.source || "Internet Archive"),
         verificationStatus: track.verificationStatus || "UNAVAILABLE",
         rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
         bytesTotal: Number(track.bytesTotal) || 0,
@@ -170,10 +163,8 @@
     write([...read(), playlist]);
     return playlist;
   }
-  function upsertFromTracks(name, tracks) {
-    const clean = String(name || "Singles Mix")
-      .trim()
-      .slice(0, 60);
+  function createOrUpdateFromTracks(name, tracks) {
+    const clean = String(name || "Internet Archive Mix").trim().slice(0, 60);
     const items = (Array.isArray(tracks) ? tracks : [])
       .filter((track) => track && track.src)
       .slice(0, 24)
@@ -192,53 +183,41 @@
       }));
     if (!clean || !items.length) return null;
     const playlists = read();
-    let playlist = playlists.find((item) => item.name === clean);
-    if (playlist) {
-      playlist.tracks = items;
-      playlist.updatedAt = Date.now();
-    } else {
-      playlist = {
-        id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
-        name: clean,
-        tracks: items,
-        createdAt: Date.now(),
-      };
-      playlists.push(playlist);
-    }
-    write(playlists);
+    const existing = playlists.find((item) => item.name === clean);
+    const playlist = existing
+      ? { ...existing, tracks: items, updatedAt: Date.now() }
+      : {
+          id: String(Date.now()) + Math.random().toString(36).slice(2, 7),
+          name: clean,
+          tracks: items,
+          createdAt: Date.now(),
+        };
+    write(existing
+      ? playlists.map((item) => item.id === existing.id ? playlist : item)
+      : [...playlists, playlist]);
+    render();
     return playlist;
+  }
+
+  function upsertFromTracks(name, tracks) {
+    return createOrUpdateFromTracks(name, tracks);
   }
 
   function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
-    if (!playlist || !playlist.tracks.length) {
+    if (!playlist || !Array.isArray(playlist.tracks) || !playlist.tracks.length) {
       alert("This playlist is empty. Add songs from search results.");
       return;
     }
-    const queue = playlist.tracks
-      .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
-      .map((track) => ({
-        title: String(track.title || "Untitled track"),
-        artist: String(track.artist || "Unknown artist"),
-        src: String(track.src),
-        url: String(track.url || ""),
-        artwork: String(track.artwork || ""),
-        license: String(track.license || ""),
-        source: String(track.source || "Saved audio"),
-        catalogId: String(track.catalogId || ""),
-        verificationStatus: track.verificationStatus || "UNAVAILABLE",
-        rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
-        bytesTotal: Number(track.bytesTotal) || 0,
-      }));
-    if (!queue.length) {
-      alert("This playlist has no browser-playable songs yet.");
+    const started = window.PulsePlaylistPlayback?.start?.(playlist);
+    if (!started) {
+      alert("This playlist has no playable tracks yet.");
       return;
     }
-    window.dispatchEvent(
-      new CustomEvent("pulse:play-playlist", {
-        detail: { name: playlist.name, tracks: queue },
-      }),
-    );
+    const status = $("unifiedSearchStatus");
+    if (status)
+      status.textContent =
+        'Playing all tracks in "' + playlist.name + '" in saved order.';
   }
 
   createButton.onclick = () => {
@@ -260,7 +239,7 @@
         src: item.audioUrl,
         url: item.pageUrl,
         license: item.license,
-        source: "Open audio catalogue",
+        source: "Internet Archive",
         verificationStatus: item.verificationStatus || "VERIFYING",
         rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
         bytesTotal: Number(item.fileSize) || 0,
@@ -271,6 +250,7 @@
     read,
     create,
     createFromTracks,
+    createOrUpdateFromTracks,
     upsertFromTracks,
     render,
     play: playFromPlaylist,
