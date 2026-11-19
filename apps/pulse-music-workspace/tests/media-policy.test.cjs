@@ -13,7 +13,7 @@ test("native transport accepts HTTPS only", () => {
   assert.equal(policy.isHttpsAudioUrl("https://audio.example/song.mp3"), true);
   assert.equal(policy.isHttpsAudioUrl("http://audio.example/song.mp3"), false);
   assert.equal(policy.isHttpsAudioUrl("javascript:alert(1)"), false);
-  assert.equal(policy.isHttpsAudioUrl("https:///missing-host"), false);
+  assert.equal(policy.isHttpsAudioUrl("https://"), false);
 });
 
 test("offline approval requires a verified full Internet Archive track", () => {
