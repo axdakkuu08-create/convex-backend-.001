@@ -21,6 +21,7 @@ test("offline approval requires a verified full Internet Archive track", () => {
     src: "https://archive.org/download/item/song.mp3",
     source: "Internet Archive",
     license: "https://creativecommons.org/licenses/by/4.0/",
+    sourcePage: "https://archive.org/details/example",
     verificationStatus: "VERIFIED_FULL",
     rightsReviewStatus: "APPROVED",
   };
@@ -28,6 +29,7 @@ test("offline approval requires a verified full Internet Archive track", () => {
   assert.equal(policy.canDownloadOffline({ ...base, rightsReviewStatus: "REVIEW_REQUIRED" }), false);
   assert.equal(policy.canDownloadOffline({ ...base, verificationStatus: "VERIFYING" }), false);
   assert.equal(policy.canDownloadOffline({ ...base, license: "" }), false);
+  assert.equal(policy.canDownloadOffline({ ...base, sourcePage: "" }), false);
   assert.equal(policy.canDownloadOffline({ ...base, src: "http://archive.org/song.mp3" }), false);
 });
 
