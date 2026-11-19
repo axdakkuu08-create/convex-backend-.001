@@ -372,6 +372,7 @@ async function restoreQueue() {
         "user_audio",
       licenseLabel: String(track.licenseLabel || track.archiveLicense || ""),
       sourcePage: String(track.sourcePage || track.archivePage || ""),
+      offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(track.src)),
     }));
     tracks.splice(0, tracks.length, ...restored);
     index = normalized.currentIndex;
@@ -1256,6 +1257,7 @@ function playPlaylistQueue(playlistName, incomingTracks) {
       verificationStatus: item.verificationStatus || "UNAVAILABLE",
       rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
       bytesTotal: Number(item.bytesTotal) || 0,
+      offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(item.src)),
     };
   });
   if (!queue.length) {
