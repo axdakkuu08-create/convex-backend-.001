@@ -346,7 +346,7 @@ async function play() {
       e && e.name === "NotAllowedError"
         ? "Tap Play again to allow audio playback."
         : "Could not start this audio. Check the link or try another file.";
-    $("audioStatus").textContent = msg;
+    reportPlayback("error", msg);
     toast(msg);
   }
 }
@@ -364,14 +364,15 @@ function next() {
   const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(
     index,
     tracks.length,
-    {
-      shuffle: shuffleOn,
-      repeat: repeatOn,
-    },
+    { shuffle: shuffleOn, repeat: repeatOn },
   );
   if (!Number.isInteger(nextIndex)) {
-    pause();
+    audio.pause();
+    playing = false;
+    $("play").textContent = "▶";
     if (Number.isFinite(audio.duration)) audio.currentTime = 0;
+    reportPlayback("ended", "Playlist finished.");
+    render();
     return;
   }
   setTrack(nextIndex, true);
@@ -486,8 +487,7 @@ $("progress").oninput = (e) => {
 };
 audio.onended = () => next();
 audio.onwaiting = () => {
-  $("audioStatus").textContent =
-    "Loading audio… If it stays here, the link may not be a direct audio file.";
+  reportPlayback("buffering", "Loading audio… If it stays here, the link may not be a direct audio file.");
 };
 audio.oncanplay = () => {
   if (!playing) reportPlayback("ready", "Audio ready · press Play if it has not started.");
@@ -497,7 +497,7 @@ audio.onerror = () => {
   $("play").textContent = "▶";
   const msg =
     "Audio failed to load. Try a local file or a direct .mp3/.m4a/.ogg link; Spotify/YouTube page links will not work here.";
-  $("audioStatus").textContent = msg;
+  reportPlayback("error", msg);
   toast("Audio could not load. Try another source.");
   render();
 };
