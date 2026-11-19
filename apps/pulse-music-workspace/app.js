@@ -214,144 +214,52 @@ function loadMusicEmbed(raw) {
   }
 }
 
-const QUEUE_DB_NAME = "pulse-player-state";
-const QUEUE_STORE_NAME = "player-state";
-const QUEUE_STORAGE_KEY = "pulse.playerQueue.v1";
-let queueDatabasePromise = null;
+const queueStorage = window.PulseQueueStorage;
 let queueReady = false;
 let queueDirty = false;
-
-function openQueueDatabase() {
-  if (!window.indexedDB) return Promise.resolve(null);
-  if (!queueDatabasePromise) {
-    queueDatabasePromise = new Promise((resolve) => {
-      const request = window.indexedDB.open(QUEUE_DB_NAME, 1);
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(QUEUE_STORE_NAME))
-          db.createObjectStore(QUEUE_STORE_NAME);
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => resolve(null);
-      request.onblocked = () => resolve(null);
-    });
-  }
-  return queueDatabasePromise;
-}
 function makeQueueSnapshot() {
-  const stableTracks = tracks
-    .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
-    .map((track) => ({
-      id: track.id,
-      catalogId: String(track.catalogId || ""),
-      source: String(track.source || "Saved audio"),
-      title: String(track.title || "Untitled track"),
-      artist: String(track.artist || "Unknown artist"),
-      mood: String(track.mood || "Playlist"),
-      time: String(track.time || "—"),
-      cover: String(track.cover || "violet"),
-      symbol: String(track.symbol || "♫"),
-      src: String(track.src),
-      customUrl: true,
-      artwork: String(track.artwork || ""),
-      sourcePage: String(track.sourcePage || track.url || ""),
-      archivePage: String(track.archivePage || ""),
-      archiveLicense: String(track.archiveLicense || track.license || ""),
-      verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
-      rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"),
-      bytesTotal: Number(track.bytesTotal) || 0,
-    }));
+  const stableTracks = tracks.filter((track) => track && /^https?:\/\//i.test(String(track.src || ""))).map((track) => ({
+    id: track.id, catalogId: String(track.catalogId || ""), source: String(track.source || "Saved audio"),
+    title: String(track.title || "Untitled track"), artist: String(track.artist || "Unknown artist"),
+    mood: String(track.mood || "Playlist"), time: String(track.time || "—"), cover: String(track.cover || "violet"),
+    symbol: String(track.symbol || "♫"), src: String(track.src), customUrl: true, artwork: String(track.artwork || ""),
+    sourcePage: String(track.sourcePage || track.url || ""), archivePage: String(track.archivePage || ""),
+    archiveLicense: String(track.archiveLicense || track.license || ""),
+    verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
+    rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"), bytesTotal: Number(track.bytesTotal) || 0
+  }));
   const currentId = tracks[index]?.id ?? null;
-  return {
-    tracks: stableTracks,
-    currentTrackId: stableTracks.some(
-      (track) => String(track.id) === String(currentId),
-    )
-      ? currentId
-      : null,
-    currentIndex: stableTracks.findIndex(
-      (track) => String(track.id) === String(currentId),
-    ),
-    repeatOn,
-    shuffleOn,
-    updatedAt: Date.now(),
-  };
+  return { schemaVersion: 2, tracks: stableTracks,
+    currentTrackId: stableTracks.some((track) => String(track.id) === String(currentId)) ? currentId : null,
+    currentIndex: stableTracks.findIndex((track) => String(track.id) === String(currentId)),
+    repeatOn, shuffleOn, updatedAt: Date.now() };
 }
 function persistQueue() {
-  if (!queueReady) {
-    queueDirty = true;
-    return;
-  }
-  const snapshot = makeQueueSnapshot();
-  try {
-    localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(snapshot));
-  } catch (_) {}
-  void openQueueDatabase().then((db) => {
-    if (!db) return;
-    try {
-      db.transaction(QUEUE_STORE_NAME, "readwrite")
-        .objectStore(QUEUE_STORE_NAME)
-        .put(snapshot, "queue");
-    } catch (_) {}
+  if (!queueReady) { queueDirty = true; return; }
+  void queueStorage.save(makeQueueSnapshot()).catch(() => {
+    if (typeof reportPlayback === "function") reportPlayback("storage-error", "Queue could not be saved. Check browser storage.");
   });
 }
-async function readQueueSnapshot() {
-  const db = await openQueueDatabase();
-  if (db) {
-    const stored = await new Promise((resolve) => {
-      try {
-        const request = db
-          .transaction(QUEUE_STORE_NAME, "readonly")
-          .objectStore(QUEUE_STORE_NAME)
-          .get("queue");
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => resolve(null);
-      } catch (_) {
-        resolve(null);
-      }
-    });
-    if (stored) return stored;
-  }
-  try {
-    return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || "null");
-  } catch (_) {
-    return null;
-  }
-}
 async function restoreQueue() {
-  const snapshot = await readQueueSnapshot();
-  if (!queueDirty && Array.isArray(snapshot?.tracks)) {
-    const restored = snapshot.tracks
-      .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
-      .map((track, queueIndex) => ({
-        ...track,
-        id: track.id ?? Date.now() + queueIndex,
-        mood: track.mood || "Playlist",
-        time: track.time || "—",
-        cover: track.cover || "violet",
-        symbol: track.symbol || "♫",
-        customUrl: true,
-      }));
+  let snapshot = null;
+  try { snapshot = await queueStorage.load(); } catch (_) {}
+  const changedBeforeRestore = queueDirty;
+  if (!changedBeforeRestore && Array.isArray(snapshot?.tracks)) {
+    const restored = snapshot.tracks.filter((track) => track && /^https?:\/\//i.test(String(track.src || ""))).map((track, queueIndex) => ({
+      ...track, id: track.id ?? Date.now() + queueIndex, mood: track.mood || "Playlist",
+      time: track.time || "—", cover: track.cover || "violet", symbol: track.symbol || "♫", customUrl: true
+    }));
     if (restored.length) {
       tracks.splice(0, tracks.length, ...restored);
-      const current = restored.findIndex(
-        (track) => String(track.id) === String(snapshot.currentTrackId),
-      );
-      index =
-        current >= 0
-          ? current
-          : Math.min(
-              Math.max(Number(snapshot.currentIndex) || 0, 0),
-              restored.length - 1,
-            );
+      const current = restored.findIndex((track) => String(track.id) === String(snapshot.currentTrackId));
+      index = current >= 0 ? current : Math.min(Math.max(Number(snapshot.currentIndex) || 0, 0), restored.length - 1);
     }
-    repeatOn = Boolean(snapshot.repeatOn);
-    shuffleOn = Boolean(snapshot.shuffleOn);
+    repeatOn = Boolean(snapshot.repeatOn); shuffleOn = Boolean(snapshot.shuffleOn);
   }
-  queueReady = true;
-  queueDirty = false;
+  queueReady = true; queueDirty = false;
   setTrack(tracks.length ? index : 0, false);
   renderQueuePanel();
+  if (changedBeforeRestore) persistQueue();
 }
 function setTrack(i, autoplay = false) {
   if (!tracks.length) {
@@ -397,6 +305,17 @@ function setTrack(i, autoplay = false) {
   persistQueue();
   if (autoplay) play();
 }
+function reportPlayback(state, message) {
+  const current = tracks[index] || null;
+  if (message) $("audioStatus").textContent = message;
+  window.dispatchEvent(new CustomEvent("pulse:playback-report", { detail: {
+    state, trackId: current?.id ?? null, title: current?.title || null,
+    positionMs: Number.isFinite(audio.currentTime) ? Math.round(audio.currentTime * 1000) : 0,
+    durationMs: Number.isFinite(audio.duration) ? Math.round(audio.duration * 1000) : 0,
+    updatedAt: Date.now()
+  }}));
+}
+
 async function play() {
   if (!tracks.length || !tracks[index]) {
     playing = false;
@@ -408,6 +327,7 @@ async function play() {
   try {
     await audio.play();
     playing = true;
+    reportPlayback("playing", "Playing · " + (tracks[index]?.title || "Audio"));
     $("audioStatus").textContent = tracks[index].archivePage
       ? "Playing · " +
         tracks[index].title +
@@ -434,6 +354,7 @@ function pause() {
   audio.pause();
   playing = false;
   $("play").textContent = "▶";
+  reportPlayback("paused", "Paused · " + (tracks[index]?.title || "No track selected"));
   render();
 }
 function toggle() {
@@ -569,8 +490,7 @@ audio.onwaiting = () => {
     "Loading audio… If it stays here, the link may not be a direct audio file.";
 };
 audio.oncanplay = () => {
-  $("audioStatus").textContent =
-    "Audio ready · press Play if it has not started.";
+  if (!playing) reportPlayback("ready", "Audio ready · press Play if it has not started.");
 };
 audio.onerror = () => {
   playing = false;
