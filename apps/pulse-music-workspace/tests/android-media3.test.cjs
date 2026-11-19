@@ -39,7 +39,15 @@ test("native plugin rejects non-HTTPS URLs and exposes transport controls", () =
   assert.match(plugin, /public void setRepeat\(PluginCall call\)/);
   assert.match(plugin, /setShuffleModeEnabled/);
   assert.match(plugin, /setRepeatMode/);
-  assert.match(plugin, /setMediaItems\(items, startIndex/);
+  assert.match(plugin, /setMediaItems\(\s*items,\s*startIndex/);
+});
+
+test("full-screen player routes native seeking and progress through Media3", () => {
+  const player = read("tempus-player.js");
+  assert.match(player, /nativeStateForCurrentTrack/);
+  assert.match(player, /PulseMedia3\.seekTo/);
+  assert.match(player, /addStateListener/);
+  assert.match(player, /tempusPlayerElapsed/);
 });
 
 test("native service enables audio focus and headset-disconnect handling", () => {
