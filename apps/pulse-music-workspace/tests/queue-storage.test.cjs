@@ -4,14 +4,23 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const source = fs.readFileSync(path.join(__dirname, "..", "queue-storage.js"), "utf8");
+const source = fs.readFileSync(
+  path.join(__dirname, "..", "queue-storage.js"),
+  "utf8",
+);
 
 function localStore(initial = {}) {
   const values = new Map(Object.entries(initial));
   return {
-    getItem(key) { return values.has(key) ? values.get(key) : null; },
-    setItem(key, value) { values.set(key, String(value)); },
-    removeItem(key) { values.delete(key); },
+    getItem(key) {
+      return values.has(key) ? values.get(key) : null;
+    },
+    setItem(key, value) {
+      values.set(key, String(value));
+    },
+    removeItem(key) {
+      values.delete(key);
+    },
     values,
   };
 }
@@ -58,9 +67,15 @@ function fakeIDB(options = {}) {
   return {
     records,
     database,
-    get openCount() { return openCount; },
-    setOpenFailure(value) { options.openFailure = value; },
-    setBlocked(value) { options.blocked = value; },
+    get openCount() {
+      return openCount;
+    },
+    setOpenFailure(value) {
+      options.openFailure = value;
+    },
+    setBlocked(value) {
+      options.blocked = value;
+    },
     open() {
       openCount += 1;
       const request = {};
@@ -105,7 +120,10 @@ test("IndexedDB round-trips ordered queue and mirrors recovery copy", async () =
   const value = snapshot("idb-");
   assert.equal(await x.storage.save(value), "indexedDB");
   assert.deepEqual(JSON.parse(JSON.stringify(await x.storage.load())), value);
-  assert.equal(JSON.parse(x.localStorage.getItem("pulse.playerQueue.v1")).tracks[1].id, 2);
+  assert.equal(
+    JSON.parse(x.localStorage.getItem("pulse.playerQueue.v1")).tracks[1].id,
+    2,
+  );
 });
 
 test("localStorage fallback works without IndexedDB", async () => {
@@ -132,7 +150,10 @@ test("IndexedDB transaction failure falls back to localStorage", async () => {
 test("localStorage recovery copy migrates into empty IndexedDB", async () => {
   const value = snapshot("legacy-");
   const idb = fakeIDB();
-  const x = instance(idb, localStore({ "pulse.playerQueue.v1": JSON.stringify(value) }));
+  const x = instance(
+    idb,
+    localStore({ "pulse.playerQueue.v1": JSON.stringify(value) }),
+  );
   assert.deepEqual(JSON.parse(JSON.stringify(await x.storage.load())), value);
   assert.deepEqual(JSON.parse(JSON.stringify(idb.records.get("queue"))), value);
 });
@@ -152,10 +173,19 @@ test("corrupt localStorage recovery data is ignored", async () => {
 
 test("reload restoration removes invalid tracks and preserves current track by ID", () => {
   const x = instance(null);
-  const input = { ...snapshot("restore-", [10, 11, 12]), currentTrackId: 12, currentIndex: 2 };
+  const input = {
+    ...snapshot("restore-", [10, 11, 12]),
+    currentTrackId: 12,
+    currentIndex: 2,
+  };
   input.tracks[1].src = "javascript:alert(1)";
-  const normalized = x.storage.normalizeSnapshot(input, (track) => /^https?:\/\//i.test(track.src));
-  assert.deepEqual(Array.from(normalized.tracks, (track) => track.id), [10, 12]);
+  const normalized = x.storage.normalizeSnapshot(input, (track) =>
+    /^https?:\/\//i.test(track.src),
+  );
+  assert.deepEqual(
+    Array.from(normalized.tracks, (track) => track.id),
+    [10, 12],
+  );
   assert.equal(normalized.currentTrackId, 12);
   assert.equal(normalized.currentIndex, 1);
 });
@@ -163,7 +193,10 @@ test("reload restoration removes invalid tracks and preserves current track by I
 test("failed IndexedDB initialization is retried on a later save", async () => {
   const idb = fakeIDB({ openFailure: true });
   const x = instance(idb);
-  assert.equal(await x.storage.save(snapshot("fallback-", [1])), "localStorage");
+  assert.equal(
+    await x.storage.save(snapshot("fallback-", [1])),
+    "localStorage",
+  );
   idb.setOpenFailure(false);
   assert.equal(await x.storage.save(snapshot("recovered-", [2])), "indexedDB");
   assert.equal(idb.openCount, 2);
@@ -201,8 +234,14 @@ test("partial or malformed queue imports keep valid tracks in their original ord
     currentTrackId: 3,
     currentIndex: 3,
   };
-  const normalized = x.storage.normalizeSnapshot(input, (track) => track && /^https?:\/\//i.test(track.src || ""));
-  assert.deepEqual(Array.from(normalized.tracks, (track) => track.id), [1, 3]);
+  const normalized = x.storage.normalizeSnapshot(
+    input,
+    (track) => track && /^https?:\/\//i.test(track.src || ""),
+  );
+  assert.deepEqual(
+    Array.from(normalized.tracks, (track) => track.id),
+    [1, 3],
+  );
   assert.equal(normalized.currentTrackId, 3);
   assert.equal(normalized.currentIndex, 1);
 });
