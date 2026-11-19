@@ -25,7 +25,13 @@
   }
   async function list() {
     const records = readRecords();
-    const cache = await caches.open(CACHE_NAME);
+    let cache;
+    try {
+      cache = await caches.open(CACHE_NAME);
+    } catch (_) {
+      writeRecords([]);
+      return [];
+    }
     const output = [];
     for (const record of records) {
       if (await cache.match(record.url)) output.push({ ...record });
