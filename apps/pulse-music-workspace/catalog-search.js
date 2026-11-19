@@ -249,6 +249,7 @@
             src,
             url: item.url,
             source: item.source,
+            sourceType: item.sourceType,
             artwork: item.artwork || "",
             license: item.license || "",
             duration: item.duration || "",
