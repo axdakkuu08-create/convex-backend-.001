@@ -7,14 +7,14 @@
 
   const pluginPromise = !nativePlatform
     ? Promise.resolve(null)
-    : Promise.resolve().then(() => {
-        const plugin = capacitor.Plugins?.PulseMedia3;
-        if (!plugin) {
-          throw new Error(
-            "PulseMedia3 is not registered in the bundled Android runtime",
-          );
+    : Promise.resolve().then(async () => {
+        const legacyPlugin = capacitor.Plugins?.PulseMedia3;
+        if (legacyPlugin) return legacyPlugin;
+        const core = await import("./capacitor-core/index.js");
+        if (typeof core.registerPlugin !== "function") {
+          throw new Error("Bundled Capacitor registerPlugin API is unavailable");
         }
-        return plugin;
+        return core.registerPlugin("PulseMedia3");
       });
 
   async function getPlugin() {
