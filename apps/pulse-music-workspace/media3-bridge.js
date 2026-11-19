@@ -7,18 +7,14 @@
 
   const pluginPromise = !nativePlatform
     ? Promise.resolve(null)
-    : Promise.resolve(
-        capacitor.Plugins && capacitor.Plugins.PulseMedia3
-          ? capacitor.Plugins.PulseMedia3
-          : null,
-      ).then(async (legacyPlugin) => {
-        if (legacyPlugin) return legacyPlugin;
-        const coreUrl = "https://esm.sh/@capacitor/core@8.5.0";
-        const core = await import(coreUrl);
-        if (typeof core.registerPlugin !== "function") {
-          throw new Error("Capacitor registerPlugin API is unavailable");
+    : Promise.resolve().then(() => {
+        const plugin = capacitor.Plugins?.PulseMedia3;
+        if (!plugin) {
+          throw new Error(
+            "PulseMedia3 is not registered in the bundled Android runtime",
+          );
         }
-        return core.registerPlugin("PulseMedia3");
+        return plugin;
       });
 
   async function getPlugin() {
