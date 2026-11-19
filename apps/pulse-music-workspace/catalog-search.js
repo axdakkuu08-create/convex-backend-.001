@@ -77,9 +77,11 @@
       index +
       '">＋ Playlist</button>';
     const offline =
-      '<button class="catalog-add" type="button" data-offline-catalog-index="' +
-      index +
-      '">↓ Save offline</button>';
+      item.sourceType === "internet_archive"
+        ? '<button class="catalog-add" type="button" data-offline-catalog-index="' +
+          index +
+          '">↓ Save offline</button>'
+        : "";
     return (
       '<article class="catalog-result">' +
       art +
