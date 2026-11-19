@@ -1261,7 +1261,6 @@ function playPlaylistQueue(playlistName, incomingTracks) {
       customUrl: !isLocal,
       localFile: isLocal,
       artwork: String(item.artwork || ""),
-      sourcePage: String(item.url || ""),
       archivePage: source.includes("Internet Archive")
         ? String(item.url || "")
         : "",
