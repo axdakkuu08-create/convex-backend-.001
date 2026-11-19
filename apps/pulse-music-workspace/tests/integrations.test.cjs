@@ -281,7 +281,9 @@ test("shared app integration persists stable queues and exposes reorder controls
     path.join(__dirname, "..", "playlist-store.js"),
     "utf8",
   );
-  assert.match(app, /indexedDB\.open/);
+  const storage = fs.readFileSync(path.join(__dirname, "..", "queue-storage.js"), "utf8");
+  assert.match(storage, /indexedDB\.open/);
+  assert.match(app, /PulseQueueStorage/);
   assert.match(app, /function restoreQueue/);
   assert.match(app, /audio\.onended = \(\) => next\(\)/);
   assert.match(app, /PulsePlaylistPlayback\?\.nextIndex/);
