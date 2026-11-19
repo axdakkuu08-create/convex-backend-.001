@@ -9,7 +9,9 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 test("native media bridge is loaded before the Pulse player", () => {
   const html = read("index.html");
   assert.ok(html.indexOf('src="media3-bridge.js"') >= 0);
-  assert.ok(html.indexOf('src="media3-bridge.js"') < html.indexOf('src="app.js"'));
+  assert.ok(
+    html.indexOf('src="media3-bridge.js"') < html.indexOf('src="app.js"'),
+  );
 });
 
 test("native playback is restricted to all-HTTPS queues", () => {
@@ -23,7 +25,10 @@ test("native playback is restricted to all-HTTPS queues", () => {
 
 test("native plugin rejects non-HTTPS URLs and exposes transport controls", () => {
   const plugin = fs.readFileSync(
-    path.join(root, "android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java"),
+    path.join(
+      root,
+      "android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java",
+    ),
     "utf8",
   );
   assert.match(plugin, /url\.startsWith\("https:\/\/"/);
@@ -35,7 +40,10 @@ test("native plugin rejects non-HTTPS URLs and exposes transport controls", () =
 
 test("native service enables audio focus and headset-disconnect handling", () => {
   const service = fs.readFileSync(
-    path.join(root, "android-native/src/main/java/com/pulse/music/PulseAudioService.java"),
+    path.join(
+      root,
+      "android-native/src/main/java/com/pulse/music/PulseAudioService.java",
+    ),
     "utf8",
   );
   assert.match(service, /setAudioAttributes\(attributes, true\)/);
