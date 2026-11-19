@@ -41,7 +41,7 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 
 | ID  | Required verification / work                                                                 | Acceptance evidence                       | Status            |
 | --- | -------------------------------------------------------------------------------------------- | ----------------------------------------- | ----------------- |
-| B13 | Audit and integrate native Media3 playback service against the current Pulse player contract | reviewed source diff + Android build      | PASS              |
+| B13 | Audit and integrate native Media3 playback service against the current Pulse player contract | reviewed source diff + Android build      | IN PROGRESS       |
 | B14 | Verify background playback after app is backgrounded and screen is locked                    | physical Android test log/video           | NOT TESTABLE HERE |
 | B15 | Verify notification / lock-screen play, pause, next, previous controls                       | physical Android test log/video           | NOT TESTABLE HERE |
 | B16 | Verify audio focus, interruptions, headset/Bluetooth disconnect behavior                     | physical Android test log/video           | NOT TESTABLE HERE |
@@ -127,11 +127,14 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 
 **Overall: IN PROGRESS — Stages 4–7 are not accepted.**
 
-B13 is PASS based on the prior successful Android build and Media3 integration
-checks. B17 and B18 have source-level changes and regression coverage for native
-playback errors, strict HTTPS URL validation, safe seek positions, and a
-pause-before-web handoff intended to prevent simultaneous native and web audio.
-No current-head APK or physical-device result is yet available.
+A prior Android build (#190) and Media3 integration checks passed on commit
+98ca01a4fdc510f8a2fac476784b99e6232cb1fe. Subsequent changes to the local
+Capacitor runtime bundle, native bridge, Android network policy, and manifest
+audit require a fresh build, so B13 is IN PROGRESS on the current head. B17 and
+B18 also have source-level changes and regression coverage for native playback
+errors, strict HTTPS URL validation, safe seek positions, and a pause-before-web
+handoff intended to prevent simultaneous native and web audio. No current-head
+APK or physical-device result is yet available.
 
 Stage 5 now has a PWA manifest with local SVG icons, a versioned service worker,
 app-shell caching, byte-range support for explicitly cached audio, an Offline
