@@ -41,9 +41,19 @@
       });
       return true;
     },
-    async setQueue(tracks, startIndex = 0) {
+    async setQueue(tracks, startIndex = 0, startPositionSeconds = 0) {
       const plugin = await getPlugin();
-      await plugin.setQueue({ tracks, startIndex });
+      await plugin.setQueue({ tracks, startIndex, startPositionSeconds });
+      return true;
+    },
+    async next() {
+      const plugin = await getPlugin();
+      await plugin.next();
+      return true;
+    },
+    async previous() {
+      const plugin = await getPlugin();
+      await plugin.previous();
       return true;
     },
     async play() {
