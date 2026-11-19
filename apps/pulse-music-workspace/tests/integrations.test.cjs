@@ -404,7 +404,6 @@ test("recognition requires explicit consent and uses a secure endpoint", () => {
   assert.doesNotMatch(source, /result\.innerHTML\s*=/);
 });
 
-
 test("Tempus player validates provider links and artwork before opening or rendering", () => {
   const player = fs.readFileSync(
     path.join(__dirname, "..", "tempus-player.js"),
@@ -454,7 +453,6 @@ test("Apple charts API rejects non-GET methods and invalid storefront codes", as
   assert.equal(countryResponse.statusCode, 400);
   assert.match(countryResponse.body.error, /two-letter/i);
 });
-
 
 test("mobile home navigation validates external provider links", () => {
   const home = fs.readFileSync(

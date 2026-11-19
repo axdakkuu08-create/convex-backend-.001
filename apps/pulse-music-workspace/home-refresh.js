@@ -1,9 +1,7 @@
 /* Mobile home interactions bridge into Pulse's existing player actions. */
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const $ = (selector, root = document) => [
-    ...root.querySelectorAll(selector),
-  ];
+  const $ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const safeExternalUrl = (value) => {
     const raw = String(value || "").trim();
     if (!raw) return "";
