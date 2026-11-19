@@ -30,6 +30,7 @@
     for (const record of records) {
       if (await cache.match(record.url)) output.push({ ...record });
     }
+    if (output.length !== records.length) writeRecords(output);
     return output;
   }
   async function download(track) {
