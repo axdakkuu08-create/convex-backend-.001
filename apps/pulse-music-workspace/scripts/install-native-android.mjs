@@ -74,6 +74,14 @@ if (/android:networkSecurityConfig="[^"]*"/.test(manifest)) {
     '<application android:networkSecurityConfig="@xml/network_security_config"',
   );
 }
+if (/android:allowBackup="[^"]*"/.test(manifest)) {
+  manifest = manifest.replace(/android:allowBackup="[^"]*"/, 'android:allowBackup="false"');
+} else {
+  manifest = manifest.replace(
+    "<application",
+    '<application android:allowBackup="false"',
+  );
+}
 const permissions = [
   '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />',
   '    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />',
@@ -186,6 +194,9 @@ if (!finalManifest.includes('android:usesCleartextTraffic="false"')) {
 }
 if (!finalManifest.includes('@xml/network_security_config')) {
   throw new Error("Android network security config is not attached");
+}
+if (!finalManifest.includes('android:allowBackup="false"')) {
+  throw new Error("Android app data backup is not explicitly disabled");
 }
 const finalNetworkConfig = await readFile(networkConfigTarget, "utf8");
 if (!finalNetworkConfig.includes('cleartextTrafficPermitted="false"')) {
