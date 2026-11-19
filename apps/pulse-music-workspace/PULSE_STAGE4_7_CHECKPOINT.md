@@ -104,16 +104,21 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 
 - Pulse Workspace Tests run #109 passed on commit
   98ca01a4fdc510f8a2fac476784b99e6232cb1fe, and Android build run #190
-  produced a debug APK on that pre-offline implementation commit.
-- The current branch adds PWA/offline modules, media-policy contracts, Android
-  network hardening, lifecycle handoff changes, and new regression tests after
-  that APK. No successful CI run for the current final head has been observed.
-- The latest observed Pulse Workspace Tests and Android build workflows were
-  still queued on an earlier branch head. The most recent Prettier workflow
-  was cancelled before it produced a formatting result for the new files.
+  produced a debug APK on that earlier Media3-only implementation commit.
+- The current branch adds PWA/offline modules, rights-gated Cache Storage,
+  Media3 handoff/error fixes, a locally bundled Capacitor runtime, Android
+  manifest hardening, and additional regression tests after that APK.
+- The latest observed workflow runs were queued on an earlier branch head;
+  no completed regression or Android build for the current head is available.
+  Both Pulse Workspace Tests and Pulse Android build now expose
+  `workflow_dispatch` so the exact checkpoint branch can be run manually.
+- The Android manifest audit is now part of both Android build workflows. It
+  checks cleartext denial, app backup disabled, internal component export
+  restrictions, protected MediaSessionService export, required foreground
+  permissions, and the system-only network trust configuration.
 - The CLA check remains a human PR-description action. No legal attestation has
   been inserted on the user's behalf.
-- The Vercel preview integration reported its daily deployment API limit.
+- Vercel's preview integration reported its daily deployment API limit.
   No production deployment was requested or performed.
 
 ## Current checkpoint decision
@@ -121,30 +126,33 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 **Overall: IN PROGRESS — Stages 4–7 are not accepted.**
 
 B13 is PASS based on the prior successful Android build and Media3 integration
-checks. B17 and B18 have additional source-level changes and regression
-coverage: native error reporting, strict HTTPS URL validation, bounded seek
-positions, and a pause-before-web handoff that prevents simultaneous native and
-web audio. Physical Android playback, lock-screen controls, Bluetooth behavior,
-and lifecycle recovery remain unverified.
+checks. B17 and B18 have source-level changes and regression coverage for native
+playback errors, strict HTTPS URL validation, safe seek positions, and a
+pause-before-web handoff intended to prevent simultaneous native and web audio.
+No current-head APK or physical-device result is yet available.
 
 Stage 5 now has a PWA manifest with local SVG icons, a versioned service worker,
 app-shell caching, byte-range support for explicitly cached audio, an Offline
 Downloads view, and a Cache Storage manager. Offline saving is restricted to
 Internet Archive items with a non-empty licence label, VERIFIED_FULL status,
 and explicit APPROVED rights review. iTunes previews and unreviewed items are
-not eligible. These changes have automated contract tests, but current-head CI
-and real browser installation/offline reopening have not been observed.
+not eligible. Automated tests cover policy, cache failure, quota, range
+responses, and app-shell references, but no completed current-head test run or
+real browser install/offline-reopen evidence is available.
+
+Important storage boundary: browser Cache Storage is not an app-level encrypted
+Android file vault. It does not complete the blueprint's encrypted/scoped
+Capacitor Filesystem requirement. Media3 also does not read a native Filesystem
+copy, so cached offline tracks do not have native background playback while
+offline. A native encrypted-storage and Media3 local-URI adapter remains open.
 
 Stage 6 now has documented playback ownership, shared media URL/source policy,
-separate PWA/offline adapters, Android system-trust-only TLS policy, disabled
-cleartext traffic and backup, attribution propagation, and additive migration
-and rollback documentation. Tests have been added but are not yet verified by
-a completed workflow run.
-
-Important remaining boundary: Cache Storage is available to the PWA/WebView
-audio path. Media3 does not yet read a native Filesystem copy, so saved offline
-tracks do not have native background playback while offline. A dedicated
-Filesystem-to-Media3 adapter is still required for that behavior.
+separate PWA/offline adapters, a locally bundled Capacitor runtime (no runtime
+CDN dependency), Android cleartext denial, system-only trust anchors, disabled
+app backup, a generated-manifest audit, attribution propagation, and additive
+migration/rollback documentation. The network configuration does not itself
+prove a TLS 1.2 minimum; that remains a separate verification gap. The tests
+and manifest audit have not yet completed on the current branch head.
 
 B23, browser installation, offline reopening, and B14–B18 physical-device
 checks require browser/device evidence. The final regression suite, production
