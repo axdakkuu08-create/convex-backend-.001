@@ -483,3 +483,14 @@ test("playlist start reports autoplay failure instead of claiming success", () =
   const store = fs.readFileSync(path.join(__dirname, "..", "playlist-store.js"), "utf8");
   assert.match(store, /started = await window\.PulsePlaylistPlayback/);
 });
+
+test("queue removal controls are available and wired to the player bridge", () => {
+  const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+  assert.match(app, /data-queue-remove/);
+  assert.match(app, /remove: \(queueIndex\)/);
+  assert.match(app, /removeTrackAt/);
+});
+test("previous navigation uses explicit queue boundary helper", () => {
+  const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
+  assert.match(app, /previousIndex\?\.\(index, tracks\.length/);
+});
