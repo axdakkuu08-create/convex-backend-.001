@@ -21,6 +21,7 @@ const SHELL_FILES = [
   "./offline-media.js",
   "./media3-bridge.js",
   "./app.js",
+  "./cloud-sync.js",
   "./home-refresh.js",
   "./playlist-store.js",
   "./home-archive-discovery.js",
