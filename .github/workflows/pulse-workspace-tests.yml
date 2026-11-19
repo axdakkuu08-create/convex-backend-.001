@@ -30,6 +30,7 @@ jobs:
       - name: Syntax-check Pulse workspace modules
         run: |
           node --check apps/pulse-music-workspace/app.js
+          node --check apps/pulse-music-workspace/queue-storage.js
           node --check apps/pulse-music-workspace/playlist-playback.js
           node --check apps/pulse-music-workspace/playlist-store.js
           node --check apps/pulse-music-workspace/home-refresh.js
