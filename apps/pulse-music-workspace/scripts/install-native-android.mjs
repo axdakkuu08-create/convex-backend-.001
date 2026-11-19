@@ -12,6 +12,14 @@ const manifestPath = path.join(android, "app/src/main/AndroidManifest.xml");
 const activityPath = path.join(javaTarget, "MainActivity.java");
 const pluginPath = path.join(javaTarget, "PulseMedia3Plugin.java");
 const servicePath = path.join(javaTarget, "PulseAudioService.java");
+const networkConfigSource = path.join(
+  template,
+  "src/main/res/xml/network_security_config.xml",
+);
+const networkConfigTarget = path.join(
+  android,
+  "app/src/main/res/xml/network_security_config.xml",
+);
 
 for (const source of [
   path.join(javaSource, "PulseMedia3Plugin.java"),
@@ -22,6 +30,8 @@ for (const source of [
 
 await mkdir(javaTarget, { recursive: true });
 await cp(javaSource, javaTarget, { recursive: true, force: true });
+await mkdir(path.dirname(networkConfigTarget), { recursive: true });
+await cp(networkConfigSource, networkConfigTarget);
 
 let gradle = await readFile(gradlePath, "utf8");
 const mediaDependencies = [
@@ -42,10 +52,26 @@ if (!gradle.includes("androidx.media3:media3-exoplayer")) {
 }
 
 let manifest = await readFile(manifestPath, "utf8");
-if (!manifest.includes("usesCleartextTraffic")) {
+if (/android:usesCleartextTraffic="[^"]*"/.test(manifest)) {
+  manifest = manifest.replace(
+    /android:usesCleartextTraffic="[^"]*"/,
+    'android:usesCleartextTraffic="false"',
+  );
+} else {
   manifest = manifest.replace(
     "<application",
     '<application android:usesCleartextTraffic="false"',
+  );
+}
+if (/android:networkSecurityConfig="[^"]*"/.test(manifest)) {
+  manifest = manifest.replace(
+    /android:networkSecurityConfig="[^"]*"/,
+    'android:networkSecurityConfig="@xml/network_security_config"',
+  );
+} else {
+  manifest = manifest.replace(
+    "<application",
+    '<application android:networkSecurityConfig="@xml/network_security_config"',
   );
 }
 const permissions = [
@@ -68,6 +94,7 @@ if (!manifest.includes("com.pulse.music.PulseAudioService")) {
         <service
             android:name="com.pulse.music.PulseAudioService"
             android:exported="true"
+            android:permission="android.permission.MEDIA_CONTENT_CONTROL"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService" />
@@ -153,6 +180,16 @@ if (!finalGradle.includes("androidx.media3:media3-exoplayer")) {
 }
 if (!finalManifest.includes("com.pulse.music.PulseAudioService")) {
   throw new Error("PulseAudioService is not registered in AndroidManifest.xml");
+}
+if (!finalManifest.includes('android:usesCleartextTraffic="false"')) {
+  throw new Error("Android cleartext traffic is not explicitly disabled");
+}
+if (!finalManifest.includes('@xml/network_security_config')) {
+  throw new Error("Android network security config is not attached");
+}
+const finalNetworkConfig = await readFile(networkConfigTarget, "utf8");
+if (!finalNetworkConfig.includes('cleartextTrafficPermitted="false"')) {
+  throw new Error("Android network security config permits cleartext traffic");
 }
 if (!finalActivity.includes("registerPlugin(PulseMedia3Plugin.class)")) {
   throw new Error("PulseMedia3 plugin is not registered in MainActivity");
