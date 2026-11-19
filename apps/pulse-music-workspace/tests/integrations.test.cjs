@@ -281,7 +281,10 @@ test("shared app integration persists stable queues and exposes reorder controls
     path.join(__dirname, "..", "playlist-store.js"),
     "utf8",
   );
-  const storage = fs.readFileSync(path.join(__dirname, "..", "queue-storage.js"), "utf8");
+  const storage = fs.readFileSync(
+    path.join(__dirname, "..", "queue-storage.js"),
+    "utf8",
+  );
   assert.match(storage, /indexedDB\.open/);
   assert.match(app, /PulseQueueStorage/);
   assert.match(app, /function restoreQueue/);
@@ -390,15 +393,27 @@ test("playback reporting is explicit and canplay does not overwrite active playb
   assert.match(app, /if \(!playing\) reportPlayback\("ready"/);
 });
 test("queue storage loads before player initialization", () => {
-  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const html = fs.readFileSync(
+    path.join(__dirname, "..", "index.html"),
+    "utf8",
+  );
   assert.ok(html.indexOf("queue-storage.js") >= 0);
   assert.ok(html.indexOf("queue-storage.js") < html.indexOf('src="app.js"'));
 });
 
 test("playlist start reports autoplay failure instead of claiming success", () => {
-  const playbackSource = fs.readFileSync(path.join(__dirname, "..", "playlist-playback.js"), "utf8");
-  assert.match(playbackSource, /then\(\(started\) => started === true, \(\) => false\)/);
-  const store = fs.readFileSync(path.join(__dirname, "..", "playlist-store.js"), "utf8");
+  const playbackSource = fs.readFileSync(
+    path.join(__dirname, "..", "playlist-playback.js"),
+    "utf8",
+  );
+  assert.match(
+    playbackSource,
+    /then\(\(started\) => started === true, \(\) => false\)/,
+  );
+  const store = fs.readFileSync(
+    path.join(__dirname, "..", "playlist-store.js"),
+    "utf8",
+  );
   assert.match(store, /started = await window\.PulsePlaylistPlayback/);
 });
 
