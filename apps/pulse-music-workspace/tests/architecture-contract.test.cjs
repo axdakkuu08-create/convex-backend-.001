@@ -16,7 +16,11 @@ test("playback ownership and platform boundaries are documented", () => {
 test("native bridge has no runtime CDN import", () => {
   const bridge = read("media3-bridge.js");
   assert.doesNotMatch(bridge, /https:\/\/esm\.sh/);
-  assert.match(bridge, /bundled Android runtime/);
+  assert.match(bridge, /\.\/capacitor-core\/index\.js/);
+  const prepare = read("scripts/prepare-web.mjs");
+  assert.match(prepare, /@capacitor/);
+  assert.match(prepare, /capacitor-core/);
+  assert.match(read("scripts/install-native-android.mjs"), /bundledCapacitorCore/);
 });
 
 test("Android installer attaches strict network policy", () => {
