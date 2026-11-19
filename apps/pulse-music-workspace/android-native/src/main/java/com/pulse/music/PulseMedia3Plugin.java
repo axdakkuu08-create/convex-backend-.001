@@ -108,6 +108,9 @@ public final class PulseMedia3Plugin extends Plugin {
         state.put("positionSeconds", Math.max(0, player.getCurrentPosition()) / 1000.0);
         state.put("durationSeconds", player.getDuration() > 0 ? player.getDuration() / 1000.0 : 0);
         state.put("playbackState", player.getPlaybackState());
+        androidx.media3.common.PlaybackException playbackError = player.getPlayerError();
+        state.put("errorMessage", playbackError == null ? "" : String.valueOf(playbackError.getMessage()));
+        state.put("errorCode", playbackError == null ? 0 : playbackError.errorCode);
         state.put("title", player.getMediaMetadata().title == null ? "" : player.getMediaMetadata().title.toString());
         state.put("mediaId", player.getCurrentMediaItem() == null ? "" : player.getCurrentMediaItem().mediaId);
         notifyListeners("playbackState", state);
