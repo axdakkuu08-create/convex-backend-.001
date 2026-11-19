@@ -119,9 +119,7 @@
     $("tempusPlayerPlay").textContent = isPlaying ? "Ⅱ" : "▶";
     $("tempusPlayerElapsed").textContent = fmt(position);
     $("tempusPlayerDuration").textContent = fmt(duration || 0);
-    $("tempusPlayerSeek").value = duration
-      ? (position / duration) * 100
-      : 0;
+    $("tempusPlayerSeek").value = duration ? (position / duration) * 100 : 0;
     $("tempusPlayerLike").textContent =
       track && window.PulsePlayerBridge?.isLiked?.(track.id)
         ? "♥ Liked"
