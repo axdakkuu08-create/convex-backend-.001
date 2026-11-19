@@ -87,6 +87,7 @@
         pageUrl: track.sourceUrl || "",
         verificationStatus: track.verificationStatus || "VERIFYING",
         rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        sourceType: "internet_archive",
       }));
     }
     const quoted = '"' + term.replace(/"/g, "") + '"';
