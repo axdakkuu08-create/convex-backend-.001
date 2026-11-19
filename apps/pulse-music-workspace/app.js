@@ -242,13 +242,18 @@ function makeQueueSnapshot() {
   const stableTracks = tracks
     .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
     .map((track) => ({
-      id: track.id, catalogId: String(track.catalogId || ""),
+      id: track.id,
+      catalogId: String(track.catalogId || ""),
       source: String(track.source || "Saved audio"),
       title: String(track.title || "Untitled track"),
       artist: String(track.artist || "Unknown artist"),
-      mood: String(track.mood || "Playlist"), time: String(track.time || "—"),
-      cover: String(track.cover || "violet"), symbol: String(track.symbol || "♫"),
-      src: String(track.src), customUrl: true, artwork: String(track.artwork || ""),
+      mood: String(track.mood || "Playlist"),
+      time: String(track.time || "—"),
+      cover: String(track.cover || "violet"),
+      symbol: String(track.symbol || "♫"),
+      src: String(track.src),
+      customUrl: true,
+      artwork: String(track.artwork || ""),
       sourcePage: String(track.sourcePage || track.url || ""),
       archivePage: String(track.archivePage || ""),
       archiveLicense: String(track.archiveLicense || track.license || ""),
@@ -259,20 +264,34 @@ function makeQueueSnapshot() {
   const currentId = tracks[index]?.id ?? null;
   return {
     tracks: stableTracks,
-    currentTrackId: stableTracks.some((track) => String(track.id) === String(currentId)) ? currentId : null,
-    currentIndex: stableTracks.findIndex((track) => String(track.id) === String(currentId)),
-    repeatOn, shuffleOn, updatedAt: Date.now(),
+    currentTrackId: stableTracks.some(
+      (track) => String(track.id) === String(currentId),
+    )
+      ? currentId
+      : null,
+    currentIndex: stableTracks.findIndex(
+      (track) => String(track.id) === String(currentId),
+    ),
+    repeatOn,
+    shuffleOn,
+    updatedAt: Date.now(),
   };
 }
 function persistQueue() {
-  if (!queueReady) { queueDirty = true; return; }
+  if (!queueReady) {
+    queueDirty = true;
+    return;
+  }
   const snapshot = makeQueueSnapshot();
-  try { localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(snapshot)); } catch (_) {}
+  try {
+    localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(snapshot));
+  } catch (_) {}
   void openQueueDatabase().then((db) => {
     if (!db) return;
     try {
       db.transaction(QUEUE_STORE_NAME, "readwrite")
-        .objectStore(QUEUE_STORE_NAME).put(snapshot, "queue");
+        .objectStore(QUEUE_STORE_NAME)
+        .put(snapshot, "queue");
     } catch (_) {}
   });
 }
@@ -281,16 +300,23 @@ async function readQueueSnapshot() {
   if (db) {
     const stored = await new Promise((resolve) => {
       try {
-        const request = db.transaction(QUEUE_STORE_NAME, "readonly")
-          .objectStore(QUEUE_STORE_NAME).get("queue");
+        const request = db
+          .transaction(QUEUE_STORE_NAME, "readonly")
+          .objectStore(QUEUE_STORE_NAME)
+          .get("queue");
         request.onsuccess = () => resolve(request.result || null);
         request.onerror = () => resolve(null);
-      } catch (_) { resolve(null); }
+      } catch (_) {
+        resolve(null);
+      }
     });
     if (stored) return stored;
   }
-  try { return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || "null"); }
-  catch (_) { return null; }
+  try {
+    return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || "null");
+  } catch (_) {
+    return null;
+  }
 }
 async function restoreQueue() {
   const snapshot = await readQueueSnapshot();
@@ -298,14 +324,26 @@ async function restoreQueue() {
     const restored = snapshot.tracks
       .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
       .map((track, queueIndex) => ({
-        ...track, id: track.id ?? Date.now() + queueIndex,
-        mood: track.mood || "Playlist", time: track.time || "—",
-        cover: track.cover || "violet", symbol: track.symbol || "♫", customUrl: true,
+        ...track,
+        id: track.id ?? Date.now() + queueIndex,
+        mood: track.mood || "Playlist",
+        time: track.time || "—",
+        cover: track.cover || "violet",
+        symbol: track.symbol || "♫",
+        customUrl: true,
       }));
     if (restored.length) {
       tracks.splice(0, tracks.length, ...restored);
-      const current = restored.findIndex((track) => String(track.id) === String(snapshot.currentTrackId));
-      index = current >= 0 ? current : Math.min(Math.max(Number(snapshot.currentIndex) || 0, 0), restored.length - 1);
+      const current = restored.findIndex(
+        (track) => String(track.id) === String(snapshot.currentTrackId),
+      );
+      index =
+        current >= 0
+          ? current
+          : Math.min(
+              Math.max(Number(snapshot.currentIndex) || 0, 0),
+              restored.length - 1,
+            );
     }
     repeatOn = Boolean(snapshot.repeatOn);
     shuffleOn = Boolean(snapshot.shuffleOn);
@@ -402,9 +440,14 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
-  const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(index, tracks.length, {
-    shuffle: shuffleOn, repeat: repeatOn,
-  });
+  const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(
+    index,
+    tracks.length,
+    {
+      shuffle: shuffleOn,
+      repeat: repeatOn,
+    },
+  );
   if (!Number.isInteger(nextIndex)) {
     pause();
     if (Number.isFinite(audio.duration)) audio.currentTime = 0;
@@ -570,19 +613,23 @@ function renderQueuePanel() {
     button.type = "button";
     button.className = "queue-item-button";
     button.dataset.queueIndex = String(queueIndex);
-    button.textContent = (queueIndex === index ? "▶ " : "") +
-      String(track.title || "Untitled track") + " — " +
+    button.textContent =
+      (queueIndex === index ? "▶ " : "") +
+      String(track.title || "Untitled track") +
+      " — " +
       String(track.artist || "Unknown artist");
     const actions = document.createElement("span");
     actions.className = "queue-item-controls";
     const up = document.createElement("button");
-    up.type = "button"; up.textContent = "↑";
+    up.type = "button";
+    up.textContent = "↑";
     up.disabled = queueIndex === 0;
     up.dataset.queueIndex = String(queueIndex);
     up.dataset.queueMove = String(queueIndex - 1);
     up.setAttribute("aria-label", "Move " + track.title + " up");
     const down = document.createElement("button");
-    down.type = "button"; down.textContent = "↓";
+    down.type = "button";
+    down.textContent = "↓";
     down.disabled = queueIndex === tracks.length - 1;
     down.dataset.queueIndex = String(queueIndex);
     down.dataset.queueMove = String(queueIndex + 1);
@@ -604,7 +651,10 @@ $("queueClose")?.addEventListener("click", () => {
 $("queueItems")?.addEventListener("click", (event) => {
   const move = event.target.closest("[data-queue-move]");
   if (move) {
-    window.PulsePlayerBridge?.reorder?.(Number(move.dataset.queueIndex), Number(move.dataset.queueMove));
+    window.PulsePlayerBridge?.reorder?.(
+      Number(move.dataset.queueIndex),
+      Number(move.dataset.queueMove),
+    );
     return;
   }
   const button = event.target.closest("[data-queue-index]");
@@ -846,40 +896,65 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
 window.addEventListener("pulse:play-playlist", (event) => {
   const detail = event.detail || {};
   const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
-  const normalized = window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incoming }) || [];
+  const normalized =
+    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incoming }) || [];
   const queue = normalized.map((item, queueIndex) => {
     const source = String(item.source || "Saved audio");
     const isLocal = String(item.src || "").startsWith("blob:");
     return {
-      id: Date.now() + queueIndex, catalogId: String(item.catalogId || ""),
-      source, title: String(item.title || "Untitled track"),
-      artist: String(item.artist || "Unknown artist"), mood: "Playlist",
-      time: String(item.duration || "—"), cover: "violet", symbol: "♫",
-      src: String(item.src), customUrl: !isLocal, localFile: isLocal,
-      artwork: String(item.artwork || ""), sourcePage: String(item.url || ""),
-      archivePage: source.includes("Internet Archive") ? String(item.url || "") : "",
+      id: Date.now() + queueIndex,
+      catalogId: String(item.catalogId || ""),
+      source,
+      title: String(item.title || "Untitled track"),
+      artist: String(item.artist || "Unknown artist"),
+      mood: "Playlist",
+      time: String(item.duration || "—"),
+      cover: "violet",
+      symbol: "♫",
+      src: String(item.src),
+      customUrl: !isLocal,
+      localFile: isLocal,
+      artwork: String(item.artwork || ""),
+      sourcePage: String(item.url || ""),
+      archivePage: source.includes("Internet Archive")
+        ? String(item.url || "")
+        : "",
       archiveLicense: String(item.license || ""),
       verificationStatus: item.verificationStatus || "UNAVAILABLE",
       rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
       bytesTotal: Number(item.bytesTotal) || 0,
     };
   });
-  if (!queue.length) { toast("This playlist has no playable songs."); return; }
+  if (!queue.length) {
+    toast("This playlist has no playable songs.");
+    return;
+  }
   tracks.splice(0, tracks.length, ...queue);
   index = 0;
   shuffleOn = false;
   setTrack(0, true);
   renderQueuePanel();
-  toast("Playing playlist · " + queue.length + " tracks in saved order · " +
-    String(detail.playlistName || detail.name || "Singles Mix"));
+  toast(
+    "Playing playlist · " +
+      queue.length +
+      " tracks in saved order · " +
+      String(detail.playlistName || detail.name || "Singles Mix"),
+  );
 });
 
 window.PulsePlayerBridge = {
   currentTrack: () => tracks[index] || null,
   isLiked: (id) => liked.has(id),
   reorder: (from, to) => {
-    if (!Number.isInteger(from) || !Number.isInteger(to) ||
-        from < 0 || to < 0 || from >= tracks.length || to >= tracks.length || from === to)
+    if (
+      !Number.isInteger(from) ||
+      !Number.isInteger(to) ||
+      from < 0 ||
+      to < 0 ||
+      from >= tracks.length ||
+      to >= tracks.length ||
+      from === to
+    )
       return false;
     const [moved] = tracks.splice(from, 1);
     tracks.splice(to, 0, moved);
@@ -889,7 +964,9 @@ window.PulsePlayerBridge = {
     render();
     renderQueuePanel();
     persistQueue();
-    window.dispatchEvent(new CustomEvent("pulse:queue-reordered", { detail: { from, to } }));
+    window.dispatchEvent(
+      new CustomEvent("pulse:queue-reordered", { detail: { from, to } }),
+    );
     return true;
   },
 };

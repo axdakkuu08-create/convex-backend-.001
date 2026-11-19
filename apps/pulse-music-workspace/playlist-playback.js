@@ -20,7 +20,9 @@
         source: String(track.source || "Saved playlist"),
         duration: String(track.duration || ""),
         verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
-        rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"),
+        rightsReviewStatus: String(
+          track.rightsReviewStatus || "REVIEW_REQUIRED",
+        ),
         bytesTotal: Number(track.bytesTotal) || 0,
       }));
   }

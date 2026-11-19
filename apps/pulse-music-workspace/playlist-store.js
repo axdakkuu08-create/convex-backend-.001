@@ -164,7 +164,9 @@
     return playlist;
   }
   function createOrUpdateFromTracks(name, tracks) {
-    const clean = String(name || "Internet Archive Mix").trim().slice(0, 60);
+    const clean = String(name || "Internet Archive Mix")
+      .trim()
+      .slice(0, 60);
     const items = (Array.isArray(tracks) ? tracks : [])
       .filter((track) => track && track.src)
       .slice(0, 24)
@@ -192,9 +194,11 @@
           tracks: items,
           createdAt: Date.now(),
         };
-    write(existing
-      ? playlists.map((item) => item.id === existing.id ? playlist : item)
-      : [...playlists, playlist]);
+    write(
+      existing
+        ? playlists.map((item) => (item.id === existing.id ? playlist : item))
+        : [...playlists, playlist],
+    );
     render();
     return playlist;
   }
@@ -205,7 +209,11 @@
 
   function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
-    if (!playlist || !Array.isArray(playlist.tracks) || !playlist.tracks.length) {
+    if (
+      !playlist ||
+      !Array.isArray(playlist.tracks) ||
+      !playlist.tracks.length
+    ) {
       alert("This playlist is empty. Add songs from search results.");
       return;
     }
