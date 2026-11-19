@@ -42,6 +42,8 @@ function refreshNativeQueue(shouldResume = playing) {
     nativeQueueItems(),
     index,
     position,
+    shuffleOn,
+    repeatOn,
   )
     .then(() => (shouldResume ? window.PulseMedia3.play() : true))
     .catch((error) => {
@@ -378,6 +380,8 @@ function setTrack(i, autoplay = false) {
       nativeQueueItems(),
       index,
       0,
+      shuffleOn,
+      repeatOn,
     ).catch((error) => {
         nativePlaybackActive = false;
         audio.src = t.src;
@@ -597,11 +601,15 @@ $("shuffleAll").onclick = () => {
     return;
   }
   shuffleOn = true;
+  if (nativePlaybackActive)
+    window.PulseMedia3.setShuffle(true).catch(() => {});
   toast("Shuffle is on");
   setTrack(Math.floor(Math.random() * tracks.length), true);
 };
 $("shuffle").onclick = () => {
   shuffleOn = !shuffleOn;
+  if (nativePlaybackActive)
+    window.PulseMedia3.setShuffle(shuffleOn).catch(() => {});
   toast(shuffleOn ? "Shuffle is on" : "Shuffle is off");
 };
 $("next").onclick = next;
@@ -631,6 +639,8 @@ $("prev").onclick = () => {
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
   audio.loop = false;
+  if (nativePlaybackActive)
+    window.PulseMedia3.setRepeat(repeatOn).catch(() => {});
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
 $("like").onclick = () => like(tracks[index]?.id);
