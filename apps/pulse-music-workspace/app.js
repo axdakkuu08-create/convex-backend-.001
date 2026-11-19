@@ -25,9 +25,11 @@ function canUseNativeQueue() {
   return Boolean(
     window.PulseMedia3?.isNative &&
     tracks.length > 0 &&
-    tracks.every((track) =>
-      window.PulseMediaPolicy?.isHttpsAudioUrl(track.src) ||
-      /^https:\/\//i.test(String(track.src || "")),
+    tracks.every(
+      (track) =>
+        !track.offlineCached &&
+        (window.PulseMediaPolicy?.isHttpsAudioUrl(track.src) ||
+          /^https:\/\//i.test(String(track.src || ""))),
     ),
   );
 }
@@ -95,6 +97,7 @@ function list() {
       cover: "blue",
       symbol: "♫",
       customUrl: true,
+      offlineCached: true,
     }));
   }
   if (view === "library") a = a.filter((t) => liked.has(t.id));
@@ -647,6 +650,7 @@ $("rows").addEventListener("click", (e) => {
         cover: "blue",
         symbol: "♫",
         customUrl: true,
+        offlineCached: true,
       });
       targetIndex = tracks.length - 1;
     }
