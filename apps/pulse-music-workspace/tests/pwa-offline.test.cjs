@@ -2,9 +2,24 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
+
+test("PWA, media and player scripts parse as JavaScript", () => {
+  for (const file of [
+    "sw.js",
+    "pwa-runtime.js",
+    "offline-media.js",
+    "media-policy.js",
+    "internet-archive.js",
+    "catalog-search.js",
+    "app.js",
+  ]) {
+    assert.doesNotThrow(() => new vm.Script(read(file)), file);
+  }
+});
 
 test("PWA manifest has standalone scope, start URL and declared icons", () => {
   const manifest = JSON.parse(read("manifest.webmanifest"));
