@@ -218,39 +218,77 @@ const queueStorage = window.PulseQueueStorage;
 let queueReady = false;
 let queueDirty = false;
 function makeQueueSnapshot() {
-  const stableTracks = tracks.filter((track) => track && /^https?:\/\//i.test(String(track.src || ""))).map((track) => ({
-    id: track.id, catalogId: String(track.catalogId || ""), source: String(track.source || "Saved audio"),
-    title: String(track.title || "Untitled track"), artist: String(track.artist || "Unknown artist"),
-    mood: String(track.mood || "Playlist"), time: String(track.time || "—"), cover: String(track.cover || "violet"),
-    symbol: String(track.symbol || "♫"), src: String(track.src), customUrl: true, artwork: String(track.artwork || ""),
-    sourcePage: String(track.sourcePage || track.url || ""), archivePage: String(track.archivePage || ""),
-    archiveLicense: String(track.archiveLicense || track.license || ""),
-    verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
-    rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"), bytesTotal: Number(track.bytesTotal) || 0
-  }));
+  const stableTracks = tracks
+    .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+    .map((track) => ({
+      id: track.id,
+      catalogId: String(track.catalogId || ""),
+      source: String(track.source || "Saved audio"),
+      title: String(track.title || "Untitled track"),
+      artist: String(track.artist || "Unknown artist"),
+      mood: String(track.mood || "Playlist"),
+      time: String(track.time || "—"),
+      cover: String(track.cover || "violet"),
+      symbol: String(track.symbol || "♫"),
+      src: String(track.src),
+      customUrl: true,
+      artwork: String(track.artwork || ""),
+      sourcePage: String(track.sourcePage || track.url || ""),
+      archivePage: String(track.archivePage || ""),
+      archiveLicense: String(track.archiveLicense || track.license || ""),
+      verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
+      rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"),
+      bytesTotal: Number(track.bytesTotal) || 0,
+    }));
   const currentId = tracks[index]?.id ?? null;
-  return { schemaVersion: 2, tracks: stableTracks,
-    currentTrackId: stableTracks.some((track) => String(track.id) === String(currentId)) ? currentId : null,
-    currentIndex: stableTracks.findIndex((track) => String(track.id) === String(currentId)),
-    repeatOn, shuffleOn, updatedAt: Date.now() };
+  return {
+    schemaVersion: 2,
+    tracks: stableTracks,
+    currentTrackId: stableTracks.some(
+      (track) => String(track.id) === String(currentId),
+    )
+      ? currentId
+      : null,
+    currentIndex: stableTracks.findIndex(
+      (track) => String(track.id) === String(currentId),
+    ),
+    repeatOn,
+    shuffleOn,
+    updatedAt: Date.now(),
+  };
 }
 function persistQueue() {
-  if (!queueReady) { queueDirty = true; return; }
+  if (!queueReady) {
+    queueDirty = true;
+    return;
+  }
   void queueStorage.save(makeQueueSnapshot()).catch(() => {
-    if (typeof reportPlayback === "function") reportPlayback("storage-error", "Queue could not be saved. Check browser storage.");
+    if (typeof reportPlayback === "function")
+      reportPlayback(
+        "storage-error",
+        "Queue could not be saved. Check browser storage.",
+      );
   });
 }
 async function restoreQueue() {
   let snapshot = null;
-  try { snapshot = await queueStorage.load(); } catch (_) {}
+  try {
+    snapshot = await queueStorage.load();
+  } catch (_) {}
   const changedBeforeRestore = queueDirty;
-  const normalized = queueStorage.normalizeSnapshot(snapshot, (track) =>
-    track && /^https?:\/\//i.test(String(track.src || "")),
+  const normalized = queueStorage.normalizeSnapshot(
+    snapshot,
+    (track) => track && /^https?:\/\//i.test(String(track.src || "")),
   );
   if (!changedBeforeRestore && normalized) {
     const restored = normalized.tracks.map((track, queueIndex) => ({
-      ...track, id: track.id ?? Date.now() + queueIndex, mood: track.mood || "Playlist",
-      time: track.time || "—", cover: track.cover || "violet", symbol: track.symbol || "♫", customUrl: true
+      ...track,
+      id: track.id ?? Date.now() + queueIndex,
+      mood: track.mood || "Playlist",
+      time: track.time || "—",
+      cover: track.cover || "violet",
+      symbol: track.symbol || "♫",
+      customUrl: true,
     }));
     tracks.splice(0, tracks.length, ...restored);
     index = normalized.currentIndex;
@@ -310,12 +348,22 @@ function setTrack(i, autoplay = false) {
 function reportPlayback(state, message) {
   const current = tracks[index] || null;
   if (message) $("audioStatus").textContent = message;
-  window.dispatchEvent(new CustomEvent("pulse:playback-report", { detail: {
-    state, trackId: current?.id ?? null, title: current?.title || null,
-    positionMs: Number.isFinite(audio.currentTime) ? Math.round(audio.currentTime * 1000) : 0,
-    durationMs: Number.isFinite(audio.duration) ? Math.round(audio.duration * 1000) : 0,
-    updatedAt: Date.now()
-  }}));
+  window.dispatchEvent(
+    new CustomEvent("pulse:playback-report", {
+      detail: {
+        state,
+        trackId: current?.id ?? null,
+        title: current?.title || null,
+        positionMs: Number.isFinite(audio.currentTime)
+          ? Math.round(audio.currentTime * 1000)
+          : 0,
+        durationMs: Number.isFinite(audio.duration)
+          ? Math.round(audio.duration * 1000)
+          : 0,
+        updatedAt: Date.now(),
+      },
+    }),
+  );
 }
 
 async function play() {
@@ -358,7 +406,10 @@ function pause() {
   audio.pause();
   playing = false;
   $("play").textContent = "▶";
-  reportPlayback("paused", "Paused · " + (tracks[index]?.title || "No track selected"));
+  reportPlayback(
+    "paused",
+    "Paused · " + (tracks[index]?.title || "No track selected"),
+  );
   render();
 }
 function toggle() {
@@ -464,8 +515,15 @@ $("shuffle").onclick = () => {
 };
 $("next").onclick = next;
 $("prev").onclick = () => {
-  if (audio.currentTime > 3) { audio.currentTime = 0; return; }
-  const previous = window.PulsePlaylistPlayback?.previousIndex?.(index, tracks.length, { repeat: repeatOn });
+  if (audio.currentTime > 3) {
+    audio.currentTime = 0;
+    return;
+  }
+  const previous = window.PulsePlaylistPlayback?.previousIndex?.(
+    index,
+    tracks.length,
+    { repeat: repeatOn },
+  );
   if (!Number.isInteger(previous)) return;
   setTrack(previous, true);
 };
@@ -490,10 +548,14 @@ $("progress").oninput = (e) => {
 };
 audio.onended = () => next();
 audio.onwaiting = () => {
-  reportPlayback("buffering", "Loading audio… If it stays here, the link may not be a direct audio file.");
+  reportPlayback(
+    "buffering",
+    "Loading audio… If it stays here, the link may not be a direct audio file.",
+  );
 };
 audio.oncanplay = () => {
-  if (!playing) reportPlayback("ready", "Audio ready · press Play if it has not started.");
+  if (!playing)
+    reportPlayback("ready", "Audio ready · press Play if it has not started.");
 };
 audio.onerror = () => {
   playing = false;
@@ -827,7 +889,9 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
 });
 
 function playPlaylistQueue(playlistName, incomingTracks) {
-  const normalized = window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incomingTracks }) || [];
+  const normalized =
+    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incomingTracks }) ||
+    [];
   const queue = normalized.map((item, queueIndex) => {
     const source = String(item.source || "Saved audio");
     const isLocal = String(item.src || "").startsWith("blob:");
@@ -846,7 +910,9 @@ function playPlaylistQueue(playlistName, incomingTracks) {
       localFile: isLocal,
       artwork: String(item.artwork || ""),
       sourcePage: String(item.url || ""),
-      archivePage: source.includes("Internet Archive") ? String(item.url || "") : "",
+      archivePage: source.includes("Internet Archive")
+        ? String(item.url || "")
+        : "",
       archiveLicense: String(item.license || ""),
       verificationStatus: item.verificationStatus || "UNAVAILABLE",
       rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
@@ -862,7 +928,12 @@ function playPlaylistQueue(playlistName, incomingTracks) {
   shuffleOn = false;
   setTrack(0, false);
   renderQueuePanel();
-  toast("Playing playlist · " + queue.length + " tracks in saved order · " + String(playlistName || "Singles Mix"));
+  toast(
+    "Playing playlist · " +
+      queue.length +
+      " tracks in saved order · " +
+      String(playlistName || "Singles Mix"),
+  );
   return play();
 }
 
@@ -871,7 +942,11 @@ window.PulsePlayerBridge = {
   remove: (queueIndex) => {
     const oldCurrentIndex = index;
     const wasPlaying = playing;
-    const result = window.PulsePlaylistPlayback?.removeTrackAt?.(tracks, index, queueIndex);
+    const result = window.PulsePlaylistPlayback?.removeTrackAt?.(
+      tracks,
+      index,
+      queueIndex,
+    );
     if (!result) return false;
     tracks.splice(0, tracks.length, ...result.tracks);
     index = result.currentIndex;
