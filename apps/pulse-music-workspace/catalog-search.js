@@ -76,11 +76,18 @@
       '<button class="catalog-add" type="button" data-add-catalog-index="' +
       index +
       '">＋ Playlist</button>';
+    const offlineAllowed = window.PulseMediaPolicy?.canDownloadOffline({
+      ...item,
+      src: item.audioUrl,
+      sourceType: item.sourceType,
+    });
     const offline =
       item.sourceType === "internet_archive"
         ? '<button class="catalog-add" type="button" data-offline-catalog-index="' +
           index +
-          '">↓ Save offline</button>'
+          '"' +
+          (offlineAllowed ? "" : ' disabled title="Requires verified full audio and approved rights review"') +
+          '>↓ Save offline</button>'
         : "";
     return (
       '<article class="catalog-result">' +
