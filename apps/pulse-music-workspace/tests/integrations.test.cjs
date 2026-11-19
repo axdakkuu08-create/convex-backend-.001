@@ -390,7 +390,7 @@ test("playback reporting is explicit and canplay does not overwrite active playb
   const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
   assert.match(app, /function reportPlayback\(state, message\)/);
   assert.match(app, /pulse:playback-report/);
-  assert.match(app, /if \(!playing\) reportPlayback\("ready"/);
+  assert.match(app, /audio\.oncanplay = \(\) => \{\s*if \(!playing\)\s*reportPlayback\("ready"/s);
 });
 test("queue storage loads before player initialization", () => {
   const html = fs.readFileSync(
@@ -408,7 +408,7 @@ test("playlist start reports autoplay failure instead of claiming success", () =
   );
   assert.match(
     playbackSource,
-    /then\(\(started\) => started === true, \(\) => false\)/,
+    /\.then\(\s*\(started\) => started === true,\s*\(\) => false,\s*\)/s,
   );
   const store = fs.readFileSync(
     path.join(__dirname, "..", "playlist-store.js"),
@@ -425,5 +425,5 @@ test("queue removal controls are available and wired to the player bridge", () =
 });
 test("previous navigation uses explicit queue boundary helper", () => {
   const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-  assert.match(app, /previousIndex\?\.\(index, tracks\.length/);
+  assert.match(app, /previousIndex\?\.\(\s*index,\s*tracks\.length/s);
 });
