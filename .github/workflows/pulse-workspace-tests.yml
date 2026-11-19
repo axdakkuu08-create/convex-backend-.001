@@ -9,6 +9,7 @@ on:
     branches:
       - feat/pulse-glass-charts-archive-mix
       - integration/pulse-pr33-37-consolidated
+      - fix/pulse-b01-b17-core-storage
     paths:
       - "apps/pulse-music-workspace/**"
       - ".github/workflows/pulse-workspace-tests.yml"
