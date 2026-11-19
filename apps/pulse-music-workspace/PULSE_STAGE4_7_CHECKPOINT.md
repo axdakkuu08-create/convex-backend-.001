@@ -108,10 +108,12 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 - The current branch adds PWA/offline modules, rights-gated Cache Storage,
   Media3 handoff/error fixes, a locally bundled Capacitor runtime, Android
   manifest hardening, and additional regression tests after that APK.
-- The latest observed workflow runs were queued on an earlier branch head;
-  no completed regression or Android build for the current head is available.
-  Both Pulse Workspace Tests and Pulse Android build now expose
-  `workflow_dispatch` so the exact checkpoint branch can be run manually.
+- Workflow runs for Pulse Workspace Tests, Pulse Android build, Prettier,
+  and the discovery gateway were created for this checkpoint line but remained
+  queued in the latest observation. No completed regression or Android build
+  for the current head is available. Both Pulse Workspace Tests and Pulse
+  Android build include a manual dispatch trigger in the checkpoint workflow
+  definitions.
 - The Android manifest audit is now part of both Android build workflows. It
   checks cleartext denial, app backup disabled, internal component export
   restrictions, protected MediaSessionService export, required foreground
@@ -149,10 +151,11 @@ offline. A native encrypted-storage and Media3 local-URI adapter remains open.
 Stage 6 now has documented playback ownership, shared media URL/source policy,
 separate PWA/offline adapters, a locally bundled Capacitor runtime (no runtime
 CDN dependency), Android cleartext denial, system-only trust anchors, disabled
-app backup, a generated-manifest audit, attribution propagation, and additive
-migration/rollback documentation. The network configuration does not itself
-prove a TLS 1.2 minimum; that remains a separate verification gap. The tests
-and manifest audit have not yet completed on the current branch head.
+app backup, a generated-manifest audit wired into both Android workflows,
+attribution propagation, and additive migration/rollback documentation. The
+network configuration does not itself prove a TLS 1.2 minimum; that remains a
+separate verification gap. The tests and manifest audit have not yet completed
+on the current branch head.
 
 B23, browser installation, offline reopening, and B14–B18 physical-device
 checks require browser/device evidence. The final regression suite, production
