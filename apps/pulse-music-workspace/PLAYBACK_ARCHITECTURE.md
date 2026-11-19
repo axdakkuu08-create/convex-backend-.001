@@ -46,6 +46,9 @@ REVIEW_REQUIRED, so unreviewed items remain stream-only.
 - Audio bytes are cached only after explicit user action and rights approval.
 - A download is rejected on non-audio responses, opaque responses, empty files,
   files over 100 MiB, or insufficient reported quota.
+- Browser Cache Storage is browser-managed, not an app-level encrypted Android
+  file vault. It is a PWA offline layer, not completion of the blueprint's
+  encrypted/scoped Capacitor Filesystem requirement.
 - Cache metadata preserves attribution and is rolled back if metadata storage
   fails.
 - Queue restoration filters invalid URLs and preserves the selected track by ID.
