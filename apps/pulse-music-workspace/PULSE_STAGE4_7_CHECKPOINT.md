@@ -97,6 +97,27 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 9. Physical Android and real-browser acceptance require the user's
    device/browser; CI cannot attest to those observations.
 
+## CI observations
+
+- Pulse Workspace Tests run #80 passed on the initial checkpoint commit
+  5b31a8badf0bb7a0de8ac74e8ce0f3e8a1081fd3. Later shuffle/repeat changes and the
+  final queue predicate correction were made after that run; they still need a
+  fresh run.
+- Android build run #161 failed during the Android SDK setup step, before Node
+  validation, Capacitor generation, Gradle compilation, or APK creation. The
+  setup action requested the obsolete SDK package named "tools". Both Android
+  workflow definitions have since been changed to request platform-tools and
+  explicitly install Android 36 / Build Tools 36. A rerun against the latest
+  branch head has not been observed.
+- Prettier run #418 reported eight files needing dprint formatting. Formatting
+  updates have been applied to those files; a fresh formatting result has not
+  been observed.
+- CLA check run #457 failed because PR #40 does not contain the repository's
+  required contribution declaration. No legal attestation has been inserted
+  on the user's behalf. PR description confirmation remains a human action.
+- Vercel status was pending on the latest observed PR head. No production
+  deployment was requested or performed.
+
 ## Current checkpoint decision
 
 **Overall: IN PROGRESS — Stage 4 is not accepted.**
