@@ -279,7 +279,7 @@ let queueReady = false;
 let queueDirty = false;
 function makeQueueSnapshot() {
   const stableTracks = tracks
-    .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+    .filter((track) => track && window.PulseMediaPolicy?.isWebAudioUrl(track.src))
     .map((track) => ({
       id: track.id,
       catalogId: String(track.catalogId || ""),
@@ -346,7 +346,7 @@ async function restoreQueue() {
   const changedBeforeRestore = queueDirty;
   const normalized = queueStorage.normalizeSnapshot(
     snapshot,
-    (track) => track && /^https?:\/\//i.test(String(track.src || "")),
+    (track) => track && window.PulseMediaPolicy?.isWebAudioUrl(track.src),
   );
   if (!changedBeforeRestore && normalized) {
     const restored = normalized.tracks.map((track, queueIndex) => ({
