@@ -300,7 +300,6 @@ function makeQueueSnapshot() {
       src: String(track.src),
       customUrl: true,
       artwork: String(track.artwork || ""),
-      sourcePage: String(track.sourcePage || track.url || ""),
       archivePage: String(track.archivePage || ""),
       archiveLicense: String(track.archiveLicense || track.license || ""),
       sourceType:
