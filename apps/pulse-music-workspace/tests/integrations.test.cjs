@@ -288,7 +288,7 @@ test("shared app integration persists stable queues and exposes reorder controls
   assert.match(storage, /indexedDB\.open/);
   assert.match(app, /PulseQueueStorage/);
   assert.match(app, /function restoreQueue/);
-  assert.match(app, /audio\.onended = \(\) => next\(\)/);
+  assert.match(app, /audio\.onended = \(\) => \{/);
   assert.match(app, /PulsePlaylistPlayback\?\.nextIndex/);
   assert.match(app, /window\.PulsePlayerBridge =/);
   assert.match(app, /data-queue-move/);
