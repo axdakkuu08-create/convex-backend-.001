@@ -409,7 +409,7 @@ test("Tempus player validates provider links and artwork before opening or rende
     path.join(__dirname, "..", "tempus-player.js"),
     "utf8",
   );
-  assert.match(player, /function safeExternalUrl/);
+  assert.match(player, /const safeExternalUrl/);
   assert.match(player, /const link = safeExternalUrl/);
   assert.match(player, /const artwork = safeExternalUrl/);
   assert.match(player, /window\.open\(url/);
