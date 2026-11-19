@@ -18,7 +18,7 @@ let nativePlaybackActive = false;
 let nativeDurationSeconds = 0;
 let nativePositionSeconds = 0;
 let nativeEndedHandled = false;
-let nativeHandoffPromise = Promise.resolve();
+let nativeHandoffPromise = Promise.resolve(true);
 let nativeLastError = "";
 
 function canUseNativeQueue() {
@@ -421,7 +421,7 @@ function setTrack(i, autoplay = false) {
   nativeDurationSeconds = 0;
   nativeEndedHandled = false;
   if (nativePlaybackActive) {
-    nativeHandoffPromise = Promise.resolve();
+    nativeHandoffPromise = Promise.resolve(true);
     audio.pause();
     nativeLoadPromise = window.PulseMedia3.setQueue(
       nativeQueueItems(),
@@ -431,8 +431,20 @@ function setTrack(i, autoplay = false) {
       repeatOn,
     ).catch((error) => {
       nativePlaybackActive = false;
-      audio.src = t.src;
-      audio.load();
+      nativeHandoffPromise = window.PulseMedia3
+        .pause()
+        .then(() => {
+          audio.src = t.src;
+          audio.load();
+          return true;
+        })
+        .catch(() => {
+          reportPlayback(
+            "error",
+            "Android playback could not stop safely; web playback was not started.",
+          );
+          return false;
+        });
       reportPlayback(
         "error",
         error?.message || "Android audio service could not load this track.",
@@ -443,15 +455,21 @@ function setTrack(i, autoplay = false) {
     const requestedSource = t.src;
     nativeHandoffPromise = window.PulseMedia3
       .pause()
-      .catch(() => false)
       .then(() => {
         if (tracks[index]?.src !== requestedSource) return false;
         audio.src = requestedSource;
         audio.load();
         return true;
+      })
+      .catch(() => {
+        reportPlayback(
+          "error",
+          "Android playback could not stop safely; web playback was not started.",
+        );
+        return false;
       });
   } else {
-    nativeHandoffPromise = Promise.resolve();
+    nativeHandoffPromise = Promise.resolve(true);
     audio.src = t.src;
     audio.load();
   }
@@ -513,10 +531,24 @@ async function play() {
   try {
     if (nativePlaybackActive) {
       await nativeLoadPromise;
-      if (nativePlaybackActive) await window.PulseMedia3.play();
-      else await audio.play();
+      if (nativePlaybackActive) {
+        await window.PulseMedia3.play();
+      } else {
+        const handoffReady = await nativeHandoffPromise;
+        if (!handoffReady) {
+          playing = false;
+          $("play").textContent = "▶";
+          return false;
+        }
+        await audio.play();
+      }
     } else {
-      await nativeHandoffPromise;
+      const handoffReady = await nativeHandoffPromise;
+      if (!handoffReady) {
+        playing = false;
+        $("play").textContent = "▶";
+        return false;
+      }
       await audio.play();
     }
     playing = true;
