@@ -224,7 +224,9 @@
       started = false;
     }
     if (!started) {
-      alert("Playback could not start. Check the track source or try another song.");
+      alert(
+        "Playback could not start. Check the track source or try another song.",
+      );
       return;
     }
     const status = $("unifiedSearchStatus");
