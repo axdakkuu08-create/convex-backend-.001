@@ -1074,7 +1074,18 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           i +
           '">＋ Playlist</button><button class="catalog-add" type="button" data-offline-archive-index="' +
           i +
-          '">↓ Save offline</button></div></article>',
+          '"' +
+          (window.PulseMediaPolicy?.canDownloadOffline({
+            src: item.audioUrl,
+            source: "Internet Archive",
+            sourceType: "internet_archive",
+            license: item.license,
+            verificationStatus: item.verificationStatus,
+            rightsReviewStatus: item.rightsReviewStatus,
+          })
+            ? ""
+            : ' disabled title="Requires verified full audio and approved rights review"') +
+          '>↓ Save offline</button></div></article>',
       )
       .join("");
   } catch (error) {
