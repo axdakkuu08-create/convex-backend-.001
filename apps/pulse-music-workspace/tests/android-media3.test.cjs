@@ -56,6 +56,8 @@ test("native-to-web playback waits for Media3 pause before starting HTML audio",
   assert.match(app, /nativeHandoffPromise/);
   assert.match(app, /await nativeHandoffPromise/);
   assert.match(app, /tracks\[index\]\?\.src !== requestedSource/);
+  assert.match(app, /!track\.offlineCached/);
+  assert.match(app, /offlineCached: Boolean\(window\.PulseOfflineMedia/);
 });
 
 test("native service enables audio focus and headset-disconnect handling", () => {
