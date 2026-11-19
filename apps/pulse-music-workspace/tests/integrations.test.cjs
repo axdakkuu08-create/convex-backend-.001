@@ -454,3 +454,13 @@ test("Apple charts API rejects non-GET methods and invalid storefront codes", as
   assert.equal(countryResponse.statusCode, 400);
   assert.match(countryResponse.body.error, /two-letter/i);
 });
+
+
+test("mobile home navigation validates external provider links", () => {
+  const home = fs.readFileSync(
+    path.join(__dirname, "..", "home-refresh.js"),
+    "utf8",
+  );
+  assert.match(home, /const safeExternalUrl/);
+  assert.match(home, /safeExternalUrl\(trackButton\.dataset\.homeUrl\)/);
+});

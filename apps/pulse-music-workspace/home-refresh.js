@@ -1,9 +1,22 @@
 /* Mobile home interactions bridge into Pulse's existing player actions. */
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  const $$ = (selector, root = document) => [
+  const $ = (selector, root = document) => [
     ...root.querySelectorAll(selector),
   ];
+  const safeExternalUrl = (value) => {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    try {
+      const parsed = new URL(raw, window.location.href);
+      return parsed.protocol === "https:" ||
+        parsed.origin === window.location.origin
+        ? parsed.href
+        : "";
+    } catch (_) {
+      return "";
+    }
+  };
 
   function playTrack(id) {
     const row = $('.row[data-id="' + String(id).replace(/[^0-9]/g, "") + '"]');
@@ -29,11 +42,8 @@
           }),
         );
       } else if (trackButton.dataset.homeUrl) {
-        window.open(
-          trackButton.dataset.homeUrl,
-          "_blank",
-          "noopener,noreferrer",
-        );
+        const url = safeExternalUrl(trackButton.dataset.homeUrl);
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
       } else {
         playTrack(trackButton.dataset.homeTrack);
       }
