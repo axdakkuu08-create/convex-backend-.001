@@ -31,4 +31,16 @@ for (const entry of await readdir(root, { withFileTypes: true })) {
   });
 }
 
-console.log("Prepared Pulse web assets in www/");
+const capacitorCoreDist = path.join(
+  root,
+  "node_modules",
+  "@capacitor",
+  "core",
+  "dist",
+);
+await cp(capacitorCoreDist, path.join(output, "capacitor-core"), {
+  recursive: true,
+  force: true,
+});
+
+console.log("Prepared Pulse web assets and local Capacitor runtime in www/");
