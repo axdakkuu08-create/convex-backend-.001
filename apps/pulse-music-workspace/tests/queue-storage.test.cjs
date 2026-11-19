@@ -59,6 +59,8 @@ function fakeIDB(options = {}) {
     records,
     database,
     get openCount() { return openCount; },
+    setOpenFailure(value) { options.openFailure = value; },
+    setBlocked(value) { options.blocked = value; },
     open() {
       openCount += 1;
       const request = {};
@@ -162,7 +164,7 @@ test("failed IndexedDB initialization is retried on a later save", async () => {
   const idb = fakeIDB({ openFailure: true });
   const x = instance(idb);
   assert.equal(await x.storage.save(snapshot("fallback-", [1])), "localStorage");
-  idb.openFailure = false;
+  idb.setOpenFailure(false);
   assert.equal(await x.storage.save(snapshot("recovered-", [2])), "indexedDB");
   assert.equal(idb.openCount, 2);
   assert.equal((await x.storage.load()).tracks[0].id, 2);
@@ -172,7 +174,7 @@ test("blocked IndexedDB upgrade falls back and can recover on retry", async () =
   const idb = fakeIDB({ blocked: true });
   const x = instance(idb);
   assert.equal(await x.storage.save(snapshot("blocked-", [1])), "localStorage");
-  idb.blocked = false;
+  idb.setBlocked(false);
   assert.equal(await x.storage.save(snapshot("unblocked-", [2])), "indexedDB");
   assert.equal(idb.openCount, 2);
 });
