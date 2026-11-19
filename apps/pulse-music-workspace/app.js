@@ -164,7 +164,11 @@ function render() {
         (liked.has(t.id) ? "liked" : "") +
         '" data-like="1">' +
         (liked.has(t.id) ? "♥" : "♡") +
-        "</button></div>",
+        "</button>" +
+        (view === "downloads"
+          ? '<button class="rowlike" type="button" data-offline-remove="1" aria-label="Remove offline download">×</button>'
+          : "") +
+        "</div>",
     )
     .join("");
 }
@@ -618,12 +622,29 @@ function setView(v) {
     .querySelectorAll(".nav")
     .forEach((b) => b.classList.toggle("active", b.dataset.view === v));
   render();
+  if (v === "downloads") {
+    void window.PulseOfflineMedia?.list?.().then(render).catch(() => {
+      toast("Offline library could not be refreshed.");
+    });
+  }
   $("sidebar").classList.remove("open");
 }
 $("rows").addEventListener("click", (e) => {
   let r = e.target.closest(".row");
   if (!r) return;
   const id = r.dataset.id;
+  if (e.target.closest("[data-offline-remove]")) {
+    const saved = (window.PulseOfflineMedia?.records?.() || []).find(
+      (record) => String(record.id) === String(id),
+    );
+    if (saved) {
+      void window.PulseOfflineMedia.remove(saved.url).then(() => {
+        render();
+        toast("Removed offline audio.");
+      }).catch(() => toast("Could not remove offline audio."));
+    }
+    return;
+  }
   if (e.target.closest("[data-like]")) {
     like(id);
     return;
