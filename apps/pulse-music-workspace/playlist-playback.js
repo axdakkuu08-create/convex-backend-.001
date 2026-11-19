@@ -42,6 +42,23 @@
     return options.repeat ? 0 : null;
   }
 
+  function previousIndex(current, length, options = {}) {
+    if (!Number.isInteger(length) || length <= 0) return null;
+    if (!Number.isInteger(current) || current < 0 || current >= length) return null;
+    if (current > 0) return current - 1;
+    return options.repeat ? length - 1 : null;
+  }
+  function removeTrackAt(queue, currentIndex, removeIndex) {
+    if (!Array.isArray(queue) || !Number.isInteger(removeIndex) || removeIndex < 0 || removeIndex >= queue.length) return null;
+    const tracks = queue.filter((_, index) => index !== removeIndex);
+    if (!tracks.length) return { tracks, currentIndex: 0 };
+    let nextCurrentIndex = currentIndex;
+    if (removeIndex < currentIndex) nextCurrentIndex -= 1;
+    else if (removeIndex === currentIndex) nextCurrentIndex = Math.min(removeIndex, tracks.length - 1);
+    nextCurrentIndex = Math.max(0, Math.min(nextCurrentIndex, tracks.length - 1));
+    return { tracks, currentIndex: nextCurrentIndex };
+  }
+
   function start(playlist) {
     const tracks = buildQueue(playlist);
     if (!tracks.length) return Promise.resolve(false);
@@ -52,5 +69,5 @@
       .then((started) => started === true, () => false);
   }
 
-  window.PulsePlaylistPlayback = { buildQueue, nextIndex, start };
+  window.PulsePlaylistPlayback = { buildQueue, nextIndex, previousIndex, removeTrackAt, start };
 })();
