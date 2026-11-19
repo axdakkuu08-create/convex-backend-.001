@@ -1338,7 +1338,7 @@ async function playPlaylistQueue(playlistName, incomingTracks) {
       verificationStatus: item.verificationStatus || "UNAVAILABLE",
       rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
       bytesTotal: Number(item.bytesTotal) || 0,
-      offlineCached: Boolean(window.PulseOfflineMedia?.isSaved(item.src)),
+      offlineCached: isOfflineCached(item.src),
     };
   });
   if (!queue.length) {
