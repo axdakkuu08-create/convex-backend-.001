@@ -1018,6 +1018,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
 $("archiveResults").addEventListener("click", async (e) => {
   const offlineButton = e.target.closest("[data-offline-archive-index]");
   if (offlineButton) {
+    const status = $("archiveStatus");
     const item = archiveItems[Number(offlineButton.dataset.offlineArchiveIndex)];
     if (!item) return;
     status.textContent = "Checking rights approval and saving audio…";
