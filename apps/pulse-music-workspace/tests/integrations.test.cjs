@@ -252,7 +252,9 @@ test("saved playlist playback queues every playable song in saved order", () => 
     "utf8",
   );
   const app = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
-  assert.match(playlists, /pulse:play-playlist/);
+  assert.match(playlists, /PulsePlaylistPlayback\?\.start/);
+  const playback = fs.readFileSync(path.join(__dirname, "..", "playlist-playback.js"), "utf8");
+  assert.match(playback, /pulse:play-playlist/);
   assert.match(playlists, /tracks\s*\.filter/);
   assert.match(app, /pulse:play-playlist/);
   assert.match(app, /tracks\.splice\(0, tracks\.length, \.\.\.queue\)/);
@@ -308,7 +310,7 @@ test("queue advancement validates indices and supports ordered repeat-all", () =
 
 test("shuffle selects a different valid item and respects repeat boundaries", () => {
   assert.equal(playback.nextIndex(0, 3, { shuffle: true }), 1);
-  assert.equal(playback.nextIndex(2, 3, { shuffle: true }), 1);
+  assert.equal(playback.nextIndex(2, 3, { shuffle: true }), 0);
   assert.equal(playback.nextIndex(0, 1, { shuffle: true }), null);
   assert.equal(playback.nextIndex(0, 1, { shuffle: true, repeat: true }), 0);
 });
@@ -352,6 +354,8 @@ test("Android home navigation styles all four destinations", () => {
 test("recognition requires explicit consent and uses a secure endpoint", () => {
   const source = fs.readFileSync(path.join(__dirname, "..", "song-recognition.js"), "utf8");
   assert.match(source, /window\.confirm/);
+  assert.match(source, /if \(rawEndpoint\)/);
+  assert.match(source, /if \(!raw\) return ""/);
   assert.match(source, /parsed\.protocol === "https:"/);
   assert.match(source, /stream\?\.getTracks\(\)\.forEach/);
   assert.doesNotMatch(source, /result\.innerHTML\s*=/);

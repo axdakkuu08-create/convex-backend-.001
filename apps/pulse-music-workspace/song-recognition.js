@@ -7,16 +7,21 @@
 
   const rawEndpoint = String(window.PULSE_RECOGNITION_ENDPOINT || "").trim();
   let endpoint = "";
-  try {
-    const parsed = new URL(rawEndpoint, window.location.href);
-    if (parsed.protocol === "https:" || parsed.origin === window.location.origin)
-      endpoint = parsed.href;
-  } catch (_) {}
+  if (rawEndpoint) {
+    try {
+      const parsed = new URL(rawEndpoint, window.location.href);
+      if (!parsed.username && !parsed.password &&
+          (parsed.protocol === "https:" || parsed.origin === window.location.origin))
+        endpoint = parsed.href;
+    } catch (_) {}
+  }
 
   let busy = false;
   const safeUrl = (value) => {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
     try {
-      const parsed = new URL(String(value || ""), window.location.href);
+      const parsed = new URL(raw, window.location.href);
       return parsed.protocol === "https:" || parsed.origin === window.location.origin
         ? parsed.href
         : "";
