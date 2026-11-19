@@ -181,6 +181,9 @@
             pageUrl:
               "https://archive.org/details/" +
               encodeURIComponent(doc.identifier),
+            sourceType: "internet_archive",
+            verificationStatus: "VERIFYING",
+            rightsReviewStatus: "REVIEW_REQUIRED",
           };
         } catch (_) {
           // An unavailable item must not fail the rest of the catalogue search.
