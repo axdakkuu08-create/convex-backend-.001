@@ -22,8 +22,8 @@ let nativeEndedHandled = false;
 function canUseNativeQueue() {
   return Boolean(
     window.PulseMedia3?.isNative &&
-      tracks.length > 0 &&
-      tracks.every((track) => /^https:\/\//i.test(String(track.src || ""))),
+    tracks.length > 0 &&
+    tracks.every((track) => /^https:\/\//i.test(String(track.src || "")),
   );
 }
 function nativeQueueItems() {
@@ -35,13 +35,20 @@ function nativeQueueItems() {
   }));
 }
 function refreshNativeQueue(shouldResume = playing) {
-  if (!nativePlaybackActive || !window.PulseMedia3) return Promise.resolve(false);
+  if (!nativePlaybackActive || !window.PulseMedia3)
+    return Promise.resolve(false);
   const position = Math.max(0, nativePositionSeconds);
-  nativeLoadPromise = window.PulseMedia3
-    .setQueue(nativeQueueItems(), index, position)
+  nativeLoadPromise = window.PulseMedia3.setQueue(
+    nativeQueueItems(),
+    index,
+    position,
+  )
     .then(() => (shouldResume ? window.PulseMedia3.play() : true))
     .catch((error) => {
-      reportPlayback("error", error?.message || "Android playback queue could not be updated.");
+      reportPlayback(
+        "error",
+        error?.message || "Android playback queue could not be updated.",
+      );
       return false;
     });
   return nativeLoadPromise;
@@ -367,13 +374,18 @@ function setTrack(i, autoplay = false) {
   nativeEndedHandled = false;
   if (nativePlaybackActive) {
     audio.pause();
-    nativeLoadPromise = window.PulseMedia3
-      .setQueue(nativeQueueItems(), index, 0)
-      .catch((error) => {
+    nativeLoadPromise = window.PulseMedia3.setQueue(
+      nativeQueueItems(),
+      index,
+      0,
+    ).catch((error) => {
         nativePlaybackActive = false;
         audio.src = t.src;
         audio.load();
-        reportPlayback("error", error?.message || "Android audio service could not load this track.");
+        reportPlayback(
+          "error",
+          error?.message || "Android audio service could not load this track.",
+        );
         return false;
       });
   } else {
@@ -412,10 +424,16 @@ function reportPlayback(state, message) {
         trackId: current?.id ?? null,
         title: current?.title || null,
         positionMs: Math.round(
-          Math.max(0, nativePlaybackActive ? nativePositionSeconds : audio.currentTime) * 1000,
+          Math.max(
+            0,
+            nativePlaybackActive ? nativePositionSeconds : audio.currentTime,
+          ) * 1000,
         ),
         durationMs: Math.round(
-          Math.max(0, nativePlaybackActive ? nativeDurationSeconds : audio.duration) * 1000,
+          Math.max(
+            0,
+            nativePlaybackActive ? nativeDurationSeconds : audio.duration,
+          ) * 1000,
         ),
         updatedAt: Date.now(),
       },
@@ -467,7 +485,9 @@ async function play() {
 }
 function pause() {
   if (nativePlaybackActive)
-    window.PulseMedia3.pause().catch(() => toast("Could not pause Android playback."));
+    window.PulseMedia3.pause().catch(() =>
+      toast("Could not pause Android playback."),
+    );
   else audio.pause();
   playing = false;
   $("play").textContent = "▶";
@@ -482,7 +502,9 @@ function toggle() {
 }
 function next() {
   if (nativePlaybackActive) {
-    window.PulseMedia3.next().catch(() => toast("Could not skip to the next track."));
+    window.PulseMedia3.next().catch(() =>
+      toast("Could not skip to the next track."),
+    );
     return;
   }
   const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(
@@ -584,14 +606,18 @@ $("shuffle").onclick = () => {
 };
 $("next").onclick = next;
 $("prev").onclick = () => {
-  const currentPosition = nativePlaybackActive ? nativePositionSeconds : audio.currentTime;
+  const currentPosition = nativePlaybackActive
+    ? nativePositionSeconds
+    : audio.currentTime;
   if (currentPosition > 3) {
     if (nativePlaybackActive) window.PulseMedia3.seekTo(0).catch(() => {});
     else audio.currentTime = 0;
     return;
   }
   if (nativePlaybackActive) {
-    window.PulseMedia3.previous().catch(() => toast("Could not return to the previous track."));
+    window.PulseMedia3.previous().catch(() =>
+      toast("Could not return to the previous track."),
+    );
     return;
   }
   const previous = window.PulsePlaylistPlayback?.previousIndex?.(
@@ -616,7 +642,11 @@ $("volume").oninput = (e) => {
 };
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
-  if (!nativePlaybackActive && Number.isFinite(audio.duration) && audio.duration > 0) {
+  if (
+    !nativePlaybackActive &&
+    Number.isFinite(audio.duration) &&
+    audio.duration > 0
+  ) {
     $("progress").value = (audio.currentTime / audio.duration) * 100;
     $("time").textContent = fmt(audio.currentTime);
     $("duration").textContent = fmt(audio.duration);
@@ -1004,7 +1034,8 @@ if (window.PulseMedia3?.isNative) {
     nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
     nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
     if (nativeDurationSeconds > 0) {
-      $("progress").value = (nativePositionSeconds / nativeDurationSeconds) * 100;
+      $("progress").value =
+        (nativePositionSeconds / nativeDurationSeconds) * 100;
       $("time").textContent = fmt(nativePositionSeconds);
       $("duration").textContent = fmt(nativeDurationSeconds);
     }
@@ -1026,19 +1057,22 @@ if (window.PulseMedia3?.isNative) {
   });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible" || !nativePlaybackActive) return;
-    window.PulseMedia3.getState().then((state) => {
+    window.PulseMedia3.getState()
+      .then((state) => {
       if (!state) return;
       nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
       nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
       playing = Boolean(state.isPlaying);
       $("play").textContent = playing ? "Ⅱ" : "▶";
       if (nativeDurationSeconds > 0) {
-        $("progress").value = (nativePositionSeconds / nativeDurationSeconds) * 100;
+        $("progress").value =
+          (nativePositionSeconds / nativeDurationSeconds) * 100;
         $("time").textContent = fmt(nativePositionSeconds);
         $("duration").textContent = fmt(nativeDurationSeconds);
       }
       render();
-    }).catch(() => {});
+      })
+      .catch(() => {});
   });
 }
 
