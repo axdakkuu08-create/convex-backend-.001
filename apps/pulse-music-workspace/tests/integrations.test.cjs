@@ -403,3 +403,54 @@ test("recognition requires explicit consent and uses a secure endpoint", () => {
   assert.match(source, /stream\?\.getTracks\(\)\.forEach/);
   assert.doesNotMatch(source, /result\.innerHTML\s*=/);
 });
+
+
+test("Tempus player validates provider links and artwork before opening or rendering", () => {
+  const player = fs.readFileSync(
+    path.join(__dirname, "..", "tempus-player.js"),
+    "utf8",
+  );
+  assert.match(player, /function safeExternalUrl/);
+  assert.match(player, /const link = safeExternalUrl/);
+  assert.match(player, /const artwork = safeExternalUrl/);
+  assert.match(player, /window\.open\(url/);
+});
+
+test("Apple chart renderer only uses HTTPS artwork and provider links", () => {
+  const charts = fs.readFileSync(
+    path.join(__dirname, "..", "charts-dashboard.js"),
+    "utf8",
+  );
+  assert.match(charts, /const safeHttpsUrl/);
+  assert.match(charts, /safeHttpsUrl\(song\.artworkUrl100\)/);
+  assert.match(charts, /safeHttpsUrl\(song\.url\)/);
+});
+
+test("Apple charts API rejects non-GET methods and invalid storefront codes", async () => {
+  const handler = require(path.join(__dirname, "..", "api", "apple-charts.js"));
+  const makeResponse = () => ({
+    headers: {},
+    statusCode: 200,
+    body: null,
+    setHeader(name, value) {
+      this.headers[name] = value;
+    },
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(payload) {
+      this.body = payload;
+      return this;
+    },
+  });
+  const methodResponse = makeResponse();
+  await handler({ method: "POST", query: {} }, methodResponse);
+  assert.equal(methodResponse.statusCode, 405);
+  assert.equal(methodResponse.headers.Allow, "GET");
+
+  const countryResponse = makeResponse();
+  await handler({ method: "GET", query: { country: "usa" } }, countryResponse);
+  assert.equal(countryResponse.statusCode, 400);
+  assert.match(countryResponse.body.error, /two-letter/i);
+});

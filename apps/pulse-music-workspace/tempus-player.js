@@ -26,6 +26,20 @@
         String(Math.floor(value % 60)).padStart(2, "0")
       : "0:00";
   const currentTrack = () => window.PulsePlayerBridge?.currentTrack?.() || null;
+  const safeExternalUrl = (value) => {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    try {
+      const parsed = new URL(raw, window.location.href);
+      if (parsed.username || parsed.password) return "";
+      return parsed.protocol === "https:" ||
+        parsed.origin === window.location.origin
+        ? parsed.href
+        : "";
+    } catch (_) {
+      return "";
+    }
+  };
   const open = () => {
     overlay.classList.add("open");
     update();
@@ -51,9 +65,11 @@
       : source.includes("Apple") || source.includes("iTunes")
         ? "This provider supplies a short preview, not a full-length track."
         : "Playback and availability are controlled by the selected source.";
-    if (track.archivePage || track.sourcePage || track.url) {
-      const link = track.archivePage || track.sourcePage || track.url;
-      rights.innerHTML = "";
+    const link = safeExternalUrl(
+      track.archivePage || track.sourcePage || track.url,
+    );
+    if (link) {
+      rights.replaceChildren();
       rights.append(
         document.createTextNode(
           track.archivePage
@@ -72,9 +88,10 @@
     }
     const art = $("tempusPlayerArt");
     art.replaceChildren();
-    if (track.artwork) {
+    const artwork = safeExternalUrl(track.artwork);
+    if (artwork) {
       const image = document.createElement("img");
-      image.src = track.artwork;
+      image.src = artwork;
       image.alt = "";
       art.append(image);
     } else {
@@ -109,7 +126,9 @@
   };
   $("tempusPlayerSourceLink").onclick = () => {
     const track = currentTrack();
-    const url = track?.archivePage || track?.sourcePage || track?.url;
+    const url = safeExternalUrl(
+      track?.archivePage || track?.sourcePage || track?.url,
+    );
     if (url) window.open(url, "_blank", "noopener,noreferrer");
   };
   $("tempusPlayerSeek").oninput = (event) => {

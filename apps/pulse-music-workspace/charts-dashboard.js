@@ -16,6 +16,14 @@
           "'": "&#39;",
         })[c],
     );
+  const safeHttpsUrl = (value) => {
+    try {
+      const parsed = new URL(String(value || ""));
+      return parsed.protocol === "https:" ? parsed.href : "";
+    } catch (_) {
+      return "";
+    }
+  };
   const prefs = () => {
     try {
       return JSON.parse(localStorage.getItem("pulse.prefs") || "{}");
@@ -60,17 +68,22 @@
     items.forEach((song, i) => {
       const row = document.createElement("article");
       row.className = "chart-track";
-      const art = String(song.artworkUrl100 || "").replace(
+      const art = safeHttpsUrl(song.artworkUrl100).replace(
           "100x100bb",
           "200x200bb",
         ),
-        href = song.url || "https://music.apple.com/" + code + "/";
+        href =
+          safeHttpsUrl(song.url) || "https://music.apple.com/" + code + "/";
       row.innerHTML =
         '<span class="chart-rank">' +
         (i + 1) +
-        '</span><img class="chart-cover" loading="lazy" src="' +
-        esc(art) +
-        '" alt=""><div class="chart-copy"><strong>' +
+        "</span>" +
+        (art
+          ? '<img class="chart-cover" loading="lazy" src="' +
+            esc(art) +
+            '" alt="">'
+          : '<span class="chart-cover-placeholder">♫</span>') +
+        '<div class="chart-copy"><strong>' +
         esc(song.name || "Untitled") +
         "</strong><small>" +
         esc(song.artistName || "Unknown artist") +
