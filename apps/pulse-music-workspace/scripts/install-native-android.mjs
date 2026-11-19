@@ -20,6 +20,8 @@ const networkConfigTarget = path.join(
   android,
   "app/src/main/res/xml/network_security_config.xml",
 );
+const bundledCapacitorCore = path.join(root, "www", "capacitor-core", "index.js");
+await readFile(bundledCapacitorCore, "utf8");
 
 for (const source of [
   path.join(javaSource, "PulseMedia3Plugin.java"),
