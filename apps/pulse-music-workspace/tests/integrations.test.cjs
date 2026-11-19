@@ -255,7 +255,8 @@ test("saved playlist playback queues every playable song in saved order", () => 
   assert.match(playlists, /PulsePlaylistPlayback\?\.start/);
   const playback = fs.readFileSync(path.join(__dirname, "..", "playlist-playback.js"), "utf8");
   assert.match(playback, /pulse:play-playlist/);
-  assert.match(playlists, /tracks\s*\.filter/);
+  assert.match(playlists, /Array\.isArray\(tracks\)/);
+  assert.match(playlists, /\.filter\(\(track\) => track && track\.src\)/);
   assert.match(app, /pulse:play-playlist/);
   assert.match(app, /tracks\.splice\(0, tracks\.length, \.\.\.queue\)/);
   assert.match(app, /audio\.onended/);
