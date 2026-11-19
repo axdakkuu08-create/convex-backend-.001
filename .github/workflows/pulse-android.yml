@@ -66,6 +66,9 @@ jobs:
         run: npx cap add android
       - name: Install native Media3 integration
         run: node scripts/install-native-android.mjs
+      - name: Audit generated Android manifest and network policy
+        run: |
+          python3 scripts/audit-android-manifest.py android/app/src/main/AndroidManifest.xml android/app/src/main/res/xml/network_security_config.xml
       - name: Sync Capacitor Android project
         run: npx cap sync android
       - name: Build debug APK
