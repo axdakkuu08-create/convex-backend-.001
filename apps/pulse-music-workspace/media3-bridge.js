@@ -24,7 +24,9 @@
   async function getPlugin() {
     const plugin = await pluginPromise;
     if (!plugin) {
-      throw new Error("PulseMedia3 native plugin is unavailable on this platform");
+      throw new Error(
+        "PulseMedia3 native plugin is unavailable on this platform",
+      );
     }
     return plugin;
   }
