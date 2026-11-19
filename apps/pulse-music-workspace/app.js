@@ -1003,7 +1003,9 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           i +
           '">▶ Play</button><button class="catalog-add" type="button" data-add-archive-index="' +
           i +
-          '">＋ Playlist</button></div></article>',
+          '">＋ Playlist</button><button class="catalog-add" type="button" data-offline-archive-index="' +
+          i +
+          '">↓ Save offline</button></div></article>',
       )
       .join("");
   } catch (error) {
@@ -1013,7 +1015,33 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
         : "Archive search failed. Please try again.";
   }
 });
-$("archiveResults").addEventListener("click", (e) => {
+$("archiveResults").addEventListener("click", async (e) => {
+  const offlineButton = e.target.closest("[data-offline-archive-index]");
+  if (offlineButton) {
+    const item = archiveItems[Number(offlineButton.dataset.offlineArchiveIndex)];
+    if (!item) return;
+    status.textContent = "Checking rights approval and saving audio…";
+    try {
+      await window.PulseOfflineMedia.download({
+        id: Date.now(),
+        title: item.title,
+        artist: item.artist,
+        src: item.audioUrl,
+        source: "Internet Archive",
+        sourceType: "internet_archive",
+        catalogId: item.id,
+        sourcePage: item.pageUrl,
+        license: item.license,
+        verificationStatus: item.verificationStatus || "VERIFYING",
+        rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+        duration: item.durationSeconds ? fmt(item.durationSeconds) : "",
+      });
+      status.textContent = "Saved offline: " + item.title;
+    } catch (error) {
+      status.textContent = error?.message || "Offline save failed.";
+    }
+    return;
+  }
   const button = e.target.closest("[data-archive-index]");
   if (!button) return;
   const item = archiveItems[Number(button.dataset.archiveIndex)];
