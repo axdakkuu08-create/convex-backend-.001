@@ -461,4 +461,6 @@ test("mobile home navigation validates external provider links", () => {
   );
   assert.match(home, /const safeExternalUrl/);
   assert.match(home, /safeExternalUrl\(trackButton\.dataset\.homeUrl\)/);
+  assert.match(home, /const queryAll =/);
+  assert.match(home, /safeExternalUrl\(item\.url\)/);
 });
