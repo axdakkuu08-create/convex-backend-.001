@@ -13,6 +13,39 @@ let index = 0,
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
 let archiveItems = [];
+let nativeLoadPromise = Promise.resolve(true);
+let nativePlaybackActive = false;
+let nativeDurationSeconds = 0;
+let nativePositionSeconds = 0;
+let nativeEndedHandled = false;
+
+function canUseNativeQueue() {
+  return Boolean(
+    window.PulseMedia3?.isNative &&
+      tracks.length > 0 &&
+      tracks.every((track) => /^https:\/\//i.test(String(track.src || ""))),
+  );
+}
+function nativeQueueItems() {
+  return tracks.map((track) => ({
+    id: String(track.id),
+    url: String(track.src),
+    title: String(track.title || "Pulse audio"),
+    artist: String(track.artist || "Unknown artist"),
+  }));
+}
+function refreshNativeQueue(shouldResume = playing) {
+  if (!nativePlaybackActive || !window.PulseMedia3) return Promise.resolve(false);
+  const position = Math.max(0, nativePositionSeconds);
+  nativeLoadPromise = window.PulseMedia3
+    .setQueue(nativeQueueItems(), index, position)
+    .then(() => (shouldResume ? window.PulseMedia3.play() : true))
+    .catch((error) => {
+      reportPlayback("error", error?.message || "Android playback queue could not be updated.");
+      return false;
+    });
+  return nativeLoadPromise;
+}
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -323,8 +356,28 @@ function setTrack(i, autoplay = false) {
   $("like").disabled = false;
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
-  audio.src = t.src;
-  audio.load();
+  const wasNativePlayback = nativePlaybackActive;
+  nativePlaybackActive = canUseNativeQueue();
+  nativePositionSeconds = 0;
+  nativeDurationSeconds = 0;
+  nativeEndedHandled = false;
+  if (nativePlaybackActive) {
+    audio.pause();
+    nativeLoadPromise = window.PulseMedia3
+      .setQueue(nativeQueueItems(), index, 0)
+      .catch((error) => {
+        nativePlaybackActive = false;
+        audio.src = t.src;
+        audio.load();
+        reportPlayback("error", error?.message || "Android audio service could not load this track.");
+        return false;
+      });
+  } else {
+    if (wasNativePlayback && window.PulseMedia3)
+      window.PulseMedia3.pause().catch(() => {});
+    audio.src = t.src;
+    audio.load();
+  }
   $("audioStatus").textContent = t.archivePage
     ? "Open-audio source · rights review required; availability is not permission."
     : t.localFile
@@ -354,12 +407,12 @@ function reportPlayback(state, message) {
         state,
         trackId: current?.id ?? null,
         title: current?.title || null,
-        positionMs: Number.isFinite(audio.currentTime)
-          ? Math.round(audio.currentTime * 1000)
-          : 0,
-        durationMs: Number.isFinite(audio.duration)
-          ? Math.round(audio.duration * 1000)
-          : 0,
+        positionMs: Math.round(
+          Math.max(0, nativePlaybackActive ? nativePositionSeconds : audio.currentTime) * 1000,
+        ),
+        durationMs: Math.round(
+          Math.max(0, nativePlaybackActive ? nativeDurationSeconds : audio.duration) * 1000,
+        ),
         updatedAt: Date.now(),
       },
     }),
@@ -375,7 +428,13 @@ async function play() {
     return false;
   }
   try {
-    await audio.play();
+    if (nativePlaybackActive) {
+      await nativeLoadPromise;
+      if (nativePlaybackActive) await window.PulseMedia3.play();
+      else await audio.play();
+    } else {
+      await audio.play();
+    }
     playing = true;
     reportPlayback("playing", "Playing · " + (tracks[index]?.title || "Audio"));
     $("audioStatus").textContent = tracks[index].archivePage
@@ -403,7 +462,9 @@ async function play() {
   }
 }
 function pause() {
-  audio.pause();
+  if (nativePlaybackActive)
+    window.PulseMedia3.pause().catch(() => toast("Could not pause Android playback."));
+  else audio.pause();
   playing = false;
   $("play").textContent = "▶";
   reportPlayback(
@@ -416,6 +477,10 @@ function toggle() {
   playing ? pause() : play();
 }
 function next() {
+  if (nativePlaybackActive) {
+    window.PulseMedia3.next().catch(() => toast("Could not skip to the next track."));
+    return;
+  }
   const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(
     index,
     tracks.length,
@@ -515,8 +580,14 @@ $("shuffle").onclick = () => {
 };
 $("next").onclick = next;
 $("prev").onclick = () => {
-  if (audio.currentTime > 3) {
-    audio.currentTime = 0;
+  const currentPosition = nativePlaybackActive ? nativePositionSeconds : audio.currentTime;
+  if (currentPosition > 3) {
+    if (nativePlaybackActive) window.PulseMedia3.seekTo(0).catch(() => {});
+    else audio.currentTime = 0;
+    return;
+  }
+  if (nativePlaybackActive) {
+    window.PulseMedia3.previous().catch(() => toast("Could not return to the previous track."));
     return;
   }
   const previous = window.PulsePlaylistPlayback?.previousIndex?.(
@@ -533,20 +604,32 @@ $("repeat").onclick = () => {
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
 $("like").onclick = () => like(tracks[index]?.id);
-$("volume").oninput = (e) => (audio.volume = Number(e.target.value));
+$("volume").oninput = (e) => {
+  const volume = Number(e.target.value);
+  if (nativePlaybackActive)
+    window.PulseMedia3.setVolume(volume).catch(() => {});
+  else audio.volume = volume;
+};
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
-  if (Number.isFinite(audio.duration) && audio.duration > 0) {
+  if (!nativePlaybackActive && Number.isFinite(audio.duration) && audio.duration > 0) {
     $("progress").value = (audio.currentTime / audio.duration) * 100;
     $("time").textContent = fmt(audio.currentTime);
     $("duration").textContent = fmt(audio.duration);
   }
 };
 $("progress").oninput = (e) => {
-  if (Number.isFinite(audio.duration))
+  if (nativePlaybackActive && nativeDurationSeconds > 0) {
+    window.PulseMedia3.seekTo(
+      (Number(e.target.value) / 100) * nativeDurationSeconds,
+    ).catch(() => {});
+  } else if (Number.isFinite(audio.duration)) {
     audio.currentTime = (Number(e.target.value) / 100) * audio.duration;
+  }
 };
-audio.onended = () => next();
+audio.onended = () => {
+  if (!nativePlaybackActive) next();
+};
 audio.onwaiting = () => {
   reportPlayback(
     "buffering",
@@ -558,6 +641,7 @@ audio.oncanplay = () => {
     reportPlayback("ready", "Audio ready · press Play if it has not started.");
 };
 audio.onerror = () => {
+  if (nativePlaybackActive) return;
   playing = false;
   $("play").textContent = "▶";
   const msg =
@@ -888,6 +972,70 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   toast("Loading " + track.title);
 });
 
+if (window.PulseMedia3?.isNative) {
+  window.PulseMedia3.setVolume(0.75).catch(() => {});
+  window.PulseMedia3.addStateListener((state) => {
+    if (!state || !nativePlaybackActive) return;
+    const mediaId = String(state.mediaId || "");
+    const transitionedIndex = mediaId
+      ? tracks.findIndex((track) => String(track.id) === mediaId)
+      : -1;
+    if (transitionedIndex >= 0 && transitionedIndex !== index) {
+      index = transitionedIndex;
+      const currentTrack = tracks[index];
+      $("nowTitle").textContent = currentTrack.title;
+      $("nowArtist").textContent = currentTrack.artist;
+      $("cover").className = "cover " + currentTrack.cover;
+      $("cover").textContent = currentTrack.symbol;
+      $("like").textContent = liked.has(currentTrack.id) ? "♥" : "♡";
+      $("like").classList.toggle("liked", liked.has(currentTrack.id));
+      $("duration").textContent = currentTrack.time;
+      $("time").textContent = "0:00";
+      render();
+      renderQueuePanel();
+      persistQueue();
+    }
+    nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
+    nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
+    if (nativeDurationSeconds > 0) {
+      $("progress").value = (nativePositionSeconds / nativeDurationSeconds) * 100;
+      $("time").textContent = fmt(nativePositionSeconds);
+      $("duration").textContent = fmt(nativeDurationSeconds);
+    }
+    const isNowPlaying = Boolean(state.isPlaying);
+    if (playing !== isNowPlaying) {
+      playing = isNowPlaying;
+      $("play").textContent = playing ? "Ⅱ" : "▶";
+      render();
+    }
+    if (state.playbackState === 4 && !nativeEndedHandled) {
+      nativeEndedHandled = true;
+      playing = false;
+      $("play").textContent = "▶";
+      reportPlayback("ended", "Playlist finished.");
+      render();
+    } else if (state.playbackState !== 4) {
+      nativeEndedHandled = false;
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || !nativePlaybackActive) return;
+    window.PulseMedia3.getState().then((state) => {
+      if (!state) return;
+      nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
+      nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
+      playing = Boolean(state.isPlaying);
+      $("play").textContent = playing ? "Ⅱ" : "▶";
+      if (nativeDurationSeconds > 0) {
+        $("progress").value = (nativePositionSeconds / nativeDurationSeconds) * 100;
+        $("time").textContent = fmt(nativePositionSeconds);
+        $("duration").textContent = fmt(nativeDurationSeconds);
+      }
+      render();
+    }).catch(() => {});
+  });
+}
+
 function playPlaylistQueue(playlistName, incomingTracks) {
   const normalized =
     window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incomingTracks }) ||
@@ -956,6 +1104,7 @@ window.PulsePlayerBridge = {
       render();
       renderQueuePanel();
       persistQueue();
+      if (nativePlaybackActive) void refreshNativeQueue(wasPlaying);
     }
     return true;
   },
@@ -980,6 +1129,7 @@ window.PulsePlayerBridge = {
     render();
     renderQueuePanel();
     persistQueue();
+    if (nativePlaybackActive) void refreshNativeQueue(playing);
     window.dispatchEvent(
       new CustomEvent("pulse:queue-reordered", { detail: { from, to } }),
     );
