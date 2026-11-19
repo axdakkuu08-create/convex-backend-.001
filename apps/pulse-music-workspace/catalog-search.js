@@ -76,6 +76,10 @@
       '<button class="catalog-add" type="button" data-add-catalog-index="' +
       index +
       '">＋ Playlist</button>';
+    const offline =
+      '<button class="catalog-add" type="button" data-offline-catalog-index="' +
+      index +
+      '">↓ Save offline</button>';
     return (
       '<article class="catalog-result">' +
       art +
@@ -96,6 +100,7 @@
       "</div>" +
       action +
       add +
+      offline +
       "</article>"
     );
   };
@@ -176,6 +181,9 @@
         verificationStatus: track.verificationStatus,
         rightsReviewStatus: track.rightsReviewStatus,
         bytesTotal: track.bytesTotal,
+        sourceType:
+          track.provider === "itunes" ? "itunes_preview" : "internet_archive",
+        src: track.streamUrl || track.previewUrl || "",
       }));
       if (!found.length) {
         status.textContent =
@@ -250,7 +258,24 @@
         }),
       );
   });
-  results.addEventListener("click", (event) => {
+  results.addEventListener("click", async (event) => {
+    const offlineButton = event.target.closest("[data-offline-catalog-index]");
+    if (offlineButton) {
+      const item = window.PulseCatalogResults?.[Number(offlineButton.dataset.offlineCatalogIndex)];
+      if (!item) return;
+      status.textContent = "Checking rights approval and saving audio…";
+      try {
+        await window.PulseOfflineMedia.download({
+          ...item,
+          src: item.audioUrl,
+          sourceType: item.sourceType,
+        });
+        status.textContent = "Saved offline: " + item.title;
+      } catch (error) {
+        status.textContent = error?.message || "Offline save failed.";
+      }
+      return;
+    }
     const button = event.target.closest("[data-add-catalog-index]");
     if (!button) return;
     const item =
