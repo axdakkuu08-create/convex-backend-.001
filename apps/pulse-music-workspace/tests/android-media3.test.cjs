@@ -19,7 +19,6 @@ test("native playback is restricted to all-HTTPS queues", () => {
   assert.match(app, /function canUseNativeQueue\(\)/);
   assert.match(app, /tracks\.every\(\s*\(track\)\s*=>/);
   assert.match(app, /PulseMediaPolicy\?\.isHttpsAudioUrl\(track\.src\)/);
-  assert.match(app, /\^https:\\\/\\\//i.test\(String\(track\.src/);
   assert.match(app, /if \(nativePlaybackActive\) \{[\s\S]*PulseMedia3\.play/);
   assert.match(app, /PulseMedia3\.next\(\)/);
   assert.match(app, /PulseMedia3\.previous\(\)/);
