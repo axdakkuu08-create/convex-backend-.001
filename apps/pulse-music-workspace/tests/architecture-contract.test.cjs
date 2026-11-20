@@ -39,6 +39,8 @@ test("offline download metadata never includes credentials or provider session f
   const offline = read("offline-media.js");
   assert.doesNotMatch(offline, /password|accessToken|refreshToken|authorization/i);
   assert.match(offline, /credentials: "omit"/);
-  assert.match(offline, /rightsReviewStatus/);
-  assert.match(offline, /licenseLabel/);
+  assert.match(offline, /\.\.\.attribution/);
+  const policy = read("media-policy.js");
+  assert.match(policy, /rightsReviewStatus/);
+  assert.match(policy, /licenseLabel/);
 });
