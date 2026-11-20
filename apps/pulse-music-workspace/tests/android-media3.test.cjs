@@ -17,7 +17,9 @@ test("native media bridge is loaded before the Pulse player", () => {
 test("native playback is restricted to all-HTTPS queues", () => {
   const app = read("app.js");
   assert.match(app, /function canUseNativeQueue\(\)/);
-  assert.match(app, /tracks\.every\(\(track\) => \/\^https:/);
+  assert.match(app, /tracks\.every\(\s*\(track\)\s*=>/);
+  assert.match(app, /PulseMediaPolicy\?\.isHttpsAudioUrl\(track\.src\)/);
+  assert.match(app, /\^https:\\\/\\\//i.test\(String\(track\.src/);
   assert.match(app, /if \(nativePlaybackActive\) \{[\s\S]*PulseMedia3\.play/);
   assert.match(app, /PulseMedia3\.next\(\)/);
   assert.match(app, /PulseMedia3\.previous\(\)/);
