@@ -33,7 +33,7 @@ test("PWA manifest has standalone scope, start URL and declared icons", () => {
 test("PWA registration is isolated from player startup and has an update signal", () => {
   const html = read("index.html");
   assert.ok(html.indexOf('src="pwa-runtime.js"') > html.indexOf('src="app.js"'));
-  assert.match(read("pwa-runtime.js"), /serviceWorker\.register\("\.\/sw\.js"/);
+  assert.match(read("pwa-runtime.js"), /serviceWorker\s*\.register\("\.\/sw\.js"/);
   assert.match(read("pwa-runtime.js"), /updatefound/);
 });
 
