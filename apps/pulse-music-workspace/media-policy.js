@@ -17,7 +17,9 @@
   function isWebAudioUrl(value) {
     try {
       const url = new URL(String(value || ""));
-      return ["https:", "http:"].includes(url.protocol) && Boolean(url.hostname);
+      return (
+        ["https:", "http:"].includes(url.protocol) && Boolean(url.hostname)
+      );
     } catch (_) {
       return false;
     }
@@ -38,20 +40,24 @@
   function canDownloadOffline(track) {
     return Boolean(
       track &&
-        sourceType(track) === "internet_archive" &&
-        isHttpsAudioUrl(track.src || track.audioUrl) &&
-        licenseLabel(track) &&
-        String(track.sourcePage || track.archivePage || track.url || "").trim() &&
-        String(track.verificationStatus || "") === "VERIFIED_FULL" &&
-        String(track.rightsReviewStatus || "") === "APPROVED",
+      sourceType(track) === "internet_archive" &&
+      isHttpsAudioUrl(track.src || track.audioUrl) &&
+      licenseLabel(track) &&
+      String(track.sourcePage || track.archivePage || track.url || "").trim() &&
+      String(track.verificationStatus || "") === "VERIFIED_FULL" &&
+      String(track.rightsReviewStatus || "") === "APPROVED",
     );
   }
   function normalizeAttribution(track) {
     return {
       sourceType: sourceType(track),
       licenseLabel: licenseLabel(track),
-      sourcePage: String(track?.sourcePage || track?.archivePage || track?.url || ""),
-      rightsReviewStatus: String(track?.rightsReviewStatus || "REVIEW_REQUIRED"),
+      sourcePage: String(
+        track?.sourcePage || track?.archivePage || track?.url || "",
+      ),
+      rightsReviewStatus: String(
+        track?.rightsReviewStatus || "REVIEW_REQUIRED",
+      ),
       verificationStatus: String(track?.verificationStatus || "UNAVAILABLE"),
     };
   }

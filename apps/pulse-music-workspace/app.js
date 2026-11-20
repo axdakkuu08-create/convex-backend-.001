@@ -298,13 +298,17 @@ const offlineLibraryReady =
     })
     .catch(() => false) || Promise.resolve(false);
 function isOfflineCached(url) {
-  return offlineCacheAvailable && Boolean(window.PulseOfflineMedia?.isSaved(url));
+  return (
+    offlineCacheAvailable && Boolean(window.PulseOfflineMedia?.isSaved(url))
+  );
 }
 let queueReady = false;
 let queueDirty = false;
 function makeQueueSnapshot() {
   const stableTracks = tracks
-    .filter((track) => track && window.PulseMediaPolicy?.isWebAudioUrl(track.src))
+    .filter(
+      (track) => track && window.PulseMediaPolicy?.isWebAudioUrl(track.src),
+    )
     .map((track) => ({
       id: track.id,
       catalogId: String(track.catalogId || ""),
@@ -327,7 +331,9 @@ function makeQueueSnapshot() {
       licenseLabel:
         window.PulseMediaPolicy?.licenseLabel(track) ||
         String(track.archiveLicense || track.license || ""),
-      sourcePage: String(track.sourcePage || track.archivePage || track.url || ""),
+      sourcePage: String(
+        track.sourcePage || track.archivePage || track.url || "",
+      ),
       verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
       rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"),
       bytesTotal: Number(track.bytesTotal) || 0,
@@ -443,8 +449,7 @@ function setTrack(i, autoplay = false) {
       repeatOn,
     ).catch((error) => {
       nativePlaybackActive = false;
-      nativeHandoffPromise = window.PulseMedia3
-        .pause()
+      nativeHandoffPromise = window.PulseMedia3.pause()
         .then(() => {
           audio.src = t.src;
           audio.load();
@@ -465,8 +470,7 @@ function setTrack(i, autoplay = false) {
     });
   } else if (wasNativePlayback && window.PulseMedia3) {
     const requestedSource = t.src;
-    nativeHandoffPromise = window.PulseMedia3
-      .pause()
+    nativeHandoffPromise = window.PulseMedia3.pause()
       .then(() => {
         if (tracks[index]?.src !== requestedSource) return false;
         audio.src = requestedSource;
@@ -667,13 +671,15 @@ function setView(v) {
     .forEach((b) => b.classList.toggle("active", b.dataset.view === v));
   render();
   if (v === "downloads") {
-    void window.PulseOfflineMedia?.list?.().then(() => {
-      offlineCacheAvailable = true;
-      render();
-    }).catch(() => {
-      offlineCacheAvailable = false;
-      toast("Offline library could not be refreshed.");
-    });
+    void window.PulseOfflineMedia?.list?.()
+      .then(() => {
+        offlineCacheAvailable = true;
+        render();
+      })
+      .catch(() => {
+        offlineCacheAvailable = false;
+        toast("Offline library could not be refreshed.");
+      });
   }
   $("sidebar").classList.remove("open");
 }
@@ -686,10 +692,12 @@ $("rows").addEventListener("click", (e) => {
       (record) => String(record.id) === String(id),
     );
     if (saved) {
-      void window.PulseOfflineMedia.remove(saved.url).then(() => {
-        render();
-        toast("Removed offline audio.");
-      }).catch(() => toast("Could not remove offline audio."));
+      void window.PulseOfflineMedia.remove(saved.url)
+        .then(() => {
+          render();
+          toast("Removed offline audio.");
+        })
+        .catch(() => toast("Could not remove offline audio."));
     }
     return;
   }
@@ -697,7 +705,9 @@ $("rows").addEventListener("click", (e) => {
     like(id);
     return;
   }
-  let targetIndex = tracks.findIndex((track) => String(track.id) === String(id));
+  let targetIndex = tracks.findIndex(
+    (track) => String(track.id) === String(id),
+  );
   if (targetIndex < 0 && view === "downloads") {
     const saved = (window.PulseOfflineMedia?.records?.() || []).find(
       (record) => String(record.id) === String(id),
@@ -1101,7 +1111,7 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           })
             ? ""
             : ' disabled title="Requires verified full audio and approved rights review"') +
-          '>↓ Save offline</button></div></article>',
+          ">↓ Save offline</button></div></article>",
       )
       .join("");
   } catch (error) {
@@ -1115,7 +1125,8 @@ $("archiveResults").addEventListener("click", async (e) => {
   const offlineButton = e.target.closest("[data-offline-archive-index]");
   if (offlineButton) {
     const status = $("archiveStatus");
-    const item = archiveItems[Number(offlineButton.dataset.offlineArchiveIndex)];
+    const item =
+      archiveItems[Number(offlineButton.dataset.offlineArchiveIndex)];
     if (!item) return;
     status.textContent = "Checking rights approval and saving audio…";
     try {

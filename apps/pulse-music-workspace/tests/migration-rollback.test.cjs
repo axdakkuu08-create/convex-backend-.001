@@ -42,23 +42,28 @@ test("new attribution fields survive queue snapshot normalization", () => {
   const storage = createStorage();
   const snapshot = {
     schemaVersion: 2,
-    tracks: [{
-      id: 7,
-      title: "Approved Archive item",
-      src: "https://archive.org/download/item/audio.mp3",
-      sourceType: "internet_archive",
-      licenseLabel: "CC BY 4.0",
-      sourcePage: "https://archive.org/details/item",
-      rightsReviewStatus: "APPROVED",
-      verificationStatus: "VERIFIED_FULL",
-    }],
+    tracks: [
+      {
+        id: 7,
+        title: "Approved Archive item",
+        src: "https://archive.org/download/item/audio.mp3",
+        sourceType: "internet_archive",
+        licenseLabel: "CC BY 4.0",
+        sourcePage: "https://archive.org/details/item",
+        rightsReviewStatus: "APPROVED",
+        verificationStatus: "VERIFIED_FULL",
+      },
+    ],
     currentTrackId: 7,
     currentIndex: 0,
   };
   const normalized = storage.normalizeSnapshot(snapshot, () => true);
   assert.equal(normalized.tracks[0].sourceType, "internet_archive");
   assert.equal(normalized.tracks[0].licenseLabel, "CC BY 4.0");
-  assert.equal(normalized.tracks[0].sourcePage, "https://archive.org/details/item");
+  assert.equal(
+    normalized.tracks[0].sourcePage,
+    "https://archive.org/details/item",
+  );
 });
 
 test("rollback instructions preserve existing queue and playlist keys", () => {

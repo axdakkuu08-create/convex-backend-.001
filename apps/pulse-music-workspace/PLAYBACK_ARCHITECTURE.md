@@ -2,8 +2,8 @@
 
 ## Ownership
 
-- The vanilla HTML/CSS/JavaScript application owns discovery, source attribution,
-  playlist presentation, and the ordered web queue.
+- The vanilla HTML/CSS/JavaScript application owns discovery, source
+  attribution, playlist presentation, and the ordered web queue.
 - `PulsePlaylistPlayback` owns playlist normalization and queue navigation.
 - `PulseQueueStorage` owns queue snapshots and recovery (IndexedDB primary,
   localStorage fallback). It stores references and attribution, not audio bytes.
@@ -32,8 +32,8 @@ REVIEW_REQUIRED, so unreviewed items remain stream-only.
   security caveat; offline downloads require HTTPS.
 - Local blob URLs remain browser-only and are not persisted as reusable offline
   media references.
-- The service worker serves saved media from Cache Storage, including byte
-  range requests, and does not cache arbitrary streaming URLs.
+- The service worker serves saved media from Cache Storage, including byte range
+  requests, and does not cache arbitrary streaming URLs.
 - A cached offline item is marked `offlineCached` and deliberately bypasses
   Media3 so the WebView service worker can satisfy the request. Android-native
   background playback of cached files still requires a separate Filesystem to

@@ -9,7 +9,9 @@ const root = path.join(__dirname, "..");
 const audit = path.join(root, "scripts", "audit-android-manifest.py");
 
 function runAudit(manifest) {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "pulse-android-audit-"));
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "pulse-android-audit-"),
+  );
   const manifestPath = path.join(directory, "AndroidManifest.xml");
   const networkPath = path.join(directory, "network_security_config.xml");
   fs.writeFileSync(manifestPath, manifest);
@@ -45,7 +47,9 @@ test("Android manifest audit accepts the intended protected MediaSessionService"
 
 test("Android manifest audit rejects exported content providers", () => {
   const result = runAudit(
-    validManifest('<provider android:name="com.pulse.music.LeakyProvider" android:exported="true" />'),
+    validManifest(
+      '<provider android:name="com.pulse.music.LeakyProvider" android:exported="true" />',
+    ),
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stdout, /Exported ContentProvider/);
@@ -53,7 +57,10 @@ test("Android manifest audit rejects exported content providers", () => {
 
 test("Android manifest audit rejects cleartext traffic and missing app hardening", () => {
   const result = runAudit(
-    validManifest().replace('android:usesCleartextTraffic="false"', 'android:usesCleartextTraffic="true"'),
+    validManifest().replace(
+      'android:usesCleartextTraffic="false"',
+      'android:usesCleartextTraffic="true"',
+    ),
   );
   assert.notEqual(result.status, 0);
   assert.match(result.stdout, /usesCleartextTraffic/);

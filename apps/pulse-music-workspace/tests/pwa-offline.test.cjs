@@ -32,8 +32,13 @@ test("PWA manifest has standalone scope, start URL and declared icons", () => {
 
 test("PWA registration is isolated from player startup and has an update signal", () => {
   const html = read("index.html");
-  assert.ok(html.indexOf('src="pwa-runtime.js"') > html.indexOf('src="app.js"'));
-  assert.match(read("pwa-runtime.js"), /serviceWorker\s*\.register\("\.\/sw\.js"/);
+  assert.ok(
+    html.indexOf('src="pwa-runtime.js"') > html.indexOf('src="app.js"'),
+  );
+  assert.match(
+    read("pwa-runtime.js"),
+    /serviceWorker\s*\.register\("\.\/sw\.js"/,
+  );
   assert.match(read("pwa-runtime.js"), /updatefound/);
 });
 
@@ -41,10 +46,15 @@ test("service worker app-shell precache list contains real workspace assets", ()
   const worker = read("sw.js");
   const block = worker.match(/const SHELL_FILES = \[([\s\S]*?)\];/);
   assert.ok(block);
-  const assets = [...block[1].matchAll(/"\.\/([^"]+)"/g)].map((match) => match[1]);
+  const assets = [...block[1].matchAll(/"\.\/([^"]+)"/g)].map(
+    (match) => match[1],
+  );
   assert.ok(assets.length > 10);
   for (const asset of assets) {
-    assert.ok(fs.existsSync(path.join(root, asset)), "missing precache asset: " + asset);
+    assert.ok(
+      fs.existsSync(path.join(root, asset)),
+      "missing precache asset: " + asset,
+    );
   }
   const html = read("index.html");
   const localAssets = [
@@ -66,11 +76,16 @@ test("service worker returns correct partial and suffix byte ranges", async () =
   const context = {
     self: {
       location: { origin: "https://pulse.example" },
-      addEventListener: (name, handler) => { handlers[name] = handler; },
+      addEventListener: (name, handler) => {
+        handlers[name] = handler;
+      },
       skipWaiting: () => Promise.resolve(),
       clients: { claim: () => Promise.resolve() },
     },
-    caches: { open: () => Promise.resolve({ addAll: () => Promise.resolve() }), keys: () => Promise.resolve([]) },
+    caches: {
+      open: () => Promise.resolve({ addAll: () => Promise.resolve() }),
+      keys: () => Promise.resolve([]),
+    },
     URL,
     Response,
     Promise,
@@ -105,8 +120,12 @@ test("service worker versions the app shell and preserves the separate media cac
 
 test("offline media and attribution adapters are loaded before the app", () => {
   const html = read("index.html");
-  assert.ok(html.indexOf('src="media-policy.js"') < html.indexOf('src="app.js"'));
-  assert.ok(html.indexOf('src="offline-media.js"') < html.indexOf('src="app.js"'));
+  assert.ok(
+    html.indexOf('src="media-policy.js"') < html.indexOf('src="app.js"'),
+  );
+  assert.ok(
+    html.indexOf('src="offline-media.js"') < html.indexOf('src="app.js"'),
+  );
   assert.match(read("app.js"), /view === "downloads"/);
   assert.match(read("app.js"), /licenseLabel/);
 });

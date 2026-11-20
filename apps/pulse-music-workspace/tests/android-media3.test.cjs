@@ -74,7 +74,9 @@ test("native service enables audio focus and headset-disconnect handling", () =>
   assert.match(service, /setAudioAttributes\(attributes, true\)/);
   assert.match(service, /setHandleAudioBecomingNoisy\(true\)/);
   assert.match(service, /extends MediaSessionService/);
-  const plugin = read("android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java");
+  const plugin = read(
+    "android-native/src/main/java/com/pulse/music/PulseMedia3Plugin.java",
+  );
   assert.match(plugin, /getPlayerError\(\)/);
   assert.match(plugin, /errorMessage/);
 });

@@ -20,7 +20,12 @@ const networkConfigTarget = path.join(
   android,
   "app/src/main/res/xml/network_security_config.xml",
 );
-const bundledCapacitorCore = path.join(root, "www", "capacitor-core", "index.js");
+const bundledCapacitorCore = path.join(
+  root,
+  "www",
+  "capacitor-core",
+  "index.js",
+);
 await readFile(bundledCapacitorCore, "utf8");
 
 for (const source of [
@@ -77,7 +82,10 @@ if (/android:networkSecurityConfig="[^"]*"/.test(manifest)) {
   );
 }
 if (/android:allowBackup="[^"]*"/.test(manifest)) {
-  manifest = manifest.replace(/android:allowBackup="[^"]*"/, 'android:allowBackup="false"');
+  manifest = manifest.replace(
+    /android:allowBackup="[^"]*"/,
+    'android:allowBackup="false"',
+  );
 } else {
   manifest = manifest.replace(
     "<application",
@@ -194,7 +202,7 @@ if (!finalManifest.includes("com.pulse.music.PulseAudioService")) {
 if (!finalManifest.includes('android:usesCleartextTraffic="false"')) {
   throw new Error("Android cleartext traffic is not explicitly disabled");
 }
-if (!finalManifest.includes('@xml/network_security_config')) {
+if (!finalManifest.includes("@xml/network_security_config")) {
   throw new Error("Android network security config is not attached");
 }
 if (!finalManifest.includes('android:allowBackup="false"')) {

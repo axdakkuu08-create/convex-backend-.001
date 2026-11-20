@@ -4,7 +4,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const source = fs.readFileSync(path.join(__dirname, "..", "media-policy.js"), "utf8");
+const source = fs.readFileSync(
+  path.join(__dirname, "..", "media-policy.js"),
+  "utf8",
+);
 const window = {};
 vm.runInNewContext(source, { window, URL, Set, Boolean, String });
 const policy = window.PulseMediaPolicy;
@@ -26,11 +29,23 @@ test("offline approval requires a verified full Internet Archive track", () => {
     rightsReviewStatus: "APPROVED",
   };
   assert.equal(policy.canDownloadOffline(base), true);
-  assert.equal(policy.canDownloadOffline({ ...base, rightsReviewStatus: "REVIEW_REQUIRED" }), false);
-  assert.equal(policy.canDownloadOffline({ ...base, verificationStatus: "VERIFYING" }), false);
+  assert.equal(
+    policy.canDownloadOffline({
+      ...base,
+      rightsReviewStatus: "REVIEW_REQUIRED",
+    }),
+    false,
+  );
+  assert.equal(
+    policy.canDownloadOffline({ ...base, verificationStatus: "VERIFYING" }),
+    false,
+  );
   assert.equal(policy.canDownloadOffline({ ...base, license: "" }), false);
   assert.equal(policy.canDownloadOffline({ ...base, sourcePage: "" }), false);
-  assert.equal(policy.canDownloadOffline({ ...base, src: "http://archive.org/song.mp3" }), false);
+  assert.equal(
+    policy.canDownloadOffline({ ...base, src: "http://archive.org/song.mp3" }),
+    false,
+  );
 });
 
 test("iTunes previews and generic user URLs never qualify for offline saving", () => {
@@ -40,8 +55,14 @@ test("iTunes previews and generic user URLs never qualify for offline saving", (
     verificationStatus: "VERIFIED_FULL",
     rightsReviewStatus: "APPROVED",
   };
-  assert.equal(policy.canDownloadOffline({ ...base, sourceType: "itunes_preview" }), false);
-  assert.equal(policy.canDownloadOffline({ ...base, sourceType: "user_audio" }), false);
+  assert.equal(
+    policy.canDownloadOffline({ ...base, sourceType: "itunes_preview" }),
+    false,
+  );
+  assert.equal(
+    policy.canDownloadOffline({ ...base, sourceType: "user_audio" }),
+    false,
+  );
 });
 
 test("attribution normalization preserves source, licence and review status", () => {
