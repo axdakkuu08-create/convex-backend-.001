@@ -5,10 +5,10 @@
 - Queue snapshots remain at schemaVersion 2. The new attribution properties
   (`sourceType`, `licenseLabel`, and `sourcePage`) are additive and optional.
 - Existing queue snapshots without those properties continue to load. Missing
-  attribution is normalized conservatively to `user_audio`,
-  `REVIEW_REQUIRED`, and an empty licence label.
-- The new offline index uses the independent key
-  `pulse.offlineMedia.v1`; no existing queue or playlist key is rewritten.
+  attribution is normalized conservatively to `user_audio`, `REVIEW_REQUIRED`,
+  and an empty licence label.
+- The new offline index uses the independent key `pulse.offlineMedia.v1`; no
+  existing queue or playlist key is rewritten.
 - Existing local playlist records keep their current key and shape. New
   attribution fields are additive.
 - Existing iTunes preview records remain preview-only and are not migrated into

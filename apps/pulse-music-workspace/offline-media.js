@@ -57,15 +57,22 @@
       headers: { Accept: "audio/*,application/octet-stream;q=0.9" },
     });
     if (!response.ok || response.type === "opaque") {
-      throw new Error("The audio source did not allow a safe offline download.");
+      throw new Error(
+        "The audio source did not allow a safe offline download.",
+      );
     }
     const contentType = response.headers.get("content-type") || "";
-    if (!/^audio\//i.test(contentType) && !/application\/octet-stream/i.test(contentType)) {
+    if (
+      !/^audio\//i.test(contentType) &&
+      !/application\/octet-stream/i.test(contentType)
+    ) {
       throw new Error("The source did not return an audio file.");
     }
     const blob = await response.blob();
     if (!blob.size || blob.size > MAX_TRACK_BYTES) {
-      throw new Error("The audio file is empty or exceeds the 100 MB offline limit.");
+      throw new Error(
+        "The audio file is empty or exceeds the 100 MB offline limit.",
+      );
     }
     if (navigator.storage?.estimate) {
       const estimate = await navigator.storage.estimate();
@@ -74,7 +81,9 @@
         Number.isFinite(estimate.usage) &&
         estimate.usage + blob.size > estimate.quota * 0.85
       ) {
-        throw new Error("Not enough available browser storage for this download.");
+        throw new Error(
+          "Not enough available browser storage for this download.",
+        );
       }
     }
     if (navigator.storage?.persist) {
@@ -113,7 +122,9 @@
       ]);
     } catch (error) {
       await cache.delete(url);
-      throw new Error("Offline metadata could not be saved; cached audio was removed.");
+      throw new Error(
+        "Offline metadata could not be saved; cached audio was removed.",
+      );
     }
     return { saved: true, alreadySaved: false, record };
   }

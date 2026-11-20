@@ -86,8 +86,10 @@
         ? '<button class="catalog-add" type="button" data-offline-catalog-index="' +
           index +
           '"' +
-          (offlineAllowed ? "" : ' disabled title="Requires verified full audio and approved rights review"') +
-          '>↓ Save offline</button>'
+          (offlineAllowed
+            ? ""
+            : ' disabled title="Requires verified full audio and approved rights review"') +
+          ">↓ Save offline</button>"
         : "";
     return (
       '<article class="catalog-result">' +
@@ -271,7 +273,10 @@
   results.addEventListener("click", async (event) => {
     const offlineButton = event.target.closest("[data-offline-catalog-index]");
     if (offlineButton) {
-      const item = window.PulseCatalogResults?.[Number(offlineButton.dataset.offlineCatalogIndex)];
+      const item =
+        window.PulseCatalogResults?.[
+          Number(offlineButton.dataset.offlineCatalogIndex)
+        ];
       if (!item) return;
       status.textContent = "Checking rights approval and saving audio…";
       try {

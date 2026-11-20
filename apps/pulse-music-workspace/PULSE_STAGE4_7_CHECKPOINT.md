@@ -45,17 +45,17 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 | B14 | Verify background playback after app is backgrounded and screen is locked                    | physical Android test log/video           | NOT TESTABLE HERE |
 | B15 | Verify notification / lock-screen play, pause, next, previous controls                       | physical Android test log/video           | NOT TESTABLE HERE |
 | B16 | Verify audio focus, interruptions, headset/Bluetooth disconnect behavior                     | physical Android test log/video           | NOT TESTABLE HERE |
-| B17 | Verify supported audio formats, stream errors, seek and queue transitions                    | automated tests + physical device results | IN PROGRESS      |
-| B18 | Verify Android lifecycle recovery and web/native playback handoff without duplicate audio    | automated tests + physical device results | IN PROGRESS      |
+| B17 | Verify supported audio formats, stream errors, seek and queue transitions                    | automated tests + physical device results | IN PROGRESS       |
+| B18 | Verify Android lifecycle recovery and web/native playback handoff without duplicate audio    | automated tests + physical device results | IN PROGRESS       |
 
 ### Stage 5 — Offline reliability (B19–B23)
 
 | ID  | Required verification / work                                                     | Acceptance evidence                           | Status            |
 | --- | -------------------------------------------------------------------------------- | --------------------------------------------- | ----------------- |
-| B19 | Add/verify PWA manifest, icons, installability metadata                          | manifest audit + browser installability check | IN PROGRESS      |
-| B20 | Add/verify service worker lifecycle and versioned app-shell caching              | service-worker tests + browser evidence       | IN PROGRESS      |
-| B21 | Define offline media storage and rights/attribution metadata policy              | design review + storage tests                 | IN PROGRESS      |
-| B22 | Implement resilient offline queue/library restoration and cache failure handling | automated storage tests                       | IN PROGRESS      |
+| B19 | Add/verify PWA manifest, icons, installability metadata                          | manifest audit + browser installability check | IN PROGRESS       |
+| B20 | Add/verify service worker lifecycle and versioned app-shell caching              | service-worker tests + browser evidence       | IN PROGRESS       |
+| B21 | Define offline media storage and rights/attribution metadata policy              | design review + storage tests                 | IN PROGRESS       |
+| B22 | Implement resilient offline queue/library restoration and cache failure handling | automated storage tests                       | IN PROGRESS       |
 | B23 | Verify install, offline reopen, cached navigation and recovery after update      | browser + physical device evidence            | NOT TESTABLE HERE |
 
 ### Stage 6 — Architecture improvements (B24–B29)
@@ -103,16 +103,16 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
 ## CI observations
 
 - Pulse Workspace Tests run #109 passed on commit
-  98ca01a4fdc510f8a2fac476784b99e6232cb1fe, and Android build run #190
-  produced a debug APK on that earlier Media3-only implementation commit.
+  98ca01a4fdc510f8a2fac476784b99e6232cb1fe, and Android build run #190 produced
+  a debug APK on that earlier Media3-only implementation commit.
 - The current branch adds PWA/offline modules, rights-gated Cache Storage,
   Media3 handoff/error fixes, a locally bundled Capacitor runtime, Android
   manifest hardening, and additional regression tests after that APK.
-- Workflow runs for Pulse Workspace Tests, Pulse Android build, Prettier,
-  and the discovery gateway were created for this checkpoint line but remained
-  queued in the latest observation. No completed regression or Android build
-  for the current head is available. Both Pulse Workspace Tests and Pulse
-  Android build include a manual dispatch trigger in the checkpoint workflow
+- Workflow runs for Pulse Workspace Tests, Pulse Android build, Prettier, and
+  the discovery gateway were created for this checkpoint line but remained
+  queued in the latest observation. No completed regression or Android build for
+  the current head is available. Both Pulse Workspace Tests and Pulse Android
+  build include a manual dispatch trigger in the checkpoint workflow
   definitions.
 - The Android manifest audit is now part of both Android build workflows. It
   checks cleartext denial, app backup disabled, internal component export
@@ -120,8 +120,8 @@ HERE. A CI build or static test is not a substitute for device/browser evidence.
   permissions, and the system-only network trust configuration.
 - The CLA check remains a human PR-description action. No legal attestation has
   been inserted on the user's behalf.
-- Vercel's preview integration reported its daily deployment API limit.
-  No production deployment was requested or performed.
+- Vercel's preview integration reported its daily deployment API limit. No
+  production deployment was requested or performed.
 
 ## Current checkpoint decision
 
@@ -139,11 +139,11 @@ APK or physical-device result is yet available.
 Stage 5 now has a PWA manifest with local SVG icons, a versioned service worker,
 app-shell caching, byte-range support for explicitly cached audio, an Offline
 Downloads view, and a Cache Storage manager. Offline saving is restricted to
-Internet Archive items with a non-empty licence label, VERIFIED_FULL status,
-and explicit APPROVED rights review. iTunes previews and unreviewed items are
-not eligible. Automated tests cover policy, cache failure, quota, range
-responses, and app-shell references, but no completed current-head test run or
-real browser install/offline-reopen evidence is available.
+Internet Archive items with a non-empty licence label, VERIFIED_FULL status, and
+explicit APPROVED rights review. iTunes previews and unreviewed items are not
+eligible. Automated tests cover policy, cache failure, quota, range responses,
+and app-shell references, but no completed current-head test run or real browser
+install/offline-reopen evidence is available.
 
 Important storage boundary: browser Cache Storage is not an app-level encrypted
 Android file vault. It does not complete the blueprint's encrypted/scoped
@@ -160,8 +160,8 @@ network configuration does not itself prove a TLS 1.2 minimum; that remains a
 separate verification gap. The tests and manifest audit have not yet completed
 on the current branch head.
 
-B23, browser installation, offline reopening, and B14–B18 physical-device
-checks require browser/device evidence. The final regression suite, production
-build, current-head APK, and final acceptance remain HOLD until their evidence
-is available. PR #40 remains Draft; main is untouched; no merge or production
+B23, browser installation, offline reopening, and B14–B18 physical-device checks
+require browser/device evidence. The final regression suite, production build,
+current-head APK, and final acceptance remain HOLD until their evidence is
+available. PR #40 remains Draft; main is untouched; no merge or production
 deployment has been performed.

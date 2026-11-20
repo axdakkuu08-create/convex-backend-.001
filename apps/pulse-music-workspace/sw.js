@@ -32,18 +32,26 @@ const SHELL_FILES = [
 ];
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_FILES)).then(() => self.skipWaiting()),
+    caches
+      .open(SHELL_CACHE)
+      .then((cache) => cache.addAll(SHELL_FILES))
+      .then(() => self.skipWaiting()),
   );
 });
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key.startsWith("pulse-shell-") && key !== SHELL_CACHE)
-          .map((key) => caches.delete(key)),
-      ),
-    ).then(() => self.clients.claim()),
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter(
+              (key) => key.startsWith("pulse-shell-") && key !== SHELL_CACHE,
+            )
+            .map((key) => caches.delete(key)),
+        ),
+      )
+      .then(() => self.clients.claim()),
   );
 });
 function rangeResponse(response, rangeHeader) {
@@ -64,7 +72,10 @@ function rangeResponse(response, rangeHeader) {
         ? Math.min(Number(match[2]), size - 1)
         : size - 1;
     if (start >= size || end < start) {
-      return new Response(null, { status: 416, headers: { "Content-Range": "bytes */" + size } });
+      return new Response(null, {
+        status: 416,
+        headers: { "Content-Range": "bytes */" + size },
+      });
     }
     const body = buffer.slice(start, end + 1);
     return new Response(body, {

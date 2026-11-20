@@ -18,12 +18,21 @@
           const worker = registration.installing;
           if (!worker) return;
           worker.addEventListener("statechange", () => {
-            if (worker.state === "installed" && navigator.serviceWorker.controller) {
-              status("Pulse update available. Reload to use the latest version.");
+            if (
+              worker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              status(
+                "Pulse update available. Reload to use the latest version.",
+              );
             }
           });
         });
       })
-      .catch(() => status("Offline app-shell setup failed; online playback remains available."));
+      .catch(() =>
+        status(
+          "Offline app-shell setup failed; online playback remains available.",
+        ),
+      );
   });
 })();

@@ -161,7 +161,9 @@
         source: String(track.source || "Internet Archive"),
         sourceType:
           track.sourceType ||
-          (String(track.source || "Internet Archive").includes("Internet Archive")
+          (String(track.source || "Internet Archive").includes(
+            "Internet Archive",
+          )
             ? "internet_archive"
             : String(track.source || "").includes("Apple/iTunes")
               ? "itunes_preview"
@@ -200,7 +202,9 @@
         source: String(track.source || "Internet Archive"),
         sourceType:
           track.sourceType ||
-          (String(track.source || "Internet Archive").includes("Internet Archive")
+          (String(track.source || "Internet Archive").includes(
+            "Internet Archive",
+          )
             ? "internet_archive"
             : String(track.source || "").includes("Apple/iTunes")
               ? "itunes_preview"

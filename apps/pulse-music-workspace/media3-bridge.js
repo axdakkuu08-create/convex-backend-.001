@@ -12,7 +12,9 @@
         if (legacyPlugin) return legacyPlugin;
         const core = await import("./capacitor-core/index.js");
         if (typeof core.registerPlugin !== "function") {
-          throw new Error("Bundled Capacitor registerPlugin API is unavailable");
+          throw new Error(
+            "Bundled Capacitor registerPlugin API is unavailable",
+          );
         }
         return core.registerPlugin("PulseMedia3");
       });

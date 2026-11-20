@@ -9,15 +9,15 @@ package is a separate Capacitor shell that bundles the same frontend.
 - The Capacitor PulseMedia3 plugin exposes a queue, play/pause, seek, volume,
   next/previous and playback-state events.
 - Native mode is selected only when every item in the active Pulse queue is a
-  direct HTTPS audio URL. Mixed queues (including local blob URLs) remain on
-  the existing HTMLAudioElement path so Android cannot silently skip local
-  items or reorder a mixed queue.
+  direct HTTPS audio URL. Mixed queues (including local blob URLs) remain on the
+  existing HTMLAudioElement path so Android cannot silently skip local items or
+  reorder a mixed queue.
 - Native service transport is HTTPS-only. The generated Android manifest
   disables cleartext traffic and declares media foreground-service, wake-lock
   and notification permissions.
 - ExoPlayer handles audio focus and pauses when audio becomes noisy (such as
-  headset disconnect). These are source-level integrations until physical
-  device tests pass.
+  headset disconnect). These are source-level integrations until physical device
+  tests pass.
 - MediaSessionService provides the system media notification and lock-screen
   transport actions for the native queue.
 
@@ -40,8 +40,8 @@ keys or signing credentials to these variables.
   native background playback while offline.
 - Local file blob URLs and mixed HTTP/blob queues use web playback and do not
   gain native background playback.
-- A green Android build proves packaging and compilation only. It does not
-  prove background execution, lock-screen actions, audio focus, Bluetooth
-  behavior, format compatibility, or real playback.
-- B14–B18 remain pending until tested on a physical Android device. Do not
-  treat CI as device acceptance.
+- A green Android build proves packaging and compilation only. It does not prove
+  background execution, lock-screen actions, audio focus, Bluetooth behavior,
+  format compatibility, or real playback.
+- B14–B18 remain pending until tested on a physical Android device. Do not treat
+  CI as device acceptance.
