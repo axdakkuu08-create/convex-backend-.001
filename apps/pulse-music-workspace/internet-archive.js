@@ -87,6 +87,7 @@
         pageUrl: track.sourceUrl || "",
         verificationStatus: track.verificationStatus || "VERIFYING",
         rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
+        sourceType: "internet_archive",
       }));
     }
     const quoted = '"' + term.replace(/"/g, "") + '"';
@@ -181,6 +182,9 @@
             pageUrl:
               "https://archive.org/details/" +
               encodeURIComponent(doc.identifier),
+            sourceType: "internet_archive",
+            verificationStatus: "VERIFYING",
+            rightsReviewStatus: "REVIEW_REQUIRED",
           };
         } catch (_) {
           // An unavailable item must not fail the rest of the catalogue search.

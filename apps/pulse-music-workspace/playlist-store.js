@@ -122,7 +122,16 @@
         url: track.url || "",
         artwork: track.artwork || "",
         license: track.license || "",
+        licenseLabel: track.licenseLabel || track.license || "",
         source: track.source || "Saved audio",
+        sourceType:
+          track.sourceType ||
+          (String(track.source || "").includes("Internet Archive")
+            ? "internet_archive"
+            : String(track.source || "").includes("Apple/iTunes")
+              ? "itunes_preview"
+              : "user_audio"),
+        sourcePage: track.sourcePage || track.url || "",
         verificationStatus: track.verificationStatus || "UNAVAILABLE",
         rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
         bytesTotal: Number(track.bytesTotal) || 0,
@@ -148,7 +157,18 @@
         url: String(track.url || ""),
         artwork: String(track.artwork || ""),
         license: String(track.license || ""),
+        licenseLabel: String(track.licenseLabel || track.license || ""),
         source: String(track.source || "Internet Archive"),
+        sourceType:
+          track.sourceType ||
+          (String(track.source || "Internet Archive").includes(
+            "Internet Archive",
+          )
+            ? "internet_archive"
+            : String(track.source || "").includes("Apple/iTunes")
+              ? "itunes_preview"
+              : "user_audio"),
+        sourcePage: String(track.sourcePage || track.url || ""),
         verificationStatus: track.verificationStatus || "UNAVAILABLE",
         rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
         bytesTotal: Number(track.bytesTotal) || 0,
@@ -178,7 +198,18 @@
         url: String(track.url || ""),
         artwork: String(track.artwork || ""),
         license: String(track.license || ""),
+        licenseLabel: String(track.licenseLabel || track.license || ""),
         source: String(track.source || "Internet Archive"),
+        sourceType:
+          track.sourceType ||
+          (String(track.source || "Internet Archive").includes(
+            "Internet Archive",
+          )
+            ? "internet_archive"
+            : String(track.source || "").includes("Apple/iTunes")
+              ? "itunes_preview"
+              : "user_audio"),
+        sourcePage: String(track.sourcePage || track.url || ""),
         verificationStatus: track.verificationStatus || "VERIFYING",
         rightsReviewStatus: track.rightsReviewStatus || "REVIEW_REQUIRED",
         bytesTotal: Number(track.bytesTotal) || 0,
@@ -207,7 +238,7 @@
     return createOrUpdateFromTracks(name, tracks);
   }
 
-  function playFromPlaylist(id) {
+  async function playFromPlaylist(id) {
     const playlist = read().find((item) => item.id === id);
     if (
       !playlist ||
@@ -217,9 +248,16 @@
       alert("This playlist is empty. Add songs from search results.");
       return;
     }
-    const started = window.PulsePlaylistPlayback?.start?.(playlist);
+    let started = false;
+    try {
+      started = await window.PulsePlaylistPlayback?.start?.(playlist);
+    } catch (_) {
+      started = false;
+    }
     if (!started) {
-      alert("This playlist has no playable tracks yet.");
+      alert(
+        "Playback could not start. Check the track source or try another song.",
+      );
       return;
     }
     const status = $("unifiedSearchStatus");

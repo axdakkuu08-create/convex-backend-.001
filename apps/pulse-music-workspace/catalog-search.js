@@ -76,6 +76,21 @@
       '<button class="catalog-add" type="button" data-add-catalog-index="' +
       index +
       '">＋ Playlist</button>';
+    const offlineAllowed = window.PulseMediaPolicy?.canDownloadOffline({
+      ...item,
+      src: item.audioUrl,
+      sourceType: item.sourceType,
+    });
+    const offline =
+      item.sourceType === "internet_archive"
+        ? '<button class="catalog-add" type="button" data-offline-catalog-index="' +
+          index +
+          '"' +
+          (offlineAllowed
+            ? ""
+            : ' disabled title="Requires verified full audio and approved rights review"') +
+          ">↓ Save offline</button>"
+        : "";
     return (
       '<article class="catalog-result">' +
       art +
@@ -96,6 +111,7 @@
       "</div>" +
       action +
       add +
+      offline +
       "</article>"
     );
   };
@@ -176,6 +192,9 @@
         verificationStatus: track.verificationStatus,
         rightsReviewStatus: track.rightsReviewStatus,
         bytesTotal: track.bytesTotal,
+        sourceType:
+          track.provider === "itunes" ? "itunes_preview" : "internet_archive",
+        src: track.streamUrl || track.previewUrl || "",
       }));
       if (!found.length) {
         status.textContent =
@@ -239,6 +258,7 @@
             src,
             url: item.url,
             source: item.source,
+            sourceType: item.sourceType,
             artwork: item.artwork || "",
             license: item.license || "",
             duration: item.duration || "",
@@ -250,7 +270,27 @@
         }),
       );
   });
-  results.addEventListener("click", (event) => {
+  results.addEventListener("click", async (event) => {
+    const offlineButton = event.target.closest("[data-offline-catalog-index]");
+    if (offlineButton) {
+      const item =
+        window.PulseCatalogResults?.[
+          Number(offlineButton.dataset.offlineCatalogIndex)
+        ];
+      if (!item) return;
+      status.textContent = "Checking rights approval and saving audio…";
+      try {
+        await window.PulseOfflineMedia.download({
+          ...item,
+          src: item.audioUrl,
+          sourceType: item.sourceType,
+        });
+        status.textContent = "Saved offline: " + item.title;
+      } catch (error) {
+        status.textContent = error?.message || "Offline save failed.";
+      }
+      return;
+    }
     const button = event.target.closest("[data-add-catalog-index]");
     if (!button) return;
     const item =
@@ -265,7 +305,10 @@
             url: item.url,
             artwork: item.artwork || "",
             license: item.license || "",
+            licenseLabel: item.license || "",
             source: item.source,
+            sourceType: item.sourceType,
+            sourcePage: item.url || "",
             catalogId: item.catalogId || item.id || "",
             verificationStatus: item.verificationStatus || "UNAVAILABLE",
             rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",

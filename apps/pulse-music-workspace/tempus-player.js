@@ -26,6 +26,15 @@
         String(Math.floor(value % 60)).padStart(2, "0")
       : "0:00";
   const currentTrack = () => window.PulsePlayerBridge?.currentTrack?.() || null;
+  let lastNativeState = null;
+  const nativeStateForCurrentTrack = () => {
+    const track = currentTrack();
+    return window.PulseMedia3?.isNative &&
+      lastNativeState &&
+      String(lastNativeState.mediaId || "") === String(track?.id ?? "")
+      ? lastNativeState
+      : null;
+  };
   const safeExternalUrl = (value) => {
     const raw = String(value || "").trim();
     if (!raw) return "";
@@ -97,12 +106,20 @@
     } else {
       art.textContent = track.symbol || "♫";
     }
-    $("tempusPlayerPlay").textContent = audio.paused ? "▶" : "Ⅱ";
-    $("tempusPlayerElapsed").textContent = fmt(audio.currentTime);
-    $("tempusPlayerDuration").textContent = fmt(audio.duration || 0);
-    $("tempusPlayerSeek").value = audio.duration
-      ? (audio.currentTime / audio.duration) * 100
-      : 0;
+    const nativeState = nativeStateForCurrentTrack();
+    const position = nativeState
+      ? Math.max(0, Number(nativeState.positionSeconds) || 0)
+      : audio.currentTime;
+    const duration = nativeState
+      ? Math.max(0, Number(nativeState.durationSeconds) || 0)
+      : audio.duration;
+    const isPlaying = nativeState
+      ? Boolean(nativeState.isPlaying)
+      : !audio.paused;
+    $("tempusPlayerPlay").textContent = isPlaying ? "Ⅱ" : "▶";
+    $("tempusPlayerElapsed").textContent = fmt(position);
+    $("tempusPlayerDuration").textContent = fmt(duration || 0);
+    $("tempusPlayerSeek").value = duration ? (position / duration) * 100 : 0;
     $("tempusPlayerLike").textContent =
       track && window.PulsePlayerBridge?.isLiked?.(track.id)
         ? "♥ Liked"
@@ -132,6 +149,16 @@
     if (url) window.open(url, "_blank", "noopener,noreferrer");
   };
   $("tempusPlayerSeek").oninput = (event) => {
+    const nativeState = nativeStateForCurrentTrack();
+    if (nativeState) {
+      const duration = Math.max(0, Number(nativeState.durationSeconds) || 0);
+      if (duration > 0) {
+        window.PulseMedia3.seekTo(
+          (duration * Number(event.target.value)) / 100,
+        ).catch(() => {});
+      }
+      return;
+    }
     if (Number.isFinite(audio.duration))
       audio.currentTime = (audio.duration * Number(event.target.value)) / 100;
   };
@@ -139,6 +166,11 @@
   audio.addEventListener("play", update);
   audio.addEventListener("pause", update);
   audio.addEventListener("loadedmetadata", update);
+  window.PulseMedia3?.addStateListener?.((state) => {
+    lastNativeState = state || null;
+    update();
+  });
+  window.addEventListener("pulse:playback-report", update);
   window.addEventListener("pulse:play-catalog-track", () =>
     setTimeout(update, 0),
   );

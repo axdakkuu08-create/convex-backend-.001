@@ -13,6 +13,55 @@ let index = 0,
   recent = JSON.parse(localStorage.getItem("pulse-recent") || "[]"),
   timer;
 let archiveItems = [];
+let nativeLoadPromise = Promise.resolve(true);
+let nativePlaybackActive = false;
+let nativeDurationSeconds = 0;
+let nativePositionSeconds = 0;
+let nativeEndedHandled = false;
+let nativeHandoffPromise = Promise.resolve(true);
+let nativeLastError = "";
+
+function canUseNativeQueue() {
+  return Boolean(
+    window.PulseMedia3?.isNative &&
+    tracks.length > 0 &&
+    tracks.every(
+      (track) =>
+        !track.offlineCached &&
+        (window.PulseMediaPolicy?.isHttpsAudioUrl(track.src) ||
+          /^https:\/\//i.test(String(track.src || ""))),
+    ),
+  );
+}
+function nativeQueueItems() {
+  return tracks.map((track) => ({
+    id: String(track.id),
+    url: String(track.src),
+    title: String(track.title || "Pulse audio"),
+    artist: String(track.artist || "Unknown artist"),
+  }));
+}
+function refreshNativeQueue(shouldResume = playing) {
+  if (!nativePlaybackActive || !window.PulseMedia3)
+    return Promise.resolve(false);
+  const position = Math.max(0, nativePositionSeconds);
+  nativeLoadPromise = window.PulseMedia3.setQueue(
+    nativeQueueItems(),
+    index,
+    position,
+    shuffleOn,
+    repeatOn,
+  )
+    .then(() => (shouldResume ? window.PulseMedia3.play() : true))
+    .catch((error) => {
+      reportPlayback(
+        "error",
+        error?.message || "Android playback queue could not be updated.",
+      );
+      return false;
+    });
+  return nativeLoadPromise;
+}
 function toast(s) {
   $("toast").textContent = s;
   $("toast").classList.add("show");
@@ -30,6 +79,27 @@ function fmt(n) {
 }
 function list() {
   let a = [...tracks];
+  if (view === "downloads") {
+    a = (window.PulseOfflineMedia?.records?.() || []).map((record) => ({
+      ...record,
+      id: Number(record.id) || record.id,
+      src: record.url,
+      source: "Internet Archive",
+      sourceType: "internet_archive",
+      sourcePage: record.sourcePage || "",
+      archivePage: record.sourcePage || "",
+      archiveLicense: record.licenseLabel || "",
+      licenseLabel: record.licenseLabel || "",
+      verificationStatus: record.verificationStatus || "VERIFIED_FULL",
+      rightsReviewStatus: record.rightsReviewStatus || "APPROVED",
+      mood: "Offline",
+      time: record.duration || "—",
+      cover: "blue",
+      symbol: "♫",
+      customUrl: true,
+      offlineCached: true,
+    }));
+  }
   if (view === "library") a = a.filter((t) => liked.has(t.id));
   if (view === "recent")
     a = a
@@ -94,7 +164,11 @@ function render() {
         (liked.has(t.id) ? "liked" : "") +
         '" data-like="1">' +
         (liked.has(t.id) ? "♥" : "♡") +
-        "</button></div>",
+        "</button>" +
+        (view === "downloads"
+          ? '<button class="rowlike" type="button" data-offline-remove="1" aria-label="Remove offline download">×</button>'
+          : "") +
+        "</div>",
     )
     .join("");
 }
@@ -214,33 +288,27 @@ function loadMusicEmbed(raw) {
   }
 }
 
-const QUEUE_DB_NAME = "pulse-player-state";
-const QUEUE_STORE_NAME = "player-state";
-const QUEUE_STORAGE_KEY = "pulse.playerQueue.v1";
-let queueDatabasePromise = null;
+const queueStorage = window.PulseQueueStorage;
+let offlineCacheAvailable = false;
+const offlineLibraryReady =
+  window.PulseOfflineMedia?.list?.()
+    .then(() => {
+      offlineCacheAvailable = true;
+      return true;
+    })
+    .catch(() => false) || Promise.resolve(false);
+function isOfflineCached(url) {
+  return (
+    offlineCacheAvailable && Boolean(window.PulseOfflineMedia?.isSaved(url))
+  );
+}
 let queueReady = false;
 let queueDirty = false;
-
-function openQueueDatabase() {
-  if (!window.indexedDB) return Promise.resolve(null);
-  if (!queueDatabasePromise) {
-    queueDatabasePromise = new Promise((resolve) => {
-      const request = window.indexedDB.open(QUEUE_DB_NAME, 1);
-      request.onupgradeneeded = () => {
-        const db = request.result;
-        if (!db.objectStoreNames.contains(QUEUE_STORE_NAME))
-          db.createObjectStore(QUEUE_STORE_NAME);
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => resolve(null);
-      request.onblocked = () => resolve(null);
-    });
-  }
-  return queueDatabasePromise;
-}
 function makeQueueSnapshot() {
   const stableTracks = tracks
-    .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
+    .filter(
+      (track) => track && window.PulseMediaPolicy?.isWebAudioUrl(track.src),
+    )
     .map((track) => ({
       id: track.id,
       catalogId: String(track.catalogId || ""),
@@ -254,15 +322,25 @@ function makeQueueSnapshot() {
       src: String(track.src),
       customUrl: true,
       artwork: String(track.artwork || ""),
-      sourcePage: String(track.sourcePage || track.url || ""),
       archivePage: String(track.archivePage || ""),
       archiveLicense: String(track.archiveLicense || track.license || ""),
+      sourceType:
+        track.sourceType ||
+        window.PulseMediaPolicy?.sourceType(track) ||
+        "user_audio",
+      licenseLabel:
+        window.PulseMediaPolicy?.licenseLabel(track) ||
+        String(track.archiveLicense || track.license || ""),
+      sourcePage: String(
+        track.sourcePage || track.archivePage || track.url || "",
+      ),
       verificationStatus: String(track.verificationStatus || "UNAVAILABLE"),
       rightsReviewStatus: String(track.rightsReviewStatus || "REVIEW_REQUIRED"),
       bytesTotal: Number(track.bytesTotal) || 0,
     }));
   const currentId = tracks[index]?.id ?? null;
   return {
+    schemaVersion: 2,
     tracks: stableTracks,
     currentTrackId: stableTracks.some(
       (track) => String(track.id) === String(currentId),
@@ -282,79 +360,59 @@ function persistQueue() {
     queueDirty = true;
     return;
   }
-  const snapshot = makeQueueSnapshot();
-  try {
-    localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(snapshot));
-  } catch (_) {}
-  void openQueueDatabase().then((db) => {
-    if (!db) return;
-    try {
-      db.transaction(QUEUE_STORE_NAME, "readwrite")
-        .objectStore(QUEUE_STORE_NAME)
-        .put(snapshot, "queue");
-    } catch (_) {}
+  void queueStorage.save(makeQueueSnapshot()).catch(() => {
+    if (typeof reportPlayback === "function")
+      reportPlayback(
+        "storage-error",
+        "Queue could not be saved. Check browser storage.",
+      );
   });
 }
-async function readQueueSnapshot() {
-  const db = await openQueueDatabase();
-  if (db) {
-    const stored = await new Promise((resolve) => {
-      try {
-        const request = db
-          .transaction(QUEUE_STORE_NAME, "readonly")
-          .objectStore(QUEUE_STORE_NAME)
-          .get("queue");
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => resolve(null);
-      } catch (_) {
-        resolve(null);
-      }
-    });
-    if (stored) return stored;
-  }
-  try {
-    return JSON.parse(localStorage.getItem(QUEUE_STORAGE_KEY) || "null");
-  } catch (_) {
-    return null;
-  }
-}
 async function restoreQueue() {
-  const snapshot = await readQueueSnapshot();
-  if (!queueDirty && Array.isArray(snapshot?.tracks)) {
-    const restored = snapshot.tracks
-      .filter((track) => track && /^https?:\/\//i.test(String(track.src || "")))
-      .map((track, queueIndex) => ({
-        ...track,
-        id: track.id ?? Date.now() + queueIndex,
-        mood: track.mood || "Playlist",
-        time: track.time || "—",
-        cover: track.cover || "violet",
-        symbol: track.symbol || "♫",
-        customUrl: true,
-      }));
-    if (restored.length) {
-      tracks.splice(0, tracks.length, ...restored);
-      const current = restored.findIndex(
-        (track) => String(track.id) === String(snapshot.currentTrackId),
-      );
-      index =
-        current >= 0
-          ? current
-          : Math.min(
-              Math.max(Number(snapshot.currentIndex) || 0, 0),
-              restored.length - 1,
-            );
-    }
-    repeatOn = Boolean(snapshot.repeatOn);
-    shuffleOn = Boolean(snapshot.shuffleOn);
+  await offlineLibraryReady;
+  let snapshot = null;
+  try {
+    snapshot = await queueStorage.load();
+  } catch (_) {}
+  const changedBeforeRestore = queueDirty;
+  const normalized = queueStorage.normalizeSnapshot(
+    snapshot,
+    (track) => track && window.PulseMediaPolicy?.isWebAudioUrl(track.src),
+  );
+  if (!changedBeforeRestore && normalized) {
+    const restored = normalized.tracks.map((track, queueIndex) => ({
+      ...track,
+      id: track.id ?? Date.now() + queueIndex,
+      mood: track.mood || "Playlist",
+      time: track.time || "—",
+      cover: track.cover || "violet",
+      symbol: track.symbol || "♫",
+      customUrl: true,
+      sourceType:
+        track.sourceType ||
+        window.PulseMediaPolicy?.sourceType(track) ||
+        "user_audio",
+      licenseLabel: String(track.licenseLabel || track.archiveLicense || ""),
+      sourcePage: String(track.sourcePage || track.archivePage || ""),
+      offlineCached: isOfflineCached(track.src),
+    }));
+    tracks.splice(0, tracks.length, ...restored);
+    index = normalized.currentIndex;
+    repeatOn = Boolean(normalized.repeatOn);
+    shuffleOn = Boolean(normalized.shuffleOn);
   }
   queueReady = true;
   queueDirty = false;
   setTrack(tracks.length ? index : 0, false);
   renderQueuePanel();
+  if (changedBeforeRestore) persistQueue();
 }
 function setTrack(i, autoplay = false) {
   if (!tracks.length) {
+    if (nativePlaybackActive && window.PulseMedia3)
+      window.PulseMedia3.pause().catch(() => {});
+    nativePlaybackActive = false;
+    nativeLoadPromise = Promise.resolve(false);
     index = 0;
     audio.removeAttribute("src");
     audio.load();
@@ -375,8 +433,62 @@ function setTrack(i, autoplay = false) {
   $("like").disabled = false;
   index = (i + tracks.length) % tracks.length;
   let t = tracks[index];
-  audio.src = t.src;
-  audio.load();
+  const wasNativePlayback = nativePlaybackActive;
+  nativePlaybackActive = canUseNativeQueue();
+  nativePositionSeconds = 0;
+  nativeDurationSeconds = 0;
+  nativeEndedHandled = false;
+  if (nativePlaybackActive) {
+    nativeHandoffPromise = Promise.resolve(true);
+    audio.pause();
+    nativeLoadPromise = window.PulseMedia3.setQueue(
+      nativeQueueItems(),
+      index,
+      0,
+      shuffleOn,
+      repeatOn,
+    ).catch((error) => {
+      nativePlaybackActive = false;
+      nativeHandoffPromise = window.PulseMedia3.pause()
+        .then(() => {
+          audio.src = t.src;
+          audio.load();
+          return true;
+        })
+        .catch(() => {
+          reportPlayback(
+            "error",
+            "Android playback could not stop safely; web playback was not started.",
+          );
+          return false;
+        });
+      reportPlayback(
+        "error",
+        error?.message || "Android audio service could not load this track.",
+      );
+      return false;
+    });
+  } else if (wasNativePlayback && window.PulseMedia3) {
+    const requestedSource = t.src;
+    nativeHandoffPromise = window.PulseMedia3.pause()
+      .then(() => {
+        if (tracks[index]?.src !== requestedSource) return false;
+        audio.src = requestedSource;
+        audio.load();
+        return true;
+      })
+      .catch(() => {
+        reportPlayback(
+          "error",
+          "Android playback could not stop safely; web playback was not started.",
+        );
+        return false;
+      });
+  } else {
+    nativeHandoffPromise = Promise.resolve(true);
+    audio.src = t.src;
+    audio.load();
+  }
   $("audioStatus").textContent = t.archivePage
     ? "Open-audio source · rights review required; availability is not permission."
     : t.localFile
@@ -397,17 +509,66 @@ function setTrack(i, autoplay = false) {
   persistQueue();
   if (autoplay) play();
 }
+function reportPlayback(state, message) {
+  const current = tracks[index] || null;
+  if (message) $("audioStatus").textContent = message;
+  window.dispatchEvent(
+    new CustomEvent("pulse:playback-report", {
+      detail: {
+        state,
+        trackId: current?.id ?? null,
+        title: current?.title || null,
+        positionMs: Math.round(
+          Math.max(
+            0,
+            nativePlaybackActive ? nativePositionSeconds : audio.currentTime,
+          ) * 1000,
+        ),
+        durationMs: Math.round(
+          Math.max(
+            0,
+            nativePlaybackActive ? nativeDurationSeconds : audio.duration,
+          ) * 1000,
+        ),
+        updatedAt: Date.now(),
+      },
+    }),
+  );
+}
+
 async function play() {
   if (!tracks.length || !tracks[index]) {
     playing = false;
     $("play").textContent = "▶";
     $("audioStatus").textContent =
       "Choose a song from search or your playlists.";
-    return;
+    return false;
   }
   try {
-    await audio.play();
+    if (nativePlaybackActive) {
+      await nativeLoadPromise;
+      if (nativePlaybackActive) {
+        await window.PulseMedia3.play();
+      } else {
+        const handoffReady = await nativeHandoffPromise;
+        if (!handoffReady) {
+          playing = false;
+          $("play").textContent = "▶";
+          return false;
+        }
+        await audio.play();
+      }
+    } else {
+      const handoffReady = await nativeHandoffPromise;
+      if (!handoffReady) {
+        playing = false;
+        $("play").textContent = "▶";
+        return false;
+      }
+      await audio.play();
+    }
     playing = true;
+    reportPlayback("playing", "Playing · " + (tracks[index]?.title || "Audio"));
     $("audioStatus").textContent = tracks[index].archivePage
       ? "Playing · " +
         tracks[index].title +
@@ -419,6 +580,7 @@ async function play() {
     recent = recent.slice(0, 6);
     save();
     render();
+    return true;
   } catch (e) {
     playing = false;
     $("play").textContent = "▶";
@@ -426,31 +588,47 @@ async function play() {
       e && e.name === "NotAllowedError"
         ? "Tap Play again to allow audio playback."
         : "Could not start this audio. Check the link or try another file.";
-    $("audioStatus").textContent = msg;
+    reportPlayback("error", msg);
     toast(msg);
+    return false;
   }
 }
 function pause() {
-  audio.pause();
+  if (nativePlaybackActive)
+    window.PulseMedia3.pause().catch(() =>
+      toast("Could not pause Android playback."),
+    );
+  else audio.pause();
   playing = false;
   $("play").textContent = "▶";
+  reportPlayback(
+    "paused",
+    "Paused · " + (tracks[index]?.title || "No track selected"),
+  );
   render();
 }
 function toggle() {
   playing ? pause() : play();
 }
 function next() {
+  if (nativePlaybackActive) {
+    window.PulseMedia3.next().catch(() =>
+      toast("Could not skip to the next track."),
+    );
+    return;
+  }
   const nextIndex = window.PulsePlaylistPlayback?.nextIndex?.(
     index,
     tracks.length,
-    {
-      shuffle: shuffleOn,
-      repeat: repeatOn,
-    },
+    { shuffle: shuffleOn, repeat: repeatOn },
   );
   if (!Number.isInteger(nextIndex)) {
-    pause();
+    audio.pause();
+    playing = false;
+    $("play").textContent = "▶";
     if (Number.isFinite(audio.duration)) audio.currentTime = 0;
+    reportPlayback("ended", "Playlist finished.");
+    render();
     return;
   }
   setTrack(nextIndex, true);
@@ -471,13 +649,17 @@ function setView(v) {
       ? "Your library"
       : v === "recent"
         ? "Recently played"
-        : "Discover";
+        : v === "downloads"
+          ? "Offline downloads"
+          : "Discover";
   $("trackHeading").textContent =
     v === "library"
       ? "Saved tracks"
       : v === "recent"
         ? "Recently played"
-        : "Made for the moment";
+        : v === "downloads"
+          ? "Saved offline audio"
+          : "Made for the moment";
   $("heading").innerHTML =
     v === "library"
       ? "Your music, <span>your rules.</span>"
@@ -488,20 +670,72 @@ function setView(v) {
     .querySelectorAll(".nav")
     .forEach((b) => b.classList.toggle("active", b.dataset.view === v));
   render();
+  if (v === "downloads") {
+    void window.PulseOfflineMedia?.list?.()
+      .then(() => {
+        offlineCacheAvailable = true;
+        render();
+      })
+      .catch(() => {
+        offlineCacheAvailable = false;
+        toast("Offline library could not be refreshed.");
+      });
+  }
   $("sidebar").classList.remove("open");
 }
 $("rows").addEventListener("click", (e) => {
   let r = e.target.closest(".row");
   if (!r) return;
-  let id = Number(r.dataset.id);
+  const id = r.dataset.id;
+  if (e.target.closest("[data-offline-remove]")) {
+    const saved = (window.PulseOfflineMedia?.records?.() || []).find(
+      (record) => String(record.id) === String(id),
+    );
+    if (saved) {
+      void window.PulseOfflineMedia.remove(saved.url)
+        .then(() => {
+          render();
+          toast("Removed offline audio.");
+        })
+        .catch(() => toast("Could not remove offline audio."));
+    }
+    return;
+  }
   if (e.target.closest("[data-like]")) {
     like(id);
     return;
   }
-  setTrack(
-    tracks.findIndex((t) => t.id === id),
-    true,
+  let targetIndex = tracks.findIndex(
+    (track) => String(track.id) === String(id),
   );
+  if (targetIndex < 0 && view === "downloads") {
+    const saved = (window.PulseOfflineMedia?.records?.() || []).find(
+      (record) => String(record.id) === String(id),
+    );
+    if (saved) {
+      tracks.push({
+        ...saved,
+        id: Number(saved.id) || Date.now(),
+        src: saved.url,
+        source: "Internet Archive",
+        sourceType: "internet_archive",
+        sourcePage: saved.sourcePage || "",
+        archivePage: saved.sourcePage || "",
+        archiveLicense: saved.licenseLabel || "",
+        licenseLabel: saved.licenseLabel || "",
+        verificationStatus: saved.verificationStatus || "VERIFIED_FULL",
+        rightsReviewStatus: saved.rightsReviewStatus || "APPROVED",
+        mood: "Offline",
+        time: saved.duration || "—",
+        cover: "blue",
+        symbol: "♫",
+        customUrl: true,
+        offlineCached: true,
+      });
+      targetIndex = tracks.length - 1;
+    }
+  }
+  if (targetIndex >= 0) setTrack(targetIndex, true);
 });
 document
   .querySelectorAll(".nav")
@@ -529,55 +763,95 @@ $("shuffleAll").onclick = () => {
     return;
   }
   shuffleOn = true;
+  if (nativePlaybackActive) window.PulseMedia3.setShuffle(true).catch(() => {});
   toast("Shuffle is on");
   setTrack(Math.floor(Math.random() * tracks.length), true);
 };
 $("shuffle").onclick = () => {
   shuffleOn = !shuffleOn;
+  if (nativePlaybackActive)
+    window.PulseMedia3.setShuffle(shuffleOn).catch(() => {});
   toast(shuffleOn ? "Shuffle is on" : "Shuffle is off");
 };
 $("next").onclick = next;
 $("prev").onclick = () => {
-  if (audio.currentTime > 3) {
-    audio.currentTime = 0;
+  const currentPosition = nativePlaybackActive
+    ? nativePositionSeconds
+    : audio.currentTime;
+  if (currentPosition > 3) {
+    if (nativePlaybackActive) window.PulseMedia3.seekTo(0).catch(() => {});
+    else audio.currentTime = 0;
     return;
   }
-  setTrack(index - 1, true);
+  if (nativePlaybackActive) {
+    window.PulseMedia3.previous().catch(() =>
+      toast("Could not return to the previous track."),
+    );
+    return;
+  }
+  const previous = window.PulsePlaylistPlayback?.previousIndex?.(
+    index,
+    tracks.length,
+    { repeat: repeatOn },
+  );
+  if (!Number.isInteger(previous)) return;
+  setTrack(previous, true);
 };
 $("repeat").onclick = () => {
   repeatOn = !repeatOn;
   audio.loop = false;
+  if (nativePlaybackActive)
+    window.PulseMedia3.setRepeat(repeatOn).catch(() => {});
   toast(repeatOn ? "Repeat is on" : "Repeat is off");
 };
 $("like").onclick = () => like(tracks[index]?.id);
-$("volume").oninput = (e) => (audio.volume = Number(e.target.value));
+$("volume").oninput = (e) => {
+  const volume = Number(e.target.value);
+  if (nativePlaybackActive)
+    window.PulseMedia3.setVolume(volume).catch(() => {});
+  else audio.volume = volume;
+};
 audio.volume = 0.75;
 audio.ontimeupdate = () => {
-  if (Number.isFinite(audio.duration) && audio.duration > 0) {
+  if (
+    !nativePlaybackActive &&
+    Number.isFinite(audio.duration) &&
+    audio.duration > 0
+  ) {
     $("progress").value = (audio.currentTime / audio.duration) * 100;
     $("time").textContent = fmt(audio.currentTime);
     $("duration").textContent = fmt(audio.duration);
   }
 };
 $("progress").oninput = (e) => {
-  if (Number.isFinite(audio.duration))
+  if (nativePlaybackActive && nativeDurationSeconds > 0) {
+    window.PulseMedia3.seekTo(
+      (Number(e.target.value) / 100) * nativeDurationSeconds,
+    ).catch(() => {});
+  } else if (Number.isFinite(audio.duration)) {
     audio.currentTime = (Number(e.target.value) / 100) * audio.duration;
+  }
 };
-audio.onended = () => next();
+audio.onended = () => {
+  if (!nativePlaybackActive) next();
+};
 audio.onwaiting = () => {
-  $("audioStatus").textContent =
-    "Loading audio… If it stays here, the link may not be a direct audio file.";
+  reportPlayback(
+    "buffering",
+    "Loading audio… If it stays here, the link may not be a direct audio file.",
+  );
 };
 audio.oncanplay = () => {
-  $("audioStatus").textContent =
-    "Audio ready · press Play if it has not started.";
+  if (!playing)
+    reportPlayback("ready", "Audio ready · press Play if it has not started.");
 };
 audio.onerror = () => {
+  if (nativePlaybackActive) return;
   playing = false;
   $("play").textContent = "▶";
   const msg =
     "Audio failed to load. Try a local file or a direct .mp3/.m4a/.ogg link; Spotify/YouTube page links will not work here.";
-  $("audioStatus").textContent = msg;
+  reportPlayback("error", msg);
   toast("Audio could not load. Try another source.");
   render();
 };
@@ -634,7 +908,12 @@ function renderQueuePanel() {
     down.dataset.queueIndex = String(queueIndex);
     down.dataset.queueMove = String(queueIndex + 1);
     down.setAttribute("aria-label", "Move " + track.title + " down");
-    actions.append(up, down);
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.dataset.queueRemove = String(queueIndex);
+    remove.setAttribute("aria-label", "Remove " + track.title + " from queue");
+    actions.append(up, down, remove);
     item.append(button, actions);
     list.append(item);
   });
@@ -649,6 +928,11 @@ $("queueClose")?.addEventListener("click", () => {
   $("queuePanel").hidden = true;
 });
 $("queueItems")?.addEventListener("click", (event) => {
+  const remove = event.target.closest("[data-queue-remove]");
+  if (remove) {
+    window.PulsePlayerBridge?.remove?.(Number(remove.dataset.queueRemove));
+    return;
+  }
   const move = event.target.closest("[data-queue-move]");
   if (move) {
     window.PulsePlayerBridge?.reorder?.(
@@ -669,8 +953,10 @@ $("queueNext")?.addEventListener("click", () => $("next").click());
 $("queueClear")?.addEventListener("click", () => {
   const current = tracks[index];
   if (!current) return;
+  const wasPlaying = playing;
   tracks.splice(0, tracks.length, current);
   index = 0;
+  if (nativePlaybackActive) setTrack(0, wasPlaying);
   render();
   renderQueuePanel();
   persistQueue();
@@ -812,7 +1098,20 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
           i +
           '">▶ Play</button><button class="catalog-add" type="button" data-add-archive-index="' +
           i +
-          '">＋ Playlist</button></div></article>',
+          '">＋ Playlist</button><button class="catalog-add" type="button" data-offline-archive-index="' +
+          i +
+          '"' +
+          (window.PulseMediaPolicy?.canDownloadOffline({
+            src: item.audioUrl,
+            source: "Internet Archive",
+            sourceType: "internet_archive",
+            license: item.license,
+            verificationStatus: item.verificationStatus,
+            rightsReviewStatus: item.rightsReviewStatus,
+          })
+            ? ""
+            : ' disabled title="Requires verified full audio and approved rights review"') +
+          ">↓ Save offline</button></div></article>",
       )
       .join("");
   } catch (error) {
@@ -822,7 +1121,35 @@ $("archiveSearchForm").addEventListener("submit", async (e) => {
         : "Archive search failed. Please try again.";
   }
 });
-$("archiveResults").addEventListener("click", (e) => {
+$("archiveResults").addEventListener("click", async (e) => {
+  const offlineButton = e.target.closest("[data-offline-archive-index]");
+  if (offlineButton) {
+    const status = $("archiveStatus");
+    const item =
+      archiveItems[Number(offlineButton.dataset.offlineArchiveIndex)];
+    if (!item) return;
+    status.textContent = "Checking rights approval and saving audio…";
+    try {
+      await window.PulseOfflineMedia.download({
+        id: Date.now(),
+        title: item.title,
+        artist: item.artist,
+        src: item.audioUrl,
+        source: "Internet Archive",
+        sourceType: "internet_archive",
+        catalogId: item.id,
+        sourcePage: item.pageUrl,
+        license: item.license,
+        verificationStatus: item.verificationStatus || "VERIFYING",
+        rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
+        duration: item.durationSeconds ? fmt(item.durationSeconds) : "",
+      });
+      status.textContent = "Saved offline: " + item.title;
+    } catch (error) {
+      status.textContent = error?.message || "Offline save failed.";
+    }
+    return;
+  }
   const button = e.target.closest("[data-archive-index]");
   if (!button) return;
   const item = archiveItems[Number(button.dataset.archiveIndex)];
@@ -839,10 +1166,14 @@ $("archiveResults").addEventListener("click", (e) => {
     customUrl: true,
     archivePage: item.pageUrl,
     archiveLicense: item.license,
+    licenseLabel: item.license || "",
+    sourceType: "internet_archive",
+    sourcePage: item.pageUrl,
     source: "Internet Archive",
     verificationStatus: item.verificationStatus || "VERIFYING",
     rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
     bytesTotal: Number(item.fileSize) || 0,
+    offlineCached: isOfflineCached(item.audioUrl),
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -867,14 +1198,23 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
     src: item.src,
     customUrl: true,
     artwork: item.artwork || "",
-    sourcePage: item.url || "",
     archivePage: String(item.source || "").includes("Internet Archive")
       ? item.url || ""
       : "",
     archiveLicense: item.license || "",
+    licenseLabel: item.license || "",
+    sourceType:
+      item.sourceType ||
+      (String(item.source || "").includes("Internet Archive")
+        ? "internet_archive"
+        : String(item.source || "").includes("Apple/iTunes")
+          ? "itunes_preview"
+          : "user_audio"),
+    sourcePage: String(item.url || ""),
     verificationStatus: item.verificationStatus || "UNAVAILABLE",
     rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
     bytesTotal: Number(item.bytesTotal) || 0,
+    offlineCached: isOfflineCached(item.src),
   };
   tracks.splice(index + 1, 0, track);
   setTrack(index + 1, true);
@@ -893,11 +1233,89 @@ window.addEventListener("pulse:play-catalog-track", (event) => {
   toast("Loading " + track.title);
 });
 
-window.addEventListener("pulse:play-playlist", (event) => {
-  const detail = event.detail || {};
-  const incoming = Array.isArray(detail.tracks) ? detail.tracks : [];
+if (window.PulseMedia3?.isNative) {
+  window.PulseMedia3.setVolume(0.75).catch(() => {});
+  window.PulseMedia3.addStateListener((state) => {
+    if (!state || !nativePlaybackActive) return;
+    const errorMessage = String(state.errorMessage || "");
+    if (errorMessage && errorMessage !== nativeLastError) {
+      nativeLastError = errorMessage;
+      playing = false;
+      reportPlayback("error", "Android playback error: " + errorMessage);
+      $("play").textContent = "▶";
+      render();
+    } else if (!errorMessage) {
+      nativeLastError = "";
+    }
+    const mediaId = String(state.mediaId || "");
+    const transitionedIndex = mediaId
+      ? tracks.findIndex((track) => String(track.id) === mediaId)
+      : -1;
+    if (transitionedIndex >= 0 && transitionedIndex !== index) {
+      index = transitionedIndex;
+      const currentTrack = tracks[index];
+      $("nowTitle").textContent = currentTrack.title;
+      $("nowArtist").textContent = currentTrack.artist;
+      $("cover").className = "cover " + currentTrack.cover;
+      $("cover").textContent = currentTrack.symbol;
+      $("like").textContent = liked.has(currentTrack.id) ? "♥" : "♡";
+      $("like").classList.toggle("liked", liked.has(currentTrack.id));
+      $("duration").textContent = currentTrack.time;
+      $("time").textContent = "0:00";
+      render();
+      renderQueuePanel();
+      persistQueue();
+    }
+    nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
+    nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
+    if (nativeDurationSeconds > 0) {
+      $("progress").value =
+        (nativePositionSeconds / nativeDurationSeconds) * 100;
+      $("time").textContent = fmt(nativePositionSeconds);
+      $("duration").textContent = fmt(nativeDurationSeconds);
+    }
+    const isNowPlaying = Boolean(state.isPlaying);
+    if (playing !== isNowPlaying) {
+      playing = isNowPlaying;
+      $("play").textContent = playing ? "Ⅱ" : "▶";
+      render();
+    }
+    if (state.playbackState === 4 && !nativeEndedHandled) {
+      nativeEndedHandled = true;
+      playing = false;
+      $("play").textContent = "▶";
+      reportPlayback("ended", "Playlist finished.");
+      render();
+    } else if (state.playbackState !== 4) {
+      nativeEndedHandled = false;
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || !nativePlaybackActive) return;
+    window.PulseMedia3.getState()
+      .then((state) => {
+        if (!state) return;
+        nativePositionSeconds = Math.max(0, Number(state.positionSeconds) || 0);
+        nativeDurationSeconds = Math.max(0, Number(state.durationSeconds) || 0);
+        playing = Boolean(state.isPlaying);
+        $("play").textContent = playing ? "Ⅱ" : "▶";
+        if (nativeDurationSeconds > 0) {
+          $("progress").value =
+            (nativePositionSeconds / nativeDurationSeconds) * 100;
+          $("time").textContent = fmt(nativePositionSeconds);
+          $("duration").textContent = fmt(nativeDurationSeconds);
+        }
+        render();
+      })
+      .catch(() => {});
+  });
+}
+
+async function playPlaylistQueue(playlistName, incomingTracks) {
+  await offlineLibraryReady;
   const normalized =
-    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incoming }) || [];
+    window.PulsePlaylistPlayback?.buildQueue?.({ tracks: incomingTracks }) ||
+    [];
   const queue = normalized.map((item, queueIndex) => {
     const source = String(item.source || "Saved audio");
     const isLocal = String(item.src || "").startsWith("blob:");
@@ -915,34 +1333,66 @@ window.addEventListener("pulse:play-playlist", (event) => {
       customUrl: !isLocal,
       localFile: isLocal,
       artwork: String(item.artwork || ""),
-      sourcePage: String(item.url || ""),
       archivePage: source.includes("Internet Archive")
         ? String(item.url || "")
         : "",
       archiveLicense: String(item.license || ""),
+      licenseLabel: String(item.license || ""),
+      sourceType:
+        item.sourceType ||
+        (source.includes("Internet Archive")
+          ? "internet_archive"
+          : source.includes("Apple/iTunes")
+            ? "itunes_preview"
+            : "user_audio"),
+      sourcePage: String(item.url || ""),
       verificationStatus: item.verificationStatus || "UNAVAILABLE",
       rightsReviewStatus: item.rightsReviewStatus || "REVIEW_REQUIRED",
       bytesTotal: Number(item.bytesTotal) || 0,
+      offlineCached: isOfflineCached(item.src),
     };
   });
   if (!queue.length) {
     toast("This playlist has no playable songs.");
-    return;
+    return Promise.resolve(false);
   }
   tracks.splice(0, tracks.length, ...queue);
   index = 0;
   shuffleOn = false;
-  setTrack(0, true);
+  setTrack(0, false);
   renderQueuePanel();
   toast(
     "Playing playlist · " +
       queue.length +
       " tracks in saved order · " +
-      String(detail.playlistName || detail.name || "Singles Mix"),
+      String(playlistName || "Singles Mix"),
   );
-});
+  return play();
+}
 
 window.PulsePlayerBridge = {
+  playPlaylist: playPlaylistQueue,
+  remove: (queueIndex) => {
+    const oldCurrentIndex = index;
+    const wasPlaying = playing;
+    const result = window.PulsePlaylistPlayback?.removeTrackAt?.(
+      tracks,
+      index,
+      queueIndex,
+    );
+    if (!result) return false;
+    tracks.splice(0, tracks.length, ...result.tracks);
+    index = result.currentIndex;
+    if (!tracks.length || queueIndex === oldCurrentIndex) {
+      setTrack(tracks.length ? index : 0, tracks.length > 0 && wasPlaying);
+    } else {
+      render();
+      renderQueuePanel();
+      persistQueue();
+      if (nativePlaybackActive) void refreshNativeQueue(wasPlaying);
+    }
+    return true;
+  },
   currentTrack: () => tracks[index] || null,
   isLiked: (id) => liked.has(id),
   reorder: (from, to) => {
@@ -964,6 +1414,7 @@ window.PulsePlayerBridge = {
     render();
     renderQueuePanel();
     persistQueue();
+    if (nativePlaybackActive) void refreshNativeQueue(playing);
     window.dispatchEvent(
       new CustomEvent("pulse:queue-reordered", { detail: { from, to } }),
     );
