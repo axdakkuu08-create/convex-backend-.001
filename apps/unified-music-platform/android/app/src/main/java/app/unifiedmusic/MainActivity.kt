@@ -246,7 +246,7 @@ class MainActivity : ComponentActivity() {
                 }
                 if (showEqualizer) {
                     EqualizerDialog(
-                        equalizer = equalizerFor(mediaController?.audioSessionId ?: 0),
+                        equalizer = equalizerFor(PlaybackService.audioSessionId),
                         onClose = { showEqualizer = false; equalizer?.release(); equalizer = null }
                     )
                 }
