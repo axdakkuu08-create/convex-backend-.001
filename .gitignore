@@ -5,3 +5,8 @@ convex_local_storage/
 .DS_Store
 .turbo/
 # testing 123
+
+# Android/Gradle local configuration and build outputs
+.gradle/
+**/build/
+**/local.properties
