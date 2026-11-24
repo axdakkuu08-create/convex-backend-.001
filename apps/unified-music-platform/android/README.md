@@ -43,7 +43,7 @@ The current repository snapshot has blank public Convex/Clerk frontend configura
 
 ## Build and verification status
 - Source foundation is committed on the unified feature branch.
-- No Gradle wrapper is included yet.
+- No Gradle wrapper is included yet; the branch build workflow provisions Gradle 8.13 on a hosted runner.
 - An Android Gradle build and physical-device test have not been run in this environment.
 - This is not a release APK or a verified production player.
 - No production deployment, domain change, merge or PR was performed.
