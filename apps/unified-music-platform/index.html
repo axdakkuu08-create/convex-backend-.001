@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090d0b">
+  <title>Unified Music</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="Unified Music home"><span>♫</span> unified<span class="brand-dot">.</span></a>
+      <p class="eyebrow">YOUR SPACE</p>
+      <nav id="navigation" aria-label="Library sections">
+        <button class="nav-item active" data-view="all">⌂ <span>All music</span></button>
+        <button class="nav-item" data-view="recent">◷ <span>Recently added</span></button>
+        <button class="nav-item" data-view="played">↗ <span>Most played</span></button>
+        <button class="nav-item" data-view="albums">▦ <span>Albums</span></button>
+        <button class="nav-item" data-view="favorites">♡ <span>Favorites</span></button>
+      </nav>
+      <div class="sidebar-foot"><span class="status-dot"></span> LOCAL LIBRARY MODE</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><p class="eyebrow">ONE HOME FOR YOUR AUDIO</p><h1 id="page-title">Your library</h1></div>
+        <label class="import-button">＋ <span>Add audio</span><input id="file-picker" type="file" accept="audio/*" multiple></label>
+      </header>
+
+      <section class="welcome-panel">
+        <div><p class="eyebrow">LISTEN WITHOUT LIMITS</p><h2>Your music.<br><span>One place.</span></h2><p class="welcome-copy">A unified home for your personal library and supported music sources.</p></div>
+        <div class="welcome-mark" aria-hidden="true">♫</div>
+      </section>
+
+      <section class="toolbar" aria-label="Library tools">
+        <label class="search-box">⌕ <input id="search" type="search" placeholder="Search songs, artists or albums" autocomplete="off"></label>
+        <select id="sort" aria-label="Sort tracks"><option value="added">Recently added</option><option value="title">Title A–Z</option><option value="artist">Artist A–Z</option><option value="duration">Duration</option><option value="plays">Most played</option></select>
+      </section>
+
+      <section id="library-area" aria-live="polite">
+        <div class="section-heading"><div><p class="eyebrow" id="section-kicker">YOUR COLLECTION</p><h2 id="section-title">All music</h2></div><span id="track-count" class="count">0 tracks</span></div>
+        <div id="album-grid" class="album-grid" hidden></div>
+        <div id="track-list" class="track-list"></div>
+        <button id="load-more" class="load-more" hidden>Load more</button>
+        <div id="empty-state" class="empty-state"><div class="empty-icon">♫</div><h3>Your library starts here</h3><p>Add audio files from your device. Tracks shorter than one minute are automatically excluded.</p><label class="import-button">＋ Add audio<input id="empty-file-picker" type="file" accept="audio/*" multiple></label></div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="player">
+    <div class="now-playing"><div class="cover">♫</div><div><strong id="now-title">Nothing playing</strong><small id="now-artist">Choose a track from your library</small></div></div>
+    <div class="player-center"><div class="player-controls"><button id="previous" aria-label="Previous track">|◀</button><button id="play" class="play-button" aria-label="Play or pause">▶</button><button id="next" aria-label="Next track">▶|</button></div><div class="progress-row"><span id="elapsed">0:00</span><input id="seek" type="range" min="0" max="1000" value="0" aria-label="Seek"><span id="total">0:00</span></div></div>
+    <div class="player-side"><button id="favorite-current" aria-label="Favorite current track">♡</button><span id="playback-state">LOCAL</span></div>
+    <audio id="audio" preload="metadata"></audio>
+  </footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
