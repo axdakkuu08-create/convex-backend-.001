@@ -22,7 +22,7 @@ function filteredTracks() {
   if (sort === "artist") items.sort((a,b) => a.artist.localeCompare(b.artist));
   if (sort === "duration") items.sort((a,b) => a.durationMs-b.durationMs);
   if (sort === "plays") items.sort((a,b) => b.playCount-a.playCount);
-  if (sort === "added") items.sort((a,b) => b.addedAt-a.addedAt);
+  if (sort === "added" && !["recent","played"].includes(state.view)) items.sort((a,b) => b.addedAt-a.addedAt);
   return items;
 }
 function render() {
