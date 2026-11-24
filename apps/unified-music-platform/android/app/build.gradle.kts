@@ -62,5 +62,5 @@ dependencies {
     implementation("dev.convex:android-convexmobile:0.2.0@aar") { isTransitive = true }
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.clerk:clerk-convex-kotlin:0.3.0")
-    implementation("com.clerk:clerk-android-ui:1.0.0")
+    implementation("com.clerk:clerk-android-ui:1.0.12")
 }
