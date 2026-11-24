@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 val convexUrlValue = providers.gradleProperty("UNIFIED_CONVEX_URL").orElse("").get()
@@ -12,11 +13,11 @@ fun buildConfigString(value: String): String =
 
 android {
     namespace = "app.unifiedmusic"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "app.unifiedmusic"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
         buildConfigField("String", "CONVEX_URL", buildConfigString(convexUrlValue))
@@ -51,7 +52,8 @@ dependencies {
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.media3:media3-exoplayer:1.5.1")
     implementation("androidx.media3:media3-session:1.5.1")
-    implementation("dev.convex:android-convexmobile:0.8.0@aar") { isTransitive = true }
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("dev.convex:android-convexmobile:0.2.0@aar") { isTransitive = true }
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("com.clerk:clerk-convex-kotlin:0.3.0")
+    implementation("com.clerk:clerk-android-ui:1.0.0")
 }
