@@ -3,11 +3,13 @@ package app.unifiedmusic.data
 import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class ScanResult(val discovered: Int, val eligible: Int, val excludedShort: Int)
 
 class MediaStoreScanner(private val context: Context, private val dao: TrackDao) {
-    suspend fun scan(): ScanResult {
+    suspend fun scan(): ScanResult = withContext(Dispatchers.IO) {
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
@@ -51,6 +53,6 @@ class MediaStoreScanner(private val context: Context, private val dao: TrackDao)
             }
         }
         if (tracks.isNotEmpty()) dao.upsertAll(tracks)
-        return ScanResult(discovered, tracks.size, excluded)
+        ScanResult(discovered, tracks.size, excluded)
     }
 }
