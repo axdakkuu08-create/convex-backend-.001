@@ -84,12 +84,11 @@ class MainActivity : ComponentActivity() {
             var showEqualizer by remember { mutableStateOf(false) }
             var lyricsText by remember { mutableStateOf("") }
             var cloudSyncMessage by remember { mutableStateOf("Cloud sync has not run yet.") }
-            var playbackRevision by remember { mutableIntStateOf(0) }
-            var position by remember { mutableLongStateOf(0L) }
+                        var position by remember { mutableLongStateOf(0L) }
 
             DisposableEffect(mediaController) {
                 val listener = object : Player.Listener {
-                    override fun onEvents(player: Player, events: Player.Events) { playbackRevision++ }
+                    override fun onEvents(player: Player, events: Player.Events) { position = player.currentPosition }
                 }
                 mediaController?.addListener(listener)
                 onDispose { mediaController?.removeListener(listener) }
@@ -178,7 +177,7 @@ class MainActivity : ComponentActivity() {
                                     TextButton(onClick = { selectedPlaylist = null }) { Text("← All playlists") }
                                     Text("Tracks in this playlist", color = accent)
                                     LazyColumn {
-                                        items(playlistTracks, key = { it.mediaUri }) { TrackRow(it, accent, { playTrack(it, tracks, dao) }, { lifecycleScope.launch { playlistsDao.removeTrack(selectedPlaylist!!.id, it.mediaUri) } }) }
+                                        items(playlistTracks, key = { it.mediaUri }) { TrackRow(it, accent, { playTrack(it, playlistTracks, dao) }, { lifecycleScope.launch { playlistsDao.removeTrack(selectedPlaylist!!.id, it.mediaUri) } }) }
                                         item { Spacer(Modifier.height(12.dp)); Text("Add from library", color = accent) }
                                         items(tracks.filterNot { track -> playlistTracks.any { it.mediaUri == track.mediaUri } }, key = { it.mediaUri }) { TrackRow(it, accent, { lifecycleScope.launch { playlistsDao.addTrack(PlaylistTrackEntity(selectedPlaylist!!.id, it.mediaUri)) } }, null, trailing = "ADD") }
                                     }
@@ -458,10 +457,8 @@ private fun CloudAccountContent(message: String, onSyncPlaylists: () -> Unit) {
 @Composable
 private fun FullPlayerSheet(player: MediaController, tracks: List<TrackEntity>, position: Long, accent: Color, onClose: () -> Unit, onLyrics: () -> Unit, onEqualizer: () -> Unit) {
     var duration by remember { mutableLongStateOf(player.duration.coerceAtLeast(0L)) }
-    var seekValue by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(player.currentMediaItemIndex, player.duration) {
+        LaunchedEffect(player.currentMediaItemIndex, player.duration) {
         duration = player.duration.coerceAtLeast(0L)
-        seekValue = 0f
     }
     ModalBottomSheet(onDismissRequest = onClose, containerColor = Panel) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 22.dp).padding(bottom = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -473,7 +470,7 @@ private fun FullPlayerSheet(player: MediaController, tracks: List<TrackEntity>, 
             Spacer(Modifier.height(20.dp))
             Text(player.currentMediaItem?.mediaMetadata?.title?.toString() ?: "Nothing playing", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, maxLines = 1)
             Text(player.currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown artist", color = Color.LightGray)
-            Slider(value = if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f, onValueChange = { seekValue = it; player.seekTo((it * duration).toLong()) }, modifier = Modifier.fillMaxWidth())
+            Slider(value = if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f, onValueChange = { player.seekTo((it * duration).toLong()) }, modifier = Modifier.fillMaxWidth())
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(timeText(position), color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                 Text(timeText(duration), color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
