@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import app.unifiedmusic.data.LibraryDatabase
@@ -100,7 +101,19 @@ class MainActivity : ComponentActivity() {
                                 onScan = ::requestScan,
                                 onPlay = { track ->
                                     mediaController?.let { player ->
-                                        player.setMediaItem(MediaItem.fromUri(track.mediaUri))
+                                        val queue = tracks.map { item ->
+                                            MediaItem.Builder()
+                                                .setUri(item.mediaUri)
+                                                .setMediaMetadata(
+                                                    MediaMetadata.Builder()
+                                                        .setTitle(item.title)
+                                                        .setArtist(item.artist)
+                                                        .build()
+                                                )
+                                                .build()
+                                        }
+                                        val startIndex = tracks.indexOfFirst { it.mediaUri == track.mediaUri }.coerceAtLeast(0)
+                                        player.setMediaItems(queue, startIndex, 0L)
                                         player.prepare()
                                         player.play()
                                         lifecycleScope.launch { dao.incrementPlayCount(track.mediaUri) }
