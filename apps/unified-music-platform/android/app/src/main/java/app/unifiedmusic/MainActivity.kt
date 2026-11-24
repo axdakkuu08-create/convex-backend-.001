@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
@@ -32,6 +33,10 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import app.unifiedmusic.data.*
+import app.unifiedmusic.cloud.CloudSyncRepository
+import com.clerk.api.Clerk
+import com.clerk.ui.auth.AuthView
+import com.clerk.ui.userbutton.UserButton
 import app.unifiedmusic.playback.PlaybackService
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.delay
@@ -78,6 +83,7 @@ class MainActivity : ComponentActivity() {
             var showLyrics by remember { mutableStateOf(false) }
             var showEqualizer by remember { mutableStateOf(false) }
             var lyricsText by remember { mutableStateOf("") }
+            var cloudSyncMessage by remember { mutableStateOf("Cloud sync has not run yet.") }
             var playbackRevision by remember { mutableIntStateOf(0) }
             var position by remember { mutableLongStateOf(0L) }
 
@@ -180,8 +186,26 @@ class MainActivity : ComponentActivity() {
                             }
                             "Albums" -> AlbumContent(tracks, accent, onPlay = { playTrack(it, tracks, dao) })
                             "Settings" -> SettingsContent(
-                                scanMessage, themeChoice, onTheme = { choice -> themeChoice = choice; getSharedPreferences("unified-settings", MODE_PRIVATE).edit().putString("theme", choice).apply() },
-                                onScan = ::requestScan, onEqualizer = { showEqualizer = true }
+                                scanMessage, themeChoice, cloudSyncMessage,
+                                onTheme = { choice -> themeChoice = choice; getSharedPreferences("unified-settings", MODE_PRIVATE).edit().putString("theme", choice).apply() },
+                                onScan = ::requestScan,
+                                onEqualizer = { showEqualizer = true },
+                                onSyncPlaylists = {
+                                    val client = (application as UnifiedMusicApplication).convexClient
+                                    if (client == null) {
+                                        cloudSyncMessage = "Cloud sync needs a Convex URL and Clerk publishable key."
+                                    } else {
+                                        lifecycleScope.launch {
+                                            runCatching {
+                                                CloudSyncRepository(client).syncPlaylistNames(playlists.map { it.name })
+                                            }.onSuccess { count ->
+                                                cloudSyncMessage = "Cloud playlists updated. $count new playlist names synced."
+                                            }.onFailure { error ->
+                                                cloudSyncMessage = "Sync unavailable: " + (error.message ?: "authentication or deployment check failed")
+                                            }
+                                        }
+                                    }
+                                }
                             )
                         }
                         Spacer(Modifier.height(10.dp))
@@ -370,7 +394,15 @@ private fun AlbumContent(tracks: List<TrackEntity>, accent: Color, onPlay: (Trac
 }
 
 @Composable
-private fun SettingsContent(message: String, theme: String, onTheme: (String) -> Unit, onScan: () -> Unit, onEqualizer: () -> Unit) {
+private fun SettingsContent(
+    message: String,
+    theme: String,
+    cloudSyncMessage: String,
+    onTheme: (String) -> Unit,
+    onScan: () -> Unit,
+    onEqualizer: () -> Unit,
+    onSyncPlaylists: () -> Unit
+) {
     LazyColumn {
         item {
             Text("Appearance", color = Mint, style = MaterialTheme.typography.titleMedium)
@@ -390,9 +422,36 @@ private fun SettingsContent(message: String, theme: String, onTheme: (String) ->
             Text(message, color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
             Spacer(Modifier.height(16.dp))
             Text("Privacy", color = Mint, style = MaterialTheme.typography.titleMedium)
-            Text("Local audio and saved lyrics stay on this device. Cloud sync is not connected yet.", color = Color.LightGray)
+            Text("Local audio and saved lyrics stay on this device. Local playback never depends on sign-in.", color = Color.LightGray)
+            Spacer(Modifier.height(14.dp))
+            CloudAccountContent(cloudSyncMessage, onSyncPlaylists)
         }
     }
+}
+
+
+@Composable
+private fun CloudAccountContent(message: String, onSyncPlaylists: () -> Unit) {
+    val app = LocalContext.current.applicationContext as UnifiedMusicApplication
+    Text("Cloud account", color = Mint, style = MaterialTheme.typography.titleMedium)
+    if (app.convexClient == null) {
+        Text(
+            "Convex is prepared in the app, but this build has no development deployment URL or Clerk publishable key configured.",
+            color = Color.LightGray
+        )
+    } else {
+        val user by Clerk.userFlow.collectAsState(initial = null)
+        if (user == null) {
+            AuthView()
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Clerk account signed in", modifier = Modifier.weight(1f), color = Color.LightGray)
+                UserButton()
+            }
+            Button(onClick = onSyncPlaylists) { Text("Sync playlist names") }
+        }
+    }
+    Text(message, color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
