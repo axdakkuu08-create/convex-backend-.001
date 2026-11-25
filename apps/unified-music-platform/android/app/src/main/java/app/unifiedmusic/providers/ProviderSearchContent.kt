@@ -52,10 +52,10 @@ fun ProviderSearchContent(
                     Surface(color = Color(0xFF141C19), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().clickable { onPlayTrack(track, tracks) }) {
                         Column(Modifier.padding(13.dp)) {
                             Text(track.title, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                            Text("\${track.artist} • \${track.provider.replace('_', ' ')}", color = accent, style = MaterialTheme.typography.bodySmall)
-                            Text("\${track.durationMs / 60000}:\${((track.durationMs / 1000) % 60).toString().padStart(2, '0')} • Full track", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
-                            Text("License: \${track.licenseUrl}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall, maxLines = 2)
-                            Text("Attribution: \${track.attribution}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                            Text("${track.artist} • ${track.provider.replace('_', ' ')}", color = accent, style = MaterialTheme.typography.bodySmall)
+                            Text("${track.durationMs / 60000}:${((track.durationMs / 1000) % 60).toString().padStart(2, '0')} • Full track", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                            Text("License: ${track.licenseUrl}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall, maxLines = 2)
+                            Text("Attribution: ${track.attribution}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -66,7 +66,7 @@ fun ProviderSearchContent(
                     Surface(color = Color(0xFF141C19), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().clickable { onPlayStation(station) }) {
                         Column(Modifier.padding(13.dp)) {
                             Text(station.name, fontWeight = FontWeight.SemiBold)
-                            Text(listOfNotNull(station.country, station.language, station.codec, station.bitrate.takeIf { it > 0 }?.let { "\${it} kbps" }).joinToString(" • "), color = accent, style = MaterialTheme.typography.bodySmall)
+                            Text(listOfNotNull(station.country, station.language, station.codec, station.bitrate.takeIf { it > 0 }?.let { "${it} kbps" }).joinToString(" • "), color = accent, style = MaterialTheme.typography.bodySmall)
                             Text("Internet radio • station stream", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                         }
                     }
@@ -82,10 +82,10 @@ fun ProviderSearchContent(
         try {
             if (mode == "Tracks") {
                 tracks = repository.searchTracks(query)
-                message = if (tracks.isEmpty()) "No eligible licensed full-track matches. Items without an accepted license are excluded." else "\${tracks.size} eligible tracks • source attribution is displayed."
+                message = if (tracks.isEmpty()) "No eligible licensed full-track matches. Items without an accepted license are excluded." else "${tracks.size} eligible tracks • source attribution is displayed."
             } else {
                 stations = repository.searchRadio(query)
-                message = if (stations.isEmpty()) "No station entries returned." else "\${stations.size} radio stations • streams may become unavailable."
+                message = if (stations.isEmpty()) "No station entries returned." else "${stations.size} radio stations • streams may become unavailable."
             }
         } catch (error: Exception) {
             message = error.message ?: "Provider search failed."
