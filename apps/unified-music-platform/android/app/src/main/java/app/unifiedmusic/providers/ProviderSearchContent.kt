@@ -34,7 +34,7 @@ fun ProviderSearchContent(
     var tracks by remember { mutableStateOf<List<ProviderTrack>>(emptyList()) }
     var stations by remember { mutableStateOf<List<RadioStation>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
-    var message by remember { mutableStateOf("Search Internet Archive and configured Jamendo music, or discover radio stations.") }
+    var message by remember { mutableStateOf("Search Internet Archive candidates and Jamendo (requires a developer client ID), or discover radio stations.") }
     var requestKey by remember { mutableStateOf("") }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -53,7 +53,7 @@ fun ProviderSearchContent(
                         Column(Modifier.padding(13.dp)) {
                             Text(track.title, fontWeight = FontWeight.SemiBold, maxLines = 1)
                             Text("${track.artist} • ${track.provider.replace('_', ' ')}", color = accent, style = MaterialTheme.typography.bodySmall)
-                            Text("${track.durationMs / 60000}:${((track.durationMs / 1000) % 60).toString().padStart(2, '0')} • Full track", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                            Text("${track.durationMs / 60000}:${((track.durationMs / 1000) % 60).toString().padStart(2, '0')} • Candidate full-length stream — playback not yet verified", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                             Text("License: ${track.licenseUrl}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall, maxLines = 2)
                             Text("Attribution: ${track.attribution}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                         }
@@ -67,7 +67,8 @@ fun ProviderSearchContent(
                         Column(Modifier.padding(13.dp)) {
                             Text(station.name, fontWeight = FontWeight.SemiBold)
                             Text(listOfNotNull(station.country, station.language, station.codec, station.bitrate.takeIf { it > 0 }?.let { "${it} kbps" }).joinToString(" • "), color = accent, style = MaterialTheme.typography.bodySmall)
-                            Text("Internet radio • station stream", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                            Text("Radio Browser listing • stream availability can change", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                            station.homepage?.let { Text(it, color = accent, style = MaterialTheme.typography.labelSmall, maxLines = 1) }
                         }
                     }
                 }
