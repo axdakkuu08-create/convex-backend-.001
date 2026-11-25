@@ -10,12 +10,12 @@ import java.net.URL
 import java.net.URLEncoder
 import java.util.Locale
 
-enum class Eligibility { FULL_TRACK, PREVIEW_ONLY, EXTERNAL_ONLY, METADATA_ONLY, BLOCKED, UNKNOWN }
+enum class Eligibility { CANDIDATE_FULL_TRACK, FULL_TRACK, PREVIEW_ONLY, EXTERNAL_ONLY, METADATA_ONLY, BLOCKED, UNKNOWN }
 data class ProviderTrack(
     val provider: String, val providerId: String, val title: String, val artist: String,
     val durationMs: Long, val streamUrl: String, val permalink: String,
     val licenseUrl: String, val artworkUrl: String?, val attribution: String
-) { val stableId: String get() = "${provider}:${providerId}"; val eligibility = Eligibility.FULL_TRACK }
+) { val stableId: String get() = "${provider}:${providerId}"; val eligibility = Eligibility.CANDIDATE_FULL_TRACK }
 data class RadioStation(
     val id: String, val name: String, val country: String?, val language: String?,
     val codec: String?, val bitrate: Int, val streamUrl: String, val homepage: String?
@@ -60,7 +60,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
                 if (!allowed(license)) return@runCatching
                 val files = payload.optJSONArray("files") ?: JSONArray()
                 val candidates = (0 until files.length()).mapNotNull { files.optJSONObject(it) }
-                    .filter { it.optString("name").matches(Regex("(?i).+\\\\.(mp3|m4a|ogg|oga|opus|wav|flac)")) && !it.optString("name").contains("spectrogram", true) }
+                    .filter { it.optString("name").matches(Regex("(?i).+\\.(mp3|m4a|ogg|oga|opus|wav|flac)")) && !it.optString("name").contains("spectrogram", true) }
                 val file = candidates.firstOrNull { it.optString("name").endsWith(".mp3", true) } ?: candidates.firstOrNull() ?: return@runCatching
                 val duration = durationMs(meta.optString("runtime").ifBlank { file.optString("length") })
                 if (duration < 60_000L) return@runCatching
