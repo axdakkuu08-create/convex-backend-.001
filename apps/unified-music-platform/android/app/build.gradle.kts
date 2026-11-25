@@ -10,6 +10,7 @@ plugins {
 
 val convexUrlValue = providers.gradleProperty("UNIFIED_CONVEX_URL").orElse("").get()
 val clerkKeyValue = providers.gradleProperty("UNIFIED_CLERK_PUBLISHABLE_KEY").orElse("").get()
+val jamendoClientIdValue = providers.gradleProperty("JAMENDO_CLIENT_ID").orElse("").get()
 fun buildConfigString(value: String): String =
     "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
@@ -24,6 +25,7 @@ android {
         versionName = "0.1.0"
         buildConfigField("String", "CONVEX_URL", buildConfigString(convexUrlValue))
         buildConfigField("String", "CLERK_PUBLISHABLE_KEY", buildConfigString(clerkKeyValue))
+        buildConfigField("String", "JAMENDO_CLIENT_ID", buildConfigString(jamendoClientIdValue))
     }
     buildFeatures {
         compose = true
