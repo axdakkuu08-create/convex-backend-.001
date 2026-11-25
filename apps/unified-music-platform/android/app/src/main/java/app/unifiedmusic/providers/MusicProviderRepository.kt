@@ -45,7 +45,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
     }
 
     private fun archive(term: String): List<ProviderTrack> {
-        val q = "mediatype:audio AND (title:\\"${term}\\" OR creator:\\"${term}\\")"
+        val q = "mediatype:audio AND (title:\"${term}\" OR creator:\"${term}\")"
         val url = "https://archive.org/advancedsearch.php?q=${enc(q)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=20&output=json"
         val docs = JSONObject(get(url)).optJSONObject("response")?.optJSONArray("docs") ?: return emptyList()
         val out = mutableListOf<ProviderTrack>()
