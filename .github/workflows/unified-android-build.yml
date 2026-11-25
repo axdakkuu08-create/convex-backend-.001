@@ -38,4 +38,4 @@ jobs:
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Assemble debug APK
-        run: gradle --no-daemon -p apps/unified-music-platform/android :app:assembleDebug
+        run: gradle --no-daemon --stacktrace --info -p apps/unified-music-platform/android :app:assembleDebug
