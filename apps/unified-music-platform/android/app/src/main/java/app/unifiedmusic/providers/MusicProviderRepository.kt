@@ -15,7 +15,7 @@ data class ProviderTrack(
     val provider: String, val providerId: String, val title: String, val artist: String,
     val durationMs: Long, val streamUrl: String, val permalink: String,
     val licenseUrl: String, val artworkUrl: String?, val attribution: String
-) { val stableId: String get() = "\${provider}:\${providerId}"; val eligibility = Eligibility.FULL_TRACK }
+) { val stableId: String get() = "${provider}:${providerId}"; val eligibility = Eligibility.FULL_TRACK }
 data class RadioStation(
     val id: String, val name: String, val country: String?, val language: String?,
     val codec: String?, val bitrate: Int, val streamUrl: String, val homepage: String?
@@ -32,7 +32,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
 
     suspend fun searchRadio(query: String): List<RadioStation> = withContext(Dispatchers.IO) {
         require(query.trim().length >= 2) { "Enter at least two characters." }
-        val url = "https://de1.api.radio-browser.info/json/stations/search?name=\${enc(query)}&hidebroken=true&order=clickcount&reverse=true&limit=40"
+        val url = "https://de1.api.radio-browser.info/json/stations/search?name=${enc(query)}&hidebroken=true&order=clickcount&reverse=true&limit=40"
         val array = JSONArray(get(url))
         buildList {
             for (i in 0 until array.length()) {
@@ -45,8 +45,8 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
     }
 
     private fun archive(term: String): List<ProviderTrack> {
-        val q = "mediatype:audio AND (title:\\"\${term}\\" OR creator:\\"\${term}\\")"
-        val url = "https://archive.org/advancedsearch.php?q=\${enc(q)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=20&output=json"
+        val q = "mediatype:audio AND (title:\\"${term}\\" OR creator:\\"${term}\\")"
+        val url = "https://archive.org/advancedsearch.php?q=${enc(q)}&fl[]=identifier&fl[]=title&fl[]=creator&rows=20&output=json"
         val docs = JSONObject(get(url)).optJSONObject("response")?.optJSONArray("docs") ?: return emptyList()
         val out = mutableListOf<ProviderTrack>()
         for (i in 0 until docs.length()) {
@@ -54,7 +54,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
             val id = doc.optString("identifier")
             if (!id.matches(Regex("[A-Za-z0-9_-]{1,100}"))) continue
             runCatching {
-                val payload = JSONObject(get("https://archive.org/metadata/\${enc(id)}"))
+                val payload = JSONObject(get("https://archive.org/metadata/${enc(id)}"))
                 val meta = payload.optJSONObject("metadata") ?: JSONObject()
                 val license = meta.optString("licenseurl").ifBlank { meta.optString("rights") }
                 if (!allowed(license)) return@runCatching
@@ -65,14 +65,14 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
                 val duration = durationMs(meta.optString("runtime").ifBlank { file.optString("length") })
                 if (duration < 60_000L) return@runCatching
                 val name = file.optString("name")
-                out += ProviderTrack("internet_archive", id, meta.optString("title").ifBlank { doc.optString("title").ifBlank { id } }, meta.optString("creator").ifBlank { doc.optString("creator").ifBlank { "Internet Archive contributor" } }, duration, "https://archive.org/download/\${enc(id)}/\${Uri.encode(name)}", "https://archive.org/details/\${enc(id)}", license, "https://archive.org/services/img/\${enc(id)}", "Internet Archive • \${meta.optString("creator")}")
+                out += ProviderTrack("internet_archive", id, meta.optString("title").ifBlank { doc.optString("title").ifBlank { id } }, meta.optString("creator").ifBlank { doc.optString("creator").ifBlank { "Internet Archive contributor" } }, duration, "https://archive.org/download/${enc(id)}/${Uri.encode(name)}", "https://archive.org/details/${enc(id)}", license, "https://archive.org/services/img/${enc(id)}", "Internet Archive • ${meta.optString("creator")}")
             }
         }
         return out
     }
 
     private fun jamendo(term: String): List<ProviderTrack> {
-        val url = "https://api.jamendo.com/v3.0/tracks/?client_id=\${enc(jamendoClientId)}&format=json&limit=20&search=\${enc(term)}&audioformat=mp32"
+        val url = "https://api.jamendo.com/v3.0/tracks/?client_id=${enc(jamendoClientId)}&format=json&limit=20&search=${enc(term)}&audioformat=mp32"
         val results = JSONObject(get(url)).optJSONArray("results") ?: return emptyList()
         return buildList {
             for (i in 0 until results.length()) {
@@ -82,7 +82,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
                 val id = x.optString("id")
                 val duration = x.optLong("duration") * 1000
                 if (!allowed(license) || !stream.startsWith("https://") || id.isBlank() || duration < 60_000L) continue
-                add(ProviderTrack("jamendo", id, x.optString("name"), x.optString("artist_name"), duration, stream, x.optString("shareurl").ifBlank { "https://www.jamendo.com/track/\${id}" }, license, x.optString("album_image").takeIf(String::isNotBlank), "Music by \${x.optString("artist_name")} via Jamendo"))
+                add(ProviderTrack("jamendo", id, x.optString("name"), x.optString("artist_name"), duration, stream, x.optString("shareurl").ifBlank { "https://www.jamendo.com/track/${id}" }, license, x.optString("album_image").takeIf(String::isNotBlank), "Music by ${x.optString("artist_name")} via Jamendo"))
             }
         }
     }
@@ -107,7 +107,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
             c.connectTimeout = 10_000; c.readTimeout = 12_000
             c.setRequestProperty("Accept", "application/json")
             c.setRequestProperty("User-Agent", "UnifiedMusic/0.1 Android")
-            if (c.responseCode !in 200..299) error("Provider request failed (\${c.responseCode})")
+            if (c.responseCode !in 200..299) error("Provider request failed (${c.responseCode})")
             return c.inputStream.bufferedReader().use { it.readText() }
         } finally { c.disconnect() }
     }
