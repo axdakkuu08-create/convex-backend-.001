@@ -38,6 +38,10 @@ import com.clerk.api.Clerk
 import com.clerk.ui.auth.AuthView
 import com.clerk.ui.userbutton.UserButton
 import app.unifiedmusic.playback.PlaybackService
+import app.unifiedmusic.providers.MusicProviderRepository
+import app.unifiedmusic.providers.ProviderTrack
+import app.unifiedmusic.providers.RadioStation
+import app.unifiedmusic.providers.ProviderSearchContent
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -150,9 +154,18 @@ class MainActivity : ComponentActivity() {
                             "Home" -> HomeContent(tracks, scanMessage, accent, ::requestScan, onOpen = { selected = it })
                             "Library" -> TrackList(tracks, accent, ::requestScan, onPlay = { playTrack(it, tracks, dao) }, onFavorite = { track -> lifecycleScope.launch { dao.setFavorite(track.mediaUri, !track.isFavorite) } })
                             "Search" -> {
-                                OutlinedTextField(query, { query = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Search songs, artists, albums") }, leadingIcon = { Icon(Icons.Default.Search, null) }, singleLine = true)
-                                Spacer(Modifier.height(10.dp))
-                                TrackList(searchResults, accent, null, onPlay = { playTrack(it, tracks, dao) }, onFavorite = { track -> lifecycleScope.launch { dao.setFavorite(track.mediaUri, !track.isFavorite) } })
+                                Text("ON THIS DEVICE • ${searchResults.size}", color = accent, style = MaterialTheme.typography.labelMedium)
+                                searchResults.take(3).forEach { track ->
+                                    TrackRow(track, accent, { playTrack(track, tracks, dao) }, { lifecycleScope.launch { dao.setFavorite(track.mediaUri, !track.isFavorite) } }, trailing = if (track.isFavorite) "♥" else "♡")
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                Text("ONLINE PROVIDERS", color = accent, style = MaterialTheme.typography.labelMedium)
+                                ProviderSearchContent(
+                                    repository = remember { MusicProviderRepository(BuildConfig.JAMENDO_CLIENT_ID) },
+                                    accent = accent,
+                                    onPlayTrack = { track, queue -> playProviderTracks(track, queue) },
+                                    onPlayStation = { station -> playRadioStation(station) }
+                                )
                             }
                             "Favorites" -> TrackList(favorites, accent, null, onPlay = { playTrack(it, tracks, dao) }, onFavorite = { track -> lifecycleScope.launch { dao.setFavorite(track.mediaUri, !track.isFavorite) } })
                             "Playlists" -> {
@@ -295,6 +308,46 @@ class MainActivity : ComponentActivity() {
         player.prepare()
         player.play()
         lifecycleScope.launch { dao.incrementPlayCount(track.mediaUri) }
+    }
+
+    private fun playProviderTracks(selected: ProviderTrack, queue: List<ProviderTrack>) {
+        val player = mediaController ?: return
+        val playable = queue.filter { it.streamUrl.startsWith("https://") && it.eligibility == app.unifiedmusic.providers.Eligibility.FULL_TRACK }
+        if (playable.isEmpty()) return
+        val items = playable.map { track ->
+            MediaItem.Builder()
+                .setMediaId(track.stableId)
+                .setUri(track.streamUrl)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(track.title)
+                        .setArtist(track.artist)
+                        .setAlbumTitle(track.provider.replace('_', ' '))
+                        .setArtworkUri(track.artworkUrl?.let(android.net.Uri::parse))
+                        .build()
+                ).build()
+        }
+        val index = playable.indexOfFirst { it.stableId == selected.stableId }.coerceAtLeast(0)
+        player.setMediaItems(items, index, 0L)
+        player.prepare()
+        player.play()
+    }
+
+    private fun playRadioStation(station: RadioStation) {
+        val player = mediaController ?: return
+        val item = MediaItem.Builder()
+            .setMediaId("radio:${station.id}")
+            .setUri(station.streamUrl)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(station.name)
+                    .setArtist(listOfNotNull(station.country, station.language).joinToString(" • ").ifBlank { "Internet radio" })
+                    .setAlbumTitle("Radio Browser")
+                    .build()
+            ).build()
+        player.setMediaItem(item)
+        player.prepare()
+        player.play()
     }
 
     private fun requestScan() {
