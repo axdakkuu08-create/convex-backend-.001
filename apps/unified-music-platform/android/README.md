@@ -47,3 +47,18 @@ The current repository snapshot has blank public Convex/Clerk frontend configura
 - An Android Gradle build and physical-device test have not been run in this environment.
 - This is not a release APK or a verified production player.
 - No production deployment, domain change, merge or PR was performed.
+
+## Online provider integration (feature branch)
+
+The native Search screen now includes independent provider discovery:
+- Internet Archive Advanced Search + item metadata lookup. Only items with an explicit accepted public-domain/CC0/CC BY/CC BY-SA rights marker and an audio file of at least 60 seconds are returned.
+- Jamendo track search is enabled only when the optional `JAMENDO_CLIENT_ID` Gradle property is configured. Its accepted license filter is limited to public-domain/CC0/CC BY/CC BY-SA markers; obtain and verify current Jamendo API permission and terms before distributing an enabled build.
+- Radio Browser station search is a separate tab and plays the station stream through the existing Media3 session.
+
+Provider IDs and permalinks are used as stable identities in Media3 queue items. Stream URLs are resolved for the current search/play session and are not written to Room or Convex. Provider results are labeled as candidate full-length streams until a real device playback test confirms the specific source. Radio station streams can change or fail independently.
+
+To enable Jamendo, register an application with Jamendo and add `JAMENDO_CLIENT_ID=...` to private Gradle user properties; never commit account credentials. Without this value, Internet Archive and Radio Browser remain available.
+
+SoundCloud and Audiomack are intentionally not enabled: SoundCloud's multi-service aggregation restrictions conflict with this product model absent written approval, and Audiomack production credentials/rights are not established. No scraping, private endpoints, download bypasses or offline copies are used.
+
+This integration is an initial provider-discovery and queue-playback slice. Remote favorites, cloud playlist source records, playback URL expiry recovery, and verified provider playback tests remain follow-up work. Do not treat API metadata or a returned stream URL as proof that a provider is fully approved or every track is playable.
