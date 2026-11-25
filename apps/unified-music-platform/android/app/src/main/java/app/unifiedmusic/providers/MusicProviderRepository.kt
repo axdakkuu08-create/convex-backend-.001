@@ -38,7 +38,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
             for (i in 0 until array.length()) {
                 val x = array.optJSONObject(i) ?: continue
                 val stream = x.optString("url_resolved").ifBlank { x.optString("url") }
-                if (!stream.startsWith("http")) continue
+                if (!stream.startsWith("https://")) continue
                 add(RadioStation(x.optString("stationuuid"), x.optString("name"), x.optString("country").takeIf(String::isNotBlank), x.optString("language").takeIf(String::isNotBlank), x.optString("codec").takeIf(String::isNotBlank), x.optInt("bitrate"), stream, x.optString("homepage").takeIf(String::isNotBlank)))
             }
         }.distinctBy { it.id }
