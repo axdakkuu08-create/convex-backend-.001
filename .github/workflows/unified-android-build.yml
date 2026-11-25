@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/unified-music-platform-foundation-2026-11-24
+      - feat/unified-provider-integration-2026-11-25
     paths:
       - "apps/unified-music-platform/android/**"
       - ".github/workflows/unified-android-build.yml"
