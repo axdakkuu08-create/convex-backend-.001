@@ -312,7 +312,7 @@ class MainActivity : ComponentActivity() {
 
     private fun playProviderTracks(selected: ProviderTrack, queue: List<ProviderTrack>) {
         val player = mediaController ?: return
-        val playable = queue.filter { it.streamUrl.startsWith("https://") && it.eligibility == app.unifiedmusic.providers.Eligibility.CANDIDATE_FULL_TRACK || it.eligibility == app.unifiedmusic.providers.Eligibility.FULL_TRACK }
+        val playable = queue.filter { it.streamUrl.startsWith("https://") && (it.eligibility == app.unifiedmusic.providers.Eligibility.CANDIDATE_FULL_TRACK || it.eligibility == app.unifiedmusic.providers.Eligibility.FULL_TRACK) }
         if (playable.isEmpty()) return
         val items = playable.map { track ->
             MediaItem.Builder()
