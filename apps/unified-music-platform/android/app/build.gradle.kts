@@ -63,6 +63,6 @@ dependencies {
     implementation("androidx.media3:media3-session:1.5.1")
     implementation("dev.convex:android-convexmobile:0.2.0@aar") { isTransitive = true }
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-    implementation("com.clerk:clerk-convex-kotlin:0.3.0")
+    implementation("com.clerk:clerk-convex-kotlin:0.16.0")
     implementation("com.clerk:clerk-android-ui:1.0.12")
 }
