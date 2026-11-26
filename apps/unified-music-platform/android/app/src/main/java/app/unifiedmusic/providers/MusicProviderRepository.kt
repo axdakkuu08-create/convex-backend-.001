@@ -59,13 +59,24 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
                 val license = meta.optString("licenseurl").ifBlank { meta.optString("rights") }
                 if (!allowed(license)) return@runCatching
                 val files = payload.optJSONArray("files") ?: JSONArray()
-                val candidates = (0 until files.length()).mapNotNull { files.optJSONObject(it) }
-                    .filter { it.optString("name").matches(Regex("(?i).+\\.(mp3|m4a|ogg|oga|opus|wav|flac)")) && !it.optString("name").contains("spectrogram", true) }
-                val file = candidates.firstOrNull { it.optString("name").endsWith(".mp3", true) } ?: candidates.firstOrNull() ?: return@runCatching
-                val duration = durationMs(meta.optString("runtime").ifBlank { file.optString("length") })
+                val audioFiles = (0 until files.length()).mapNotNull { files.optJSONObject(it) }
+                    .filter {
+                        it.optString("name").matches(Regex("(?i).+\\.(mp3|m4a|ogg|oga|opus|wav|flac)")) &&
+                            !it.optString("name").contains("spectrogram", true) &&
+                            !it.optString("name").contains("thumbnail", true)
+                    }
+                // Archive file.length is a byte count, not a playback duration. Never use it as seconds.
+                // Multi-file items are ambiguous when only item-level runtime metadata is available.
+                val originals = audioFiles.filter { it.optString("source").equals("original", true) }
+                val candidates = if (originals.isNotEmpty()) originals else audioFiles
+                if (candidates.size != 1) return@runCatching
+                val file = candidates.single()
+                val duration = durationMs(meta.optString("runtime"))
                 if (duration < 60_000L) return@runCatching
                 val name = file.optString("name")
-                out += ProviderTrack("internet_archive", id, meta.optString("title").ifBlank { doc.optString("title").ifBlank { id } }, meta.optString("creator").ifBlank { doc.optString("creator").ifBlank { "Internet Archive contributor" } }, duration, "https://archive.org/download/${enc(id)}/${Uri.encode(name)}", "https://archive.org/details/${enc(id)}", license, "https://archive.org/services/img/${enc(id)}", "Internet Archive • ${meta.optString("creator")}")
+                val stream = "https://archive.org/download/\${enc(id)}/\${Uri.encode(name)}"
+                if (!probeArchiveAudio(stream)) return@runCatching
+                out += ProviderTrack("internet_archive", "$id:$name", meta.optString("title").ifBlank { doc.optString("title").ifBlank { id } }, meta.optString("creator").ifBlank { doc.optString("creator").ifBlank { "Internet Archive contributor" } }, duration, stream, "https://archive.org/details/${enc(id)}", license, "https://archive.org/services/img/${enc(id)}", "Internet Archive • ${meta.optString("creator")}")
             }
         }
         return out
@@ -88,12 +99,38 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
     }
 
     private fun allowed(value: String): Boolean {
-        val v = value.lowercase(Locale.ROOT)
-        return v.contains("creativecommons.org/publicdomain/") ||
-            v.contains("creativecommons.org/licenses/by/") ||
-            v.contains("creativecommons.org/licenses/by-sa/") ||
-            v.contains("creativecommons.org/zero/") || v.contains("public domain")
+        val v = value.trim().lowercase(Locale.ROOT)
+        if (v.contains("creativecommons.org/publicdomain/zero/") ||
+            v.contains("creativecommons.org/publicdomain/mark/") ||
+            v.contains("creativecommons.org/zero/") ||
+            v == "public domain" || v.startsWith("public domain ")) return true
+
+        // Exact CC BY / CC BY-SA families only; do not accidentally admit BY-NC or BY-ND.
+        return Regex("""creativecommons\.org/licenses/by(-sa)?/(1\.0|2\.0|2\.5|3\.0|4\.0)/?$""")
+            .containsMatchIn(v)
     }
+
+    private fun probeArchiveAudio(address: String): Boolean {
+        val connection = URL(address).openConnection() as HttpURLConnection
+        try {
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 10_000
+            connection.readTimeout = 12_000
+            connection.setRequestProperty("Range", "bytes=0-0")
+            connection.setRequestProperty("Accept", "audio/*,application/ogg,application/octet-stream")
+            connection.setRequestProperty("User-Agent", "UnifiedMusic/0.1 Android")
+            if (connection.responseCode != HttpURLConnection.HTTP_PARTIAL) return false
+            val type = connection.contentType?.lowercase(Locale.ROOT).orEmpty()
+            if (!(type.startsWith("audio/") || type.contains("ogg") || type == "application/octet-stream")) return false
+            val range = connection.getHeaderField("Content-Range").orEmpty()
+            val total = range.substringAfterLast('/', "").toLongOrNull() ?: return false
+            if (total <= 1L) return false
+            return connection.inputStream.use { it.read() >= 0 }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     private fun durationMs(s: String): Long {
         s.toDoubleOrNull()?.let { return (it * 1000).toLong() }
         val p = s.split(":").mapNotNull(String::toDoubleOrNull)
