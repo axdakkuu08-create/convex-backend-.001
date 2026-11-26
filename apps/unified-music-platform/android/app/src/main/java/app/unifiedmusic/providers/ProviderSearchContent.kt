@@ -34,7 +34,7 @@ fun ProviderSearchContent(
     onPlayStation: (RadioStation) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
-    var mode by remember { mutableStateOf("Tracks") }
+    var mode by remember { mutableStateOf("Navidrome") }
     var tracks by remember { mutableStateOf<List<ProviderTrack>>(emptyList()) }
     var stations by remember { mutableStateOf<List<RadioStation>>(emptyList()) }
     var navTracks by remember { mutableStateOf<List<ProviderTrack>>(emptyList()) }
@@ -48,12 +48,12 @@ fun ProviderSearchContent(
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = mode == "Tracks", onClick = { mode = "Tracks" }, label = { Text("Music tracks") })
-            FilterChip(selected = mode == "Radio", onClick = { mode = "Radio" }, label = { Text("Radio stations") })
             FilterChip(selected = mode == "Navidrome", onClick = { mode = "Navidrome" }, label = { Text("Navidrome") })
+            FilterChip(selected = mode == "Tracks", onClick = { mode = "Tracks" }, label = { Text("Internet Archive + music") })
+            FilterChip(selected = mode == "Radio", onClick = { mode = "Radio" }, label = { Text("Radio") })
         }
         if (mode == "Tracks" || mode == "Radio") {
-            OutlinedTextField(query, { query = it }, modifier = Modifier.fillMaxWidth(), label = { Text(if (mode == "Tracks") "Search online music" else "Search radio stations") }, singleLine = true)
+            OutlinedTextField(query, { query = it }, modifier = Modifier.fillMaxWidth(), label = { Text(if (mode == "Tracks") "Search Internet Archive and enabled music sources" else "Search radio stations") }, singleLine = true)
             Button(onClick = { requestKey = query.trim() + "|" + mode }, enabled = query.trim().length >= 2 && !loading) { Text("Search providers") }
             if (message.isNotBlank()) Text(message, color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
             if (mode == "Tracks") {
