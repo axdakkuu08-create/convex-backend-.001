@@ -42,7 +42,7 @@ fun ProviderSearchContent(
     var navApiKey by remember { mutableStateOf(credentialStore.load()?.apiKey.orEmpty()) }
     var navConfig by remember { mutableStateOf(credentialStore.load()) }
     var loading by remember { mutableStateOf(false) }
-    var message by remember { mutableStateOf("Search Internet Archive and Jamendo, discover radio, or connect your own Navidrome library.") }
+    var message by remember { mutableStateOf("Navidrome personal library first; Internet Archive genuine full-track candidates next. Radio is separate.") }
     var requestKey by remember { mutableStateOf("") }
     var connectRequest by remember { mutableIntStateOf(0) }
 
@@ -63,7 +63,7 @@ fun ProviderSearchContent(
                             Column(Modifier.padding(13.dp)) {
                                 Text(track.title, fontWeight = FontWeight.SemiBold, maxLines = 1)
                                 Text("${track.artist} • ${track.provider.replace('_', ' ')}", color = accent, style = MaterialTheme.typography.bodySmall)
-                                Text("${track.durationMs / 60000}:${((track.durationMs / 1000) % 60).toString().padStart(2, '0')} • Candidate full-length stream — playback not yet verified", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                                Text("${track.durationMs / 60000}:${((track.durationMs / 1000) % 60).toString().padStart(2, '0')} • Full-track candidate • duration metadata and audio endpoint checked; device playback still needs verification", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                                 Text("License: ${track.licenseUrl}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall, maxLines = 2)
                                 Text("Attribution: ${track.attribution}", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                             }
@@ -136,7 +136,7 @@ fun ProviderSearchContent(
             when {
                 requestKey.endsWith("|Tracks") -> {
                     tracks = repository.searchTracks(query)
-                    message = if (tracks.isEmpty()) "No eligible licensed full-track matches. Items without an accepted license are excluded." else "${tracks.size} eligible tracks • source attribution is displayed."
+                    message = if (tracks.isEmpty()) "No eligible Internet Archive full-track candidates. Items without an accepted license, reliable duration or accessible audio file are excluded." else "${tracks.size} full-track candidates • source attribution and license are displayed; playback is not marked verified until device testing."
                 }
                 requestKey.endsWith("|Radio") -> {
                     stations = repository.searchRadio(query)
