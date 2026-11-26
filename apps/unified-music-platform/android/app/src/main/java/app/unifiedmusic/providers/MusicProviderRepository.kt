@@ -74,7 +74,7 @@ class MusicProviderRepository(private val jamendoClientId: String = "") {
                 val duration = durationMs(meta.optString("runtime"))
                 if (duration < 60_000L) return@runCatching
                 val name = file.optString("name")
-                val stream = "https://archive.org/download/\${enc(id)}/\${Uri.encode(name)}"
+                val stream = "https://archive.org/download/${enc(id)}/${Uri.encode(name)}"
                 if (!probeArchiveAudio(stream)) return@runCatching
                 out += ProviderTrack("internet_archive", "$id:$name", meta.optString("title").ifBlank { doc.optString("title").ifBlank { id } }, meta.optString("creator").ifBlank { doc.optString("creator").ifBlank { "Internet Archive contributor" } }, duration, stream, "https://archive.org/details/${enc(id)}", license, "https://archive.org/services/img/${enc(id)}", "Internet Archive • ${meta.optString("creator")}")
             }
