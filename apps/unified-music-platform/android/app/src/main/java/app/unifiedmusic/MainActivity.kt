@@ -42,6 +42,7 @@ import app.unifiedmusic.providers.MusicProviderRepository
 import app.unifiedmusic.providers.ProviderTrack
 import app.unifiedmusic.providers.RadioStation
 import app.unifiedmusic.providers.ProviderSearchContent
+import app.unifiedmusic.providers.NavidromeCredentialStore
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -162,6 +163,7 @@ class MainActivity : ComponentActivity() {
                                 Text("ONLINE PROVIDERS", color = accent, style = MaterialTheme.typography.labelMedium)
                                 ProviderSearchContent(
                                     repository = remember { MusicProviderRepository(BuildConfig.JAMENDO_CLIENT_ID) },
+                                    credentialStore = remember { NavidromeCredentialStore(applicationContext) },
                                     accent = accent,
                                     onPlayTrack = { track, queue -> playProviderTracks(track, queue) },
                                     onPlayStation = { station -> playRadioStation(station) }
