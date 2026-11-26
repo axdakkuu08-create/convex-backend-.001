@@ -51,11 +51,11 @@ The current repository snapshot has blank public Convex/Clerk frontend configura
 ## Online provider integration (feature branch)
 
 The native Search screen now includes independent provider discovery:
-- Internet Archive Advanced Search + item metadata lookup. Only items with an explicit accepted public-domain/CC0/CC BY/CC BY-SA rights marker and an audio file of at least 60 seconds are returned.
+- Internet Archive Advanced Search + item metadata lookup. Only explicit public-domain/CC0/CC BY/CC BY-SA rights markers are accepted. The app requires item runtime metadata (never treats file byte length as duration), excludes ambiguous multi-audio-file items, and probes the selected audio URL with an HTTP byte-range request before showing it as a candidate.
 - Jamendo track search is enabled only when the optional `JAMENDO_CLIENT_ID` Gradle property is configured. Its accepted license filter is limited to public-domain/CC0/CC BY/CC BY-SA markers; obtain and verify current Jamendo API permission and terms before distributing an enabled build.
 - Radio Browser station search is a separate tab and plays the station stream through the existing Media3 session.
 
-Provider IDs and permalinks are used as stable identities in Media3 queue items. Stream URLs are resolved for the current search/play session and are not written to Room or Convex. Provider results are labeled as candidate full-length streams until a real device playback test confirms the specific source. Radio station streams can change or fail independently.
+Provider IDs and permalinks are used as stable identities in Media3 queue items. Stream URLs are resolved for the current search/play session and are not written to Room or Convex. Internet Archive results remain labeled as full-track candidates until real device playback confirms the selected file duration and uninterrupted playback. A successful byte-range probe only verifies that an audio endpoint responds; it is not proof that the entire recording plays correctly. Radio station streams can change or fail independently.
 
 To enable Jamendo, register an application with Jamendo and add `JAMENDO_CLIENT_ID=...` to private Gradle user properties; never commit account credentials. Without this value, Internet Archive and Radio Browser remain available.
 
@@ -66,6 +66,7 @@ This integration is an initial provider-discovery and queue-playback slice. Remo
 
 ## Navidrome / OpenSubsonic personal library
 
+- Navidrome is the first-priority personal-library streaming provider; Internet Archive is the first-priority public on-demand provider.
 - The native provider search includes a Navidrome connection panel.
 - Enter the HTTPS base URL of your Navidrome server and an API key created for the account on that server. The app checks access through `getMusicFolders` and searches tracks through OpenSubsonic `search3`.
 - API keys are encrypted with an AES-GCM key held by Android Keystore. The server URL is stored separately in app-private preferences. The app does not ask for or store the account password.
