@@ -62,3 +62,13 @@ To enable Jamendo, register an application with Jamendo and add `JAMENDO_CLIENT_
 SoundCloud and Audiomack are intentionally not enabled: SoundCloud's multi-service aggregation restrictions conflict with this product model absent written approval, and Audiomack production credentials/rights are not established. No scraping, private endpoints, download bypasses or offline copies are used.
 
 This integration is an initial provider-discovery and queue-playback slice. Remote favorites, cloud playlist source records, playback URL expiry recovery, and verified provider playback tests remain follow-up work. Do not treat API metadata or a returned stream URL as proof that a provider is fully approved or every track is playable.
+
+
+## Navidrome / OpenSubsonic personal library
+
+- The native provider search includes a Navidrome connection panel.
+- Enter the HTTPS base URL of your Navidrome server and an API key created for the account on that server. The app checks access through `getMusicFolders` and searches tracks through OpenSubsonic `search3`.
+- API keys are encrypted with an AES-GCM key held by Android Keystore. The server URL is stored separately in app-private preferences. The app does not ask for or store the account password.
+- Track streams and cover art are requested through the authenticated OpenSubsonic `stream` and `getCoverArt` endpoints and are sent to the existing Media3 player. Navidrome tracks use stable `navidrome:<song-id>` queue identities.
+- Only HTTPS server URLs are accepted so API keys are not sent in clear text. Tracks shorter than 60 seconds are excluded to match the app's library eligibility rule.
+- This connection is local to the Android app. It does not replace Convex, upload the library, or automatically share Navidrome credentials with cloud services. The server must be reachable from the Android device.
